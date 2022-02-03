@@ -4,27 +4,30 @@ Version: 0.0.0.9000
 Authors@R: 
     c(
     person(
-      given ="Mikkel",
-      middle ="Hovden",
-      family ="Christensen",
+      given = c("Mikkel", "Hovden"),
+      family = "Christensen",
       email = "mikkel@hovden.dk",
       role = c("aut", "cre"),
       comment = c(ORCID = "0000-0002-2588-3036")),
     person(
-      given = "Simon",
-      middle = "Opstrup",
+      given = c("Simon", "Opstrup"),
       family = "Drue",
       email = "simon.drue@clin.au.dk",
       role = c("aut"),
       comment = c(ORCID = "0000-0002-1401-6527")
-    ))
+    )
+  )
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
+    dplyr,
+    GenomicRanges,
+    IRanges,
     purrr,
+    Rsamtools,
     stringr,
     tibble
 Suggests: 
