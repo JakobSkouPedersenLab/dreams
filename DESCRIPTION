@@ -15,7 +15,7 @@ Authors@R:
       middle = "Opstrup",
       family = "Drue",
       email = "simon.drue@clin.au.dk",
-      role = c("cre", "aut"),
+      role = c("aut"),
       comment = c(ORCID = "0000-0002-1401-6527")
     ))
 Description: What the package does (one paragraph).
