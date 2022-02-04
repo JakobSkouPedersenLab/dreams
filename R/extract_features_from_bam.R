@@ -1,34 +1,5 @@
 #' Title
 #'
-#' @param s
-#' @param k
-#'
-#' @return
-#'
-#' @importFrom stringi stri_count_fixed
-calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
-
-  # Generate k-mers
-  alphabet_k_rep_list <- rep(list(alphabet), k)
-  k_mer_df <- expand.grid(alphabet_k_rep_list)
-  k_mer_vec <- apply(k_mer_df, 1, paste0, collapse = "")
-
-  s_length <- nchar(s) - (k - 1)
-
-  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
-
-  freq_mat <- t(count_mat) / s_length
-
-
-
-  # Shannon entropy
-  H <- -rowSums(freq_mat * log10(freq_mat), na.rm = TRUE)
-
-  return(as.numeric(H))
-}
-
-#' Title
-#'
 #' @param bam_df dataframe from load_BAM
 #' @param reference_path reference genome path
 #'
@@ -40,7 +11,7 @@ extract_features_from_bam <- function(bam_df, reference_path) {
   # Make genomic position features
   genomic_pos_feature_df <-
     distinct(
-      data.frame(
+      base::data.frame(
         chr = bam_df$chr,
         genomic_pos = bam_df$genomic_pos,
         strand = bam_df$strand
@@ -99,10 +70,10 @@ extract_features_from_bam <- function(bam_df, reference_path) {
   feature_df <- feature_df %>%
     select(
       .data$qname, .data$chr, .data$genomic_pos, .data$obs, .data$ref,
-      strand, .data$first_in_pair, .data$read_index, .data$fragment_size,
-      ctx_minus1, .data$ctx_plus1, .data$trinucleotide_ctx, .data$trinucleotide_ctx_strand, .data$context11,
-      local_complexity_1, .data$local_complexity_2, .data$local_GC, .data$umi_count, .data$umi_errors,
-      n_other_errors, .data$n_insertions_in_read, .data$n_deletions_in_read
+      .data$strand, .data$first_in_pair, .data$read_index, .data$fragment_size,
+      .data$ctx_minus1, .data$ctx_plus1, .data$trinucleotide_ctx, .data$trinucleotide_ctx_strand, .data$context11,
+      .data$local_complexity_1, .data$local_complexity_2, .data$local_GC, .data$umi_count, .data$umi_errors,
+      .data$n_other_errors, .data$n_insertions_in_read, .data$n_deletions_in_read
     )
   return(feature_df)
 }
@@ -122,4 +93,34 @@ get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
   Fa <- getSeq(FaFile, param = GRanges(chr, IRanges(genomic_pos - buffer, genomic_pos + buffer)))
 
   return(as.character(Fa, use.names = FALSE))
+}
+
+#' Title
+#'
+#' @param s string
+#' @param k kmer size
+#' @param alphabet possible readings
+#'
+#' @return shannon entropy
+#'
+#' @importFrom stringi stri_count_fixed
+calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
+
+  # Generate k-mers
+  alphabet_k_rep_list <- rep(list(alphabet), k)
+  k_mer_df <- expand.grid(alphabet_k_rep_list)
+  k_mer_vec <- apply(k_mer_df, 1, paste0, collapse = "")
+
+  s_length <- nchar(s) - (k - 1)
+
+  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
+
+  freq_mat <- t(count_mat) / s_length
+
+
+
+  # Shannon entropy
+  H <- -rowSums(freq_mat * log10(freq_mat), na.rm = TRUE)
+
+  return(as.numeric(H))
 }

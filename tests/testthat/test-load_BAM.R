@@ -14,14 +14,14 @@ test_that("Load mini bam", {
 
   # Check correct read input
   # Read start positions
-  expect_equal(bam_df$pos, c(1, 3, 2, 4))
+  expect_equal(bam_df$pos, c(6, 10, 11, 14))
   # Sequence
   expect_equal(bam_df$seq, c(
-    "AAAAA", "AAAAAAA",
-    "AAT", "TAA"
+    "AAAA", "AAAAAA",
+    "AAT", "AAA"
   ))
   # MD Tag
-  expect_equal(bam_df$MD, c("5", "7", "2A", "A2"))
+  expect_equal(bam_df$MD, c("4", "6", "2A", "3"))
 })
 
 

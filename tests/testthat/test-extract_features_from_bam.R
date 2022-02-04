@@ -1,7 +1,7 @@
 test_that("calc_string_entropy_k_mer", {
   # No entropy examples
   expect_equal(calc_string_entropy_k_mer(s = "AAA"), 0)
-  expect_equal(calc_string_entropy_k_mer(s = c("AAA", "TT")), c(0,0))
+  expect_equal(calc_string_entropy_k_mer(s = c("AAA", "TT")), c(0, 0))
   expect_equal(calc_string_entropy_k_mer(s = "AAA", k = 1), 0)
   expect_equal(calc_string_entropy_k_mer(s = "AAA", k = 1, alphabet = c("A", "B")), 0)
   expect_equal(calc_string_entropy_k_mer(s = "AAA", k = 2, alphabet = "A"), 0)
@@ -20,19 +20,15 @@ test_that("simple examples 2", {
   reference_path <- system.file("extdata", "ref.fasta", package = "dreams")
 
   bam_df_11 <- load_BAM(read_example_bam_file, chr = "chr1", pos = 11)
-  extract_features_from_bam(bam_df, reference_path = reference_path)
+  extract_features_from_bam(bam_df_11, reference_path = reference_path)
 
   bam_df_12 <- load_BAM(read_example_bam_file, chr = "chr1", pos = 12)
-  extract_features_from_bam(bam_df, reference_path = reference_path)
+  extract_features_from_bam(bam_df_12, reference_path = reference_path)
 
-  bam_df <- load_BAM(read_example_bam_file, chr = c("chr1","chr1"), pos = c(11,12))
+  bam_df_11_12 <- load_BAM(read_example_bam_file, chr = c("chr1", "chr1"), pos = c(11, 12))
 
-  expect_equal(rbind(bam_df_11, bam_df_12), bam_df)
-
-
-
+  expect_equal(rbind(bam_df_11, bam_df_12), bam_df_11_12)
 })
-
 
 
 test_that("get_reference_seq", {
@@ -47,7 +43,6 @@ test_that("get_reference_seq", {
   expect_equal(seq, "AAAAAAA")
 
   # Example 3
-  seq <- get_reference_seq(chr = rep("chr1",2), genomic_pos = c(5,6), buffer = 3, reference_path = reference_path)
+  seq <- get_reference_seq(chr = rep("chr1", 2), genomic_pos = c(5, 6), buffer = 3, reference_path = reference_path)
   expect_equal(seq, c("AAAAAAA", "AAAAAAA"))
-
 })

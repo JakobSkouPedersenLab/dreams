@@ -4,13 +4,17 @@
 \alias{calc_string_entropy_k_mer}
 \title{Title}
 \usage{
-calc_string_entropy_k_mer(s, k = 2)
+calc_string_entropy_k_mer(s, k = 2, alphabet = c("A", "C", "G", "T", "N"))
 }
 \arguments{
-\item{k}{}
+\item{s}{string}
+
+\item{k}{kmer size}
+
+\item{alphabet}{possible readings}
 }
 \value{
-
+shannon entropy
 }
 \description{
 Title
