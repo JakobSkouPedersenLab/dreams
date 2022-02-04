@@ -6,22 +6,25 @@
 #' @return
 #'
 #' @importFrom stringi stri_count_fixed
-calc_string_entropy_k_mer <- function(s, k = 2) {
+calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
 
   # Generate k-mers
-  alphabet <- c("A", "C", "G", "T", "N")
   alphabet_k_rep_list <- rep(list(alphabet), k)
   k_mer_df <- expand.grid(alphabet_k_rep_list)
   k_mer_vec <- apply(k_mer_df, 1, paste0, collapse = "")
 
   s_length <- nchar(s) - (k - 1)
 
-  f_mat <- t(sapply(s, stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)) / s_length
+  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
+
+  freq_mat <- t(count_mat) / s_length
+
+
 
   # Shannon entropy
-  H <- -rowSums(f_mat * log10(f_mat), na.rm = TRUE)
+  H <- -rowSums(freq_mat * log10(freq_mat), na.rm = TRUE)
 
-  return(H)
+  return(as.numeric(H))
 }
 
 #' Title
