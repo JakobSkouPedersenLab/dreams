@@ -90,7 +90,6 @@ test_that("simple examples", {
   expect_true(all(tests$test_accepted))
 })
 
-context("Get list of match and mismatch genomic positions in read")
 
 test_that("Getting mismatch positions", {
 
@@ -107,93 +106,91 @@ test_that("Getting mismatch positions", {
   expect_equal(get_match_genomic_pos_list(pos = pos, cigar = cigar, MDtag = MD), list(c(1, 5)))
 })
 
-# context("Getting positive and negative samples")
-#
-# test_that("simple examples 2", {
-#   # Example 1
-#   # POS+:1-2345-678
-#   # REF: T-TTTT-TTT
-#   # SEQ: TAAA-TAA--
-#   ex1 <- data.frame(
-#     pos = 1,
-#     cigar = "1M1I2M1D1M1I1M2D",
-#     MD = "1T0T0^T1T0^TT",
-#     isize = 10
-#   )
-#
-#   expect_true(sample_negative_read_positions(bam_df = ex1, n_samples = 1)$genomic_pos %in% c(1, 5))
-#   expect_equal(extract_mismatch_positions(bam_df = ex1)$genomic_pos, c(2, 3, 6))
-#
-#   # Example 2
-#   # POS+:1-234-5
-#   # REF: T-TTT-T
-#   # SEQ: TCA-TAA
-#
-#   ex2 <- data.frame(
-#     pos = 1,
-#     cigar = "1M1I1M1D1M1I1M",
-#     MD = "1T0^T1T",
-#     isize = 5
-#   )
-#
-#   expect_true(sample_negative_read_positions(bam_df = ex2, n_samples = 1)$genomic_pos %in% c(1, 4))
-#   expect_equal(extract_mismatch_positions(bam_df = ex2)$genomic_pos, c(2, 5))
-#
-#   # Example 3
-#   # POS+:123456789
-#   # REF: T-TTT-T
-#   # SEQ: TCA-TAA
-#
-#   ex3 <- data.frame(
-#     pos = 1,
-#     cigar = "9M",
-#     MD = "9",
-#     isize = 9
-#   )
-#
-#   expect_true(sample_negative_read_positions(bam_df = ex3, n_samples = 1)$genomic_pos %in% 1:9)
-#   expect_equal(extract_mismatch_positions(bam_df = ex3) %>% nrow(), 0)
-# })
-#
-#
-# context("Position in deletion region of read")
-# test_that("simple examples 2", {
-#   # Example 1
-#   # POS+:123
-#   # REF: TTT
-#   # SEQ: T-T
-#   ex1 <- data.frame(
-#     pos_idx = 1:3,
-#     cigar = "1M1D1M"
-#   )
-#
-#   res1 <- ex1 %>% correct_pos_idx_w_cigar()
-#   expect_equal(res1$is_in_deletion, c(F, T, F))
-#
-#   # Example 2
-#   # POS+:1234567
-#   # REF: TTTTTTT
-#   # SEQ: T---TTT
-#   ex2 <- data.frame(
-#     pos_idx = 1:7,
-#     cigar = "1M3D3M"
-#   )
-#
-#   res2 <- ex2 %>% correct_pos_idx_w_cigar()
-#   expect_equal(res2$is_in_deletion, c(F, T, T, T, F, F, F))
-#
-#
-#
-#   # Example 3
-#   # POS+:1--2345
-#   # REF: T--TTTT
-#   # SEQ: TAA-TTT
-#   ex3 <- data.frame(
-#     pos_idx = 1:5,
-#     cigar = "1M2I1D3M"
-#   )
-#
-#   res3 <- ex3 %>% correct_pos_idx_w_cigar()
-#   expect_equal(res3$is_in_deletion, c(F, T, F, F, F))
-# })
-#
+
+test_that("simple examples 2", {
+  # Example 1
+  # POS+:1-2345-678
+  # REF: T-TTTT-TTT
+  # SEQ: TAAA-TAA--
+  ex1 <- data.frame(
+    pos = 1,
+    cigar = "1M1I2M1D1M1I1M2D",
+    MD = "1T0T0^T1T0^TT",
+    isize = 10
+  )
+
+  expect_true(sample_negative_read_positions(bam_df = ex1, n_samples = 1)$genomic_pos %in% c(1, 5))
+  expect_equal(extract_mismatch_positions(bam_df = ex1)$genomic_pos, c(2, 3, 6))
+
+  # Example 2
+  # POS+:1-234-5
+  # REF: T-TTT-T
+  # SEQ: TCA-TAA
+
+  ex2 <- data.frame(
+    pos = 1,
+    cigar = "1M1I1M1D1M1I1M",
+    MD = "1T0^T1T",
+    isize = 5
+  )
+
+   expect_true(sample_negative_read_positions(bam_df = ex2, n_samples = 1)$genomic_pos %in% c(1, 4))
+   expect_equal(extract_mismatch_positions(bam_df = ex2)$genomic_pos, c(2, 5))
+
+  # Example 3
+  # POS+:123456789
+  # REF: T-TTT-T
+  # SEQ: TCA-TAA
+
+  ex3 <- data.frame(
+    pos = 1,
+    cigar = "9M",
+    MD = "9",
+    isize = 9
+  )
+
+   expect_true(sample_negative_read_positions(bam_df = ex3, n_samples = 1)$genomic_pos %in% 1:9)
+   expect_equal(extract_mismatch_positions(bam_df = ex3) %>% nrow(), 0)
+})
+
+
+test_that("simple examples 2", {
+  # Example 1
+  # POS+:123
+  # REF: TTT
+  # SEQ: T-T
+  ex1 <- data.frame(
+    pos_idx = 1:3,
+    cigar = "1M1D1M"
+  )
+
+  res1 <- ex1 %>% correct_pos_idx_w_cigar()
+  expect_equal(res1$is_in_deletion, c(F, T, F))
+
+  # Example 2
+  # POS+:1234567
+  # REF: TTTTTTT
+  # SEQ: T---TTT
+  ex2 <- data.frame(
+    pos_idx = 1:7,
+    cigar = "1M3D3M"
+  )
+
+  res2 <- ex2 %>% correct_pos_idx_w_cigar()
+  expect_equal(res2$is_in_deletion, c(F, T, T, T, F, F, F))
+
+
+
+  # Example 3
+  # POS+:1--2345
+  # REF: T--TTTT
+  # SEQ: TAA-TTT
+  ex3 <- data.frame(
+    pos_idx = 1:5,
+    cigar = "1M2I1D3M"
+  )
+
+  res3 <- ex3 %>% correct_pos_idx_w_cigar()
+  expect_equal(res3$is_in_deletion, c(F, T, F, F, F))
+})
+

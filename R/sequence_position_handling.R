@@ -8,19 +8,19 @@
 correct_pos_idx_w_cigar <- function(df) {
   df %>% mutate(
     # Raw processing of CIGAR
-    cigar_pos = str_extract_all(string = cigar, pattern = "\\d+(?=[MID]+)") %>% lapply(as.numeric),
-    insert_idx = str_remove_all(string = cigar, pattern = "[\\d]") %>%
+    cigar_pos = str_extract_all(string = .data$cigar, pattern = "\\d+(?=[MID]+)") %>% lapply(as.numeric),
+    insert_idx = str_remove_all(string = .data$cigar, pattern = "[\\d]") %>%
       str_locate_all(pattern = "I") %>%
       map(function(x) x[, "start"]),
     del_idx = .data$cigar %>%
       str_remove_all(pattern = "[\\d]") %>%
       str_locate_all(pattern = "D") %>%
       map(function(x) x[, "start"]),
-    ind_sz = map2(cigar_pos, insert_idx, function(x, y) x[y]),
-    del_sz = map2(cigar_pos, del_idx, function(x, y) x[y]),
+    ind_sz = map2(.data$cigar_pos, .data$insert_idx, function(x, y) x[y]),
+    del_sz = map2(.data$cigar_pos, .data$del_idx, function(x, y) x[y]),
     insert_read_index =
       map2(
-        cigar_pos, insert_idx,
+        .data$cigar_pos, .data$insert_idx,
         function(cigar_pos, insert_idx) {
           cigar_pos[insert_idx] <- 0
           cumsum(cigar_pos)[insert_idx]
@@ -28,9 +28,9 @@ correct_pos_idx_w_cigar <- function(df) {
       ),
     del_read_index = pmap(
       list(
-        cigar_pos,
-        del_idx,
-        insert_idx
+        .data$cigar_pos,
+        .data$del_idx,
+        .data$insert_idx
       ),
       function(cigar_pos, del_idx, insert_idx) {
         cigar_pos[insert_idx] <- 0
@@ -40,9 +40,9 @@ correct_pos_idx_w_cigar <- function(df) {
     # Processing of read position
     ind_cor = pmap_dbl(
       list(
-        ind_sz,
-        insert_read_index,
-        pos_idx
+        .data$ind_sz,
+        .data$insert_read_index,
+        .data$pos_idx
       ),
       function(ind_sz, insert_read_index, pos_idx) {
         sum(ind_sz[insert_read_index < pos_idx])
@@ -50,9 +50,9 @@ correct_pos_idx_w_cigar <- function(df) {
     ),
     del_cor = pmap_dbl(
       list(
-        del_sz,
-        del_read_index,
-        pos_idx
+        .data$del_sz,
+        .data$del_read_index,
+        .data$pos_idx
       ),
       function(del_sz, del_read_index, pos_idx) {
         sum(del_sz[del_read_index < pos_idx])
@@ -60,24 +60,24 @@ correct_pos_idx_w_cigar <- function(df) {
     ),
     is_in_deletion = pmap_lgl(
       list(
-        del_sz,
-        del_read_index,
-        pos_idx
+        .data$del_sz,
+        .data$del_read_index,
+        .data$pos_idx
       ),
       function(del_sz, del_read_index, pos_idx) {
         any((del_read_index - del_sz + 1 <= pos_idx) & (pos_idx <= del_read_index))
       }
     ),
-    old_pos_idx = pos_idx,
-    pos_idx = pos_idx + ind_cor - del_cor
+    old_pos_idx = .data$pos_idx,
+    pos_idx = .data$pos_idx + .data$ind_cor - .data$del_cor
   )
 }
 
 
 #' Title get_mismatch_genomic_pos_list
 #'
-#' @param pos
-#' @param MDtag
+#' @param pos Genomic position
+#' @param MDtag MDtag from BAM column
 #'
 #' @return genomic positions
 #' @importFrom stringr str_extract_all
@@ -150,4 +150,56 @@ get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
     map2(mismatch_genomic_pos, function(x, y) setdiff(x, y))
 
   return(match_positions)
+}
+
+
+
+
+#' Title sample_negative_read_positions
+#'
+#' @param bam_df bam dataframe from load_BAM
+#' @param n_samples number of samples
+#'
+#' @return negative_read_positions
+#'
+#' @importFrom purrr map_dbl
+sample_negative_read_positions <- function(bam_df, n_samples) {
+
+  # Sample random reads according to fragment size
+  random_reads_df <-
+    bam_df %>%
+    sample_n(size = n_samples, weight = abs(.data$isize), replace = T)
+
+  # Sample random negative position per read
+  negative_read_positions <-
+    random_reads_df %>%
+    mutate(
+      match_genomic_pos_list = get_match_genomic_pos_list(pos = .data$pos, cigar = .data$cigar, MDtag = .data$MD),
+      genomic_pos = map_dbl(.data$match_genomic_pos_list, function(x) sample(x = x, size = 1))
+    ) %>%
+    select(-.data$match_genomic_pos_list)
+
+  return(negative_read_positions)
+}
+
+
+#' Title Get mismatch positions
+#'
+#' @param bam_df dataframe from load_BAM
+#'
+#' @return mismatch_positions
+#' @importFrom tidyr unnest
+extract_mismatch_positions <- function(bam_df) {
+  mismatch_positions <-
+    bam_df %>%
+    # Get all reads with at least one mismatch
+    filter(str_detect(.data$MD, "\\d+[ATCG]+")) %>%
+    # Get mismatch positions
+    mutate(
+      genomic_pos = get_mismatch_genomic_pos_list(pos = .data$pos, MDtag = .data$MD)
+    ) %>%
+    # Un-nest data - get a line for each mismatch
+    unnest(.data$genomic_pos)
+
+  return(mismatch_positions)
 }
