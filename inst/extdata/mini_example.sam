@@ -1,6 +1,6 @@
 @HD	VN:1.6	SO:coordinate
 @SQ	SN:chr1	LN:10
-sample_1:1	99	chr1	1	60	5M	=	3	5	AAAAA	NNNNN	MD:Z:5	cD:i:7	cE:f:0	RG:Z:A	MI:Z:1	NM:i:0	cM:i:3	UQ:i:0	AS:i:10	cd:B:s,7,3,3	ce:B:s,0,0,0,0,0	MQ:i:60	MC:Z:7M
-sample_1:1	147	chr1	3	60	7M	=	1	-5	AAAAAAA	NNNNNNN	MD:Z:7	cD:i:5	cE:f:0	RG:Z:A	MI:Z:1	NM:i:0	cM:i:4	UQ:i:0	AS:i:10	cd:B:s,5,5,5,5,5,5,4	ce:B:s,0,0,0,0,0,0,0	MQ:i:60	MC:Z:5M
-sample_1:2	99	chr1	3	60	3M	=	5	3	AAT	NNN	MD:Z:2A	cD:i:5	cE:f:0	RG:Z:A	MI:Z:1	NM:i:0	cM:i:47	UQ:i:0	AS:i:10	cd:B:s,3,3,3,3,3	ce:B:s,0,0,0,0,0	MQ:i:60	MC:Z:3M
-sample_1:2	147	chr1	5	60	3M	=	3	-3	TAA	NNN	MD:Z:A2	cD:i:5	cE:f:0	RG:Z:A	MI:Z:1	NM:i:0	cM:i:47	UQ:i:0	AS:i:10	cd:B:s,5,5,5,5,5,5,5	ce:B:s,0,0,0,0,0,0,0	MQ:i:60	MC:Z:3M
+sample_1:1	99	chr1	6	60	4M	=	10	10	AAAA	NNNN	MD:Z:4	cD:i:7	cE:f:0	RG:Z:A	MI:Z:1	NM:i:0	cM:i:3	UQ:i:0	AS:i:10	cd:B:s,7,3,3,3	ce:B:s,0,0,0,0	MQ:i:60	MC:Z:6M
+sample_1:1	147	chr1	10	60	6M	=	6	-10	AAAAAA	NNNNNN	MD:Z:6	cD:i:5	cE:f:0	RG:Z:A	MI:Z:1	NM:i:0	cM:i:4	UQ:i:0	AS:i:10	cd:B:s,5,5,5,5,5,4	ce:B:s,0,0,0,0,0,0	MQ:i:60	MC:Z:4M
+sample_1:2	99	chr1	11	60	3M	=	14	6	AAT	NNN	MD:Z:2A	cD:i:5	cE:f:0	RG:Z:A	MI:Z:2	NM:i:0	cM:i:3	UQ:i:0	AS:i:10	cd:B:s,5,3,3	ce:B:s,0,0,0	MQ:i:60	MC:Z:3M
+sample_1:2	147	chr1	14	60	3M	=	11	-6	AAA	NNN	MD:Z:3	cD:i:7	cE:f:0	RG:Z:A	MI:Z:2	NM:i:0	cM:i:5	UQ:i:0	AS:i:10	cd:B:s,7,5,5	ce:B:s,0,0,0	MQ:i:60	MC:Z:3M
