@@ -36,8 +36,6 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
   bam <- scanBam(bamFile, param = param)
 
-
-
   for (i in 1:length(bam)) {
     # Unpack MD tag
     bam[[i]]$MD <- str_to_upper(bam[[i]]$tag$MD)
