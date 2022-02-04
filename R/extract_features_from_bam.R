@@ -1,5 +1,31 @@
 #' Title
 #'
+#' @param s
+#' @param k
+#'
+#' @return
+#'
+#' @importFrom stringi stri_count_fixed
+calc_string_entropy_k_mer <- function(s, k = 2) {
+
+  # Generate k-mers
+  alphabet <- c("A", "C", "G", "T", "N")
+  alphabet_k_rep_list <- rep(list(alphabet), k)
+  k_mer_df <- expand.grid(alphabet_k_rep_list)
+  k_mer_vec <- apply(k_mer_df, 1, paste0, collapse = "")
+
+  s_length <- nchar(s) - (k - 1)
+
+  f_mat <- t(sapply(s, stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)) / s_length
+
+  # Shannon entropy
+  H <- -rowSums(f_mat * log10(f_mat), na.rm = TRUE)
+
+  return(H)
+}
+
+#' Title
+#'
 #' @param bam_df dataframe from load_BAM
 #' @param reference_path reference genome path
 #'
