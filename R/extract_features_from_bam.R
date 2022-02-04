@@ -19,8 +19,6 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 
   freq_mat <- t(count_mat) / s_length
 
-
-
   # Shannon entropy
   H <- -rowSums(freq_mat * log10(freq_mat), na.rm = TRUE)
 
@@ -35,7 +33,12 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #' @return dataframe with read positions
 #'
 #' @importFrom purrr map2_int
-extract_features_from_bam <- function(bam_df, reference_path) {
+extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
+
+  # If UMI features are asked for but not present
+  if (add_umi_features & !all(c("cd", "ce") %in% colnames(bam_df))) {
+    warning("UMI features (ce and cd) are not available in bam_df!")
+  }
 
   # Make genomic position features
   genomic_pos_feature_df <-
@@ -59,8 +62,7 @@ extract_features_from_bam <- function(bam_df, reference_path) {
       ctx_minus1 = substring(.data$context11, 5, 5),
       ref = substring(.data$context11, 6, 6),
       ctx_plus1 = substring(.data$context11, 7, 7),
-      trinucleotide_ctx = paste0(.data$ctx_minus1, .data$ref, .data$ctx_plus1),
-      trinucleotide_ctx_strand = paste0(.data$ctx_minus1, .data$ref, .data$ctx_plus1, "_", .data$strand)
+      trinucleotide_ctx = paste0(.data$ctx_minus1, .data$ref, .data$ctx_plus1)
     )
 
   # Make read specific features
@@ -80,8 +82,6 @@ extract_features_from_bam <- function(bam_df, reference_path) {
       seq_length = nchar(.data$seq),
       read_index = if_else(.data$strand == "fwd", .data$pos_idx, .data$seq_length - .data$pos_idx + 1),
       first_in_pair = as.integer(as.logical(bitwAnd(.data$flag, 64))),
-      umi_count = map2_int(.data$cd, .data$pos_idx, function(cd, pos_idx) cd[pos_idx]),
-      umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx]),
       n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
       n_insertions_in_read = str_count(.data$cigar, "I"),
       n_deletions_in_read = str_count(.data$cigar, "D")
@@ -89,21 +89,38 @@ extract_features_from_bam <- function(bam_df, reference_path) {
     # TODO: Move to filter function! Or do before calling this function!
     filter(.data$fragment_size != 0)
 
+  # Features for output
+  selected_features <-
+    c(
+      "qname", "chr", "genomic_pos", "obs", "ref",
+      "strand", "first_in_pair", "read_index", "fragment_size",
+      "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
+      "local_complexity_1", "local_complexity_2", "local_GC",
+      "n_other_errors", "n_insertions_in_read", "n_deletions_in_read"
+    )
+
+  # Add UMI features if asked
+  if (add_umi_features) {
+    read_feature_df <-
+      read_feature_df %>%
+      mutate(
+        umi_count = map2_int(.data$cd, .data$pos_idx, function(cd, pos_idx) cd[pos_idx]),
+        umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx])
+      )
+
+    # Add UMI features to selection
+    selected_features <- c(selected_features, c("umi_count", "umi_errors"))
+  }
+
   # Join and select features: Read, genomic positions and UMI
   feature_df <-
     left_join(read_feature_df, genomic_pos_feature_df,
       by = c("chr", "genomic_pos", "strand")
     ) %>%
-    mutate(n_other_errors = .data$n_errors_in_read - ifelse((!.data$is_in_deletion) & (.data$obs != .data$ref), 1, 0))
-
-  feature_df <- feature_df %>%
-    select(
-      .data$qname, .data$chr, .data$genomic_pos, .data$obs, .data$ref,
-      strand, .data$first_in_pair, .data$read_index, .data$fragment_size,
-      ctx_minus1, .data$ctx_plus1, .data$trinucleotide_ctx, .data$trinucleotide_ctx_strand, .data$context11,
-      local_complexity_1, .data$local_complexity_2, .data$local_GC, .data$umi_count, .data$umi_errors,
-      n_other_errors, .data$n_insertions_in_read, .data$n_deletions_in_read
-    )
+    mutate(
+      n_other_errors = .data$n_errors_in_read - ifelse((!.data$is_in_deletion) & (.data$obs != .data$ref), 1, 0)
+    ) %>%
+    select(selected_features)
   return(feature_df)
 }
 
