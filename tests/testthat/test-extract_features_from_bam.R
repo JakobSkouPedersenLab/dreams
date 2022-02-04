@@ -1,4 +1,4 @@
-test_that("simple examples 2", {
+test_that("calc_string_entropy_k_mer", {
   # No entropy examples
   expect_equal(calc_string_entropy_k_mer(s = "AAA"), 0)
   expect_equal(calc_string_entropy_k_mer(s = c("AAA", "TT")), c(0,0))
