@@ -6,7 +6,8 @@
 #'
 #' @return .BAM file in tibble format
 #'
-#' @import Rsamtools stringr dplyr
+#' @import stringr dplyr
+#' @importFrom Rsamtools ScanBamParam BamFile scanBam
 #' @importFrom purrr map2
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
@@ -19,25 +20,17 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   bamFile <- BamFile(BamPath)
   print(paste0("PATH: ", BamPath))
 
-  if (!is.null(chr)) {
-    # Param for loading the selected regions of BAM file
-    param <- ScanBamParam(
-      tag = c("MD", "ce", "cd", "cE", "cD"),
-      which = GRanges(chr, IRanges(start = pos, end = pos)),
-      what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual")
-    )
-  } else {
-    # Param for loading the entire BAM file
-    param <- ScanBamParam(
-      tag = c("MD", "ce", "cd", "cE", "cD"),
-      what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual")
-    )
-  }
+  # Param for loading the selected regions of BAM file
+  param <- ScanBamParam(
+    tag = c("MD", "ce", "cd", "cE", "cD"),
+    which = GRanges(chr, IRanges(start = pos, end = pos)),
+    what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual")
+  )
 
   bam <- scanBam(bamFile, param = param)
 
   for (i in 1:length(bam)) {
-    # Unpack MD tag
+    # Unpack tags
     bam[[i]]$MD <- str_to_upper(bam[[i]]$tag$MD)
     bam[[i]]$ce <- bam[[i]]$tag$ce
     bam[[i]]$cd <- bam[[i]]$tag$cd
