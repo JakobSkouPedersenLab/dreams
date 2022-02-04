@@ -31,6 +31,7 @@ calc_string_entropy_k_mer <- function(s, k = 2) {
 #'
 #' @return dataframe with read positions
 #'
+#' @importFrom purrr map2_int
 extract_features_from_bam <- function(bam_df, reference_path) {
 
   # Make genomic position features
