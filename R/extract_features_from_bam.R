@@ -62,7 +62,7 @@ extract_features_from_bam <- function(bam_df, reference_path) {
   # Join and select features: Read, genomic positions and UMI
   feature_df <-
     left_join(read_feature_df, genomic_pos_feature_df,
-              by = c("chr", "genomic_pos", "strand")
+      by = c("chr", "genomic_pos", "strand")
     ) %>%
     mutate(n_other_errors = .data$n_errors_in_read - ifelse((!.data$is_in_deletion) & (.data$obs != .data$ref), 1, 0))
 
@@ -75,4 +75,21 @@ extract_features_from_bam <- function(bam_df, reference_path) {
       n_other_errors, .data$n_insertions_in_read, .data$n_deletions_in_read
     )
   return(feature_df)
+}
+
+#' Get reference sequence
+#'
+#' @param chr chromosome
+#' @param genomic_pos genomic_position
+#' @param buffer how many neighbors to include
+#' @param reference_path reference genome fa
+#'
+#' @importFrom Rsamtools FaFile getSeq
+
+get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
+  FaFile <- FaFile(reference_path)
+
+  Fa <- getSeq(FaFile, param = GRanges(chr, IRanges(genomic_pos - buffer, genomic_pos + buffer)))
+
+  return(as.character(Fa))
 }
