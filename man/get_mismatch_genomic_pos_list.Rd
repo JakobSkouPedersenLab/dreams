@@ -7,7 +7,9 @@
 get_mismatch_genomic_pos_list(pos, MDtag)
 }
 \arguments{
-\item{MDtag}{}
+\item{pos}{Genomic position}
+
+\item{MDtag}{MDtag from BAM column}
 }
 \value{
 genomic positions
