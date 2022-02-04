@@ -2,6 +2,7 @@
 #'
 #' @param s
 #' @param k
+#' @param alphabet
 #'
 #' @return
 #'
@@ -29,6 +30,7 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #'
 #' @param bam_df dataframe from load_BAM
 #' @param reference_path reference genome path
+#' @param add_umi_features
 #'
 #' @return dataframe with read positions
 #'
@@ -37,7 +39,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
 
   # If UMI features are asked for but not present
   if (add_umi_features & !all(c("cd", "ce") %in% colnames(bam_df))) {
-    warning("UMI features (ce and cd) are not available in bam_df!")
+    stop("UMI features (ce and cd) are not available in bam_df!")
   }
 
   # Make genomic position features
@@ -120,7 +122,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
     mutate(
       n_other_errors = .data$n_errors_in_read - ifelse((!.data$is_in_deletion) & (.data$obs != .data$ref), 1, 0)
     ) %>%
-    select(selected_features)
+    select(all_of(selected_features))
   return(feature_df)
 }
 

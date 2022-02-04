@@ -7,14 +7,10 @@
 calc_string_entropy_k_mer(s, k = 2, alphabet = c("A", "C", "G", "T", "N"))
 }
 \arguments{
-\item{s}{string}
-
-\item{k}{kmer size}
-
-\item{alphabet}{possible readings}
+\item{alphabet}{}
 }
 \value{
-shannon entropy
+
 }
 \description{
 Title

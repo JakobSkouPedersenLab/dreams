@@ -40,20 +40,24 @@ test_that("extract_features_from_bam - column selection", {
   extracted_features_do_not_load_umi <- extract_features_from_bam(bam_df = bam_w_umi_df, reference_path = reference_path, add_umi_features = FALSE)
   expect_false(all(c("umi_count", "umi_errors") %in% colnames(extracted_features_do_not_load_umi)))
 
-  bam_no_umi_df <- bam_df %>% select(-c("ce", "cd", "cE", "cD"))
+  bam_no_umi_df <- bam_w_umi_df %>% select(-c("ce", "cd", "cE", "cD"))
   extracted_features_no_umi <- extract_features_from_bam(bam_df = bam_no_umi_df, reference_path = reference_path)
   expect_false(all(c("umi_count", "umi_errors") %in% colnames(extracted_features_no_umi)))
+
+  expect_error({
+    extract_features_from_bam(bam_df = bam_no_umi_df, reference_path = reference_path, add_umi_features = TRUE)
+  })
 })
 
 
 test_that("pileup example", {
   # Example 1
   read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
-  pileup(read_example_bam_file)
+  Rsamtools::pileup(read_example_bam_file)
 
   ?pileup
 
-  pp <- PileupParam(
+  pp <- Rsamtools::PileupParam(
     max_depth = 250, min_base_quality = 13, min_mapq = 0,
     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
     distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
@@ -61,7 +65,7 @@ test_that("pileup example", {
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
-  pileup(read_example_bam_file, pileupParam = pp)
+  Rsamtools::pileup(read_example_bam_file, pileupParam = pp)
 
   expect_true(FALSE)
 })

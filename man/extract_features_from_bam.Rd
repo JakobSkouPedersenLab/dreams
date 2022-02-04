@@ -4,12 +4,18 @@
 \alias{extract_features_from_bam}
 \title{Title}
 \usage{
-extract_features_from_bam(bam_df, reference_path)
+extract_features_from_bam(
+  bam_df,
+  reference_path,
+  add_umi_features = all(c("cd", "ce") \%in\% colnames(bam_df))
+)
 }
 \arguments{
 \item{bam_df}{dataframe from load_BAM}
 
 \item{reference_path}{reference genome path}
+
+\item{add_umi_features}{}
 }
 \value{
 dataframe with read positions
