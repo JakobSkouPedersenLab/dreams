@@ -43,7 +43,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
   # Make genomic position features
   genomic_pos_feature_df <-
     distinct(
-      data.frame(
+      base::data.frame(
         chr = bam_df$chr,
         genomic_pos = bam_df$genomic_pos,
         strand = bam_df$strand
