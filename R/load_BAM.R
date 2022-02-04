@@ -39,8 +39,8 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     bam[[i]]$seq <- as.character(bam[[i]]$seq)
     bam[[i]]$qual <- as.character(bam[[i]]$qual)
     bam[[i]]$chr <- as.character(bam[[i]]$rname)
-    # Make genomic position into features
 
+    # Make genomic position into features
     if (!is.null(chr)) {
       genomic_pos <- as.numeric(as.character(str_extract(names(bam[i]), "[0-9]*$")))
       genomic_pos_vec <- rep(genomic_pos, length(bam[[i]]$rname))
