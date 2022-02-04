@@ -1,7 +1,4 @@
 
-
-
-
 test_that("Simple example", {
 
   input_df = tibble::tibble(seq = "ATCG",
