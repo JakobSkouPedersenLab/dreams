@@ -18,7 +18,6 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   # Function to read bam file, and perform initial filtering
 
   bamFile <- BamFile(BamPath)
-  print(paste0("PATH: ", BamPath))
 
   # Param for loading the selected regions of BAM file
   param <- ScanBamParam(
@@ -69,8 +68,6 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
         ),
       chr = as.character(chr)
     )
-
-  print(dim(bam_df))
 
 
   # TODO: Move filtering to other function!
