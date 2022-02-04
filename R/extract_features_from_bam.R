@@ -121,5 +121,5 @@ get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
 
   Fa <- getSeq(FaFile, param = GRanges(chr, IRanges(genomic_pos - buffer, genomic_pos + buffer)))
 
-  return(as.character(Fa))
+  return(as.character(Fa, use.names = FALSE))
 }
