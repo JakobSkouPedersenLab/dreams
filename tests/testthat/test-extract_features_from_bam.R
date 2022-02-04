@@ -36,11 +36,18 @@ test_that("simple examples 2", {
 
 
 test_that("get_reference_seq", {
-  # Example 1
-
   reference_path <- system.file("extdata", "ref.fasta", package = "dreams")
-  seq <- get_reference_seq(chr = "chr1", genomic_pos = 6, buffer = 5, reference_path = reference_path)
 
-  expect_equal(seq, c("chr1" = "AAAAAAAAAAA"))
+  # Example 1
+  seq <- get_reference_seq(chr = "chr1", genomic_pos = 6, buffer = 5, reference_path = reference_path)
+  expect_equal(seq, "AAAAAAAAAAA")
+
+  # Example 2
+  seq <- get_reference_seq(chr = "chr1", genomic_pos = 6, buffer = 3, reference_path = reference_path)
+  expect_equal(seq, "AAAAAAA")
+
+  # Example 3
+  seq <- get_reference_seq(chr = rep("chr1",2), genomic_pos = c(5,6), buffer = 3, reference_path = reference_path)
+  expect_equal(seq, c("AAAAAAA", "AAAAAAA"))
 
 })
