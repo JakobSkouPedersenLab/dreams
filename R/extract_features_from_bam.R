@@ -30,7 +30,7 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #'
 #' @param bam_df dataframe from load_BAM
 #' @param reference_path reference genome path
-#' @param add_umi_features
+#' @param add_umi_features Check if umi information is available
 #'
 #' @return dataframe with read positions
 #'
@@ -142,3 +142,90 @@ get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
 
   return(as.character(Fa, use.names = FALSE))
 }
+
+
+#' Title
+#'
+#' @param s string
+#' @param k kmer size
+#' @param alphabet possible readings
+#'
+#' @return shannon entropy
+#'
+#' @importFrom stringi stri_count_fixed
+calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
+
+  # Generate k-mers
+  alphabet_k_rep_list <- rep(list(alphabet), k)
+  k_mer_df <- expand.grid(alphabet_k_rep_list)
+  k_mer_vec <- apply(k_mer_df, 1, paste0, collapse = "")
+
+  s_length <- nchar(s) - (k - 1)
+
+  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
+
+  freq_mat <- t(count_mat) / s_length
+
+
+
+  # Shannon entropy
+  H <- -rowSums(freq_mat * log10(freq_mat), na.rm = TRUE)
+
+  return(as.numeric(H))
+}
+
+
+#'
+#' #' Title
+#' #'
+#' #' @param read_positions
+#' #' @param coverage_data_path
+#' #' @param bed_include_path
+#' #'
+#' #' @return
+#' filter_mismatch_positions <- function(read_positions, coverage_data_path = NULL, bed_include_path = NULL) {
+#'   read_positions_filtered <-
+#'     read_positions %>%
+#'     filter(obs != "N")
+#'
+#'
+#'   # Filter heterozygote positions
+#'   if (!is.null(coverage_data_path)) {
+#'     coverage_data <- fread(coverage_data_path, col.names = c("chr", "genomic_pos", "coverage"))
+#'
+#'     read_position_filter <- read_positions %>%
+#'       group_by(chr, genomic_pos) %>%
+#'       summarize(n_mismatches = n()) %>%
+#'       ungroup() %>%
+#'       left_join(coverage_data, by = c("chr", "genomic_pos")) %>%
+#'       mutate(mm_rate = n_mismatches / coverage) %>%
+#'       filter(mm_rate < 0.05)
+#'
+#'     read_positions_filtered <- read_positions_filtered %>%
+#'       semi_join(read_position_filter)
+#'   }
+#'
+#'
+#'   if (!is.null(bed_include_path)) {
+#'     bed_include <- fread(bed_include_path)
+#'     read_positions_filtered_bed <- NULL
+#'
+#'     for (i in 1:nrow(bed_include)) {
+#'       # filter data for each line in BED
+#'
+#'       bed_line <- bed_include[i, ]
+#'
+#'       region_data <-
+#'         read_positions_filtered %>%
+#'         filter(
+#'           (bed_line[[1]] == chr &
+#'              bed_line[[2]] <= genomic_pos &
+#'              genomic_pos <= bed_line[[3]])
+#'         )
+#'
+#'       read_positions_filtered_bed <- rbind(read_positions_filtered_bed, region_data)
+#'     }
+#'   }
+#'
+#'   return(read_positions_filtered_bed)
+#' }

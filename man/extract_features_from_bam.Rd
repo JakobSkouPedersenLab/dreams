@@ -15,7 +15,7 @@ extract_features_from_bam(
 
 \item{reference_path}{reference genome path}
 
-\item{add_umi_features}{}
+\item{add_umi_features}{Check if umi information is available}
 }
 \value{
 dataframe with read positions
