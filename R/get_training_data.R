@@ -1,4 +1,16 @@
-generate_training_samples <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, mm_rate_max = 1) {
+#' Title
+#'
+#' @param bam_path Path to BAM file
+#' @param reference_path Path to reference file
+#' @param bed_include_path BED regions to include
+#' @param factor ratio between negative and position data
+#' @param mm_rate_max
+#'
+#' @return dataframe with training data for a bam file
+#' @export
+#'
+#' @examples
+generate_training_samples <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude = NULL, mm_rate_max = 1) {
   bam_df <- load_BAM(bam_path)
 
   # Add genomic positions of mismatches
@@ -18,6 +30,8 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
       mm_rate_max = mm_rate_max,
       bed_include_path = NULL
     )
+
+
 
   n_samples = nrow(positive_samples) * factor
 
