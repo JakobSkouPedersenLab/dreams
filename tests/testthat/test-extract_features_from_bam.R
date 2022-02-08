@@ -87,3 +87,9 @@ test_that("get_reference_seq", {
   seq <- get_reference_seq(chr = rep("chr1", 2), genomic_pos = c(5, 6), buffer = 3, reference_path = reference_path)
   expect_equal(seq, c("AAAAAAA", "AAAAAAA"))
 })
+
+
+
+
+
+
