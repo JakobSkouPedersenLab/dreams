@@ -1,3 +1,31 @@
+
+
+#' Strand correct UMI features (ce and cd)
+#'
+#' @param bam_df
+#'
+#' @return
+strand_correct_umi_features <- function(bam_df) {
+  bam_df %>%
+    mutate(
+      ce = map2(
+        .data$strand,
+        .data$ce,
+        function(strand, ce) {
+          if (strand == "rev") rev(ce) else ce
+        }
+      ),
+      cd = map2(
+        .data$strand,
+        .data$cd,
+        function(strand, cd) {
+          if (strand == "rev") rev(cd) else cd
+        }
+      )
+    )
+}
+
+
 #' Load .BAM file into R as tibble
 #'
 #' @param BamPath Path to .BAM-file
@@ -48,53 +76,24 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     }
   }
 
-  # TODO: Look at optimization
-  # Possible speed optimization:
-  # https://stackoverflow.com/questions/44652234/read-bam-with-tags-to-tbl-recursive-dplyrbind-cols-for-list-of-lists
-
   # Convert list-of-lists into data.frame + make features and names nicer
-
   bam_df <-
     bind_rows(lapply(bam, as_tibble)) %>%
-    #    rename(
-    #     chr = rname
-    #  ) %>%
     mutate(
-      strand =
-        ifelse(
-          as.character(.data$strand) == "+",
-          "fwd",
-          "rev"
-        ),
+      strand = ifelse(
+        as.character(.data$strand) == "+", "fwd", "rev"
+      ),
       chr = as.character(chr)
     )
 
-
-  # TODO: Move filtering to other function!
-  # Initial filtering
+  # If no reads -> Return data.frame
   if (nrow(bam_df) == 0) {
     return(bam_df)
   }
 
-  # print(head(bam_df))
-
+  # Reverse ce and cd tag on reverse strand
   bam_df <- bam_df %>%
-    mutate(
-      ce = map2(
-        .data$strand,
-        .data$ce,
-        function(strand, ce) {
-          if (strand == "rev") rev(ce) else ce
-        }
-      ),
-      cd = map2(
-        .data$strand,
-        .data$cd,
-        function(strand, cd) {
-          if (strand == "rev") rev(cd) else cd
-        }
-      )
-    ) %>%
+    strand_correct_umi_features() %>%
     remove_softclips()
 
   return(bam_df)
