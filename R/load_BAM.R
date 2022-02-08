@@ -2,11 +2,11 @@
 
 #' Strand correct UMI features (ce and cd)
 #'
-#' @param bam_df
+#' @param raw_bam_df data.frame converted from lists-of-lists (scanBam)
 #'
 #' @return
-strand_correct_umi_features <- function(bam_df) {
-  bam_df %>%
+strand_correct_features <- function(raw_bam_df) {
+  raw_bam_df %>%
     mutate(
       ce = map2(
         .data$strand,
@@ -43,8 +43,7 @@ strand_correct_umi_features <- function(bam_df) {
 #' @importFrom rlang .data
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
-  # Function to read bam file, and perform initial filtering
-
+  # Get reference to BamFile
   bamFile <- BamFile(BamPath)
 
   # Param for loading the selected regions of BAM file
@@ -54,10 +53,11 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual")
   )
 
+  # Load BAM file
   bam <- scanBam(bamFile, param = param)
 
+  # Unpack tags
   for (i in 1:length(bam)) {
-    # Unpack tags
     bam[[i]]$MD <- str_to_upper(bam[[i]]$tag$MD)
     bam[[i]]$ce <- bam[[i]]$tag$ce
     bam[[i]]$cd <- bam[[i]]$tag$cd
@@ -68,32 +68,29 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     bam[[i]]$qual <- as.character(bam[[i]]$qual)
     bam[[i]]$chr <- as.character(bam[[i]]$rname)
 
-    # Make genomic position into features
-    if (!is.null(chr)) {
+    # Make genomic position into feature
+    if (!is.null(chr) & !is.null(pos)) {
       genomic_pos <- as.numeric(as.character(str_extract(names(bam[i]), "[0-9]*$")))
-      genomic_pos_vec <- rep(genomic_pos, length(bam[[i]]$rname))
-      bam[[i]]$genomic_pos <- genomic_pos_vec
+      bam[[i]]$genomic_pos <- rep(genomic_pos, length(bam[[i]]$rname))
     }
   }
 
   # Convert list-of-lists into data.frame + make features and names nicer
-  bam_df <-
-    bind_rows(lapply(bam, as_tibble)) %>%
+  raw_bam_df <- bind_rows(lapply(bam, as_tibble))
+
+  # If no reads -> Return data.frame
+  if (nrow(raw_bam_df) == 0) {
+    return(raw_bam_df)
+  }
+
+  # Clean up columns + Reverse ce and cd tag on reverse strand
+  bam_df <- raw_bam_df %>%
     mutate(
       strand = ifelse(
         as.character(.data$strand) == "+", "fwd", "rev"
-      ),
-      chr = as.character(chr)
-    )
-
-  # If no reads -> Return data.frame
-  if (nrow(bam_df) == 0) {
-    return(bam_df)
-  }
-
-  # Reverse ce and cd tag on reverse strand
-  bam_df <- bam_df %>%
-    strand_correct_umi_features() %>%
+      )
+    ) %>%
+    strand_correct_features() %>%
     remove_softclips()
 
   return(bam_df)
