@@ -42,6 +42,10 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
     stop("UMI features (ce and cd) are not available in bam_df!")
   }
 
+  if (nrow(bam_df) == 0) {
+    return(NULL)
+  }
+
   # Make genomic position features
   genomic_pos_feature_df <-
     distinct(
@@ -173,4 +177,3 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 
   return(as.numeric(H))
 }
-
