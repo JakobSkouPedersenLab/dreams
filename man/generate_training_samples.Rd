@@ -24,7 +24,7 @@ generate_training_samples(
 
 \item{positions_to_exclude_path}{positions to exclude from training}
 
-\item{mm_rate_max}{}
+\item{mm_rate_max}{maximum mismatch rate in position}
 }
 \value{
 dataframe with training data for a bam file

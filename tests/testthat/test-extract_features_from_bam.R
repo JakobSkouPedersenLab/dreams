@@ -50,25 +50,25 @@ test_that("extract_features_from_bam - column selection", {
 })
 
 
-test_that("pileup example", {
-  # Example 1
-  read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
-  Rsamtools::pileup(read_example_bam_file)
-
-  ?pileup
-
-  pp <- Rsamtools::PileupParam(
-    max_depth = 250, min_base_quality = 13, min_mapq = 0,
-    min_nucleotide_depth = 1, min_minor_allele_depth = 0,
-    distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
-    ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
-    left_bins = NULL, query_bins = NULL, cycle_bins = NULL
-  )
-
-  Rsamtools::pileup(read_example_bam_file, pileupParam = pp)
-
-  expect_true(FALSE)
-})
+# test_that("pileup example", {
+#   # Example 1
+#   read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
+#   Rsamtools::pileup(read_example_bam_file)
+#
+#   ?pileup
+#
+#   pp <- Rsamtools::PileupParam(
+#     max_depth = 250, min_base_quality = 13, min_mapq = 0,
+#     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
+#     distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
+#     ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
+#     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
+#   )
+#
+#   Rsamtools::pileup(read_example_bam_file, pileupParam = pp)
+#
+#   expect_true(FALSE)
+# })
 
 
 

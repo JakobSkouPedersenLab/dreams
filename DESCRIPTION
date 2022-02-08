@@ -28,6 +28,7 @@ Imports:
     IRanges,
     magrittr,
     purrr,
+    readr,
     rlang,
     Rsamtools,
     stringi,

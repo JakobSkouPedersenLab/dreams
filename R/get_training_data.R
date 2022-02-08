@@ -5,7 +5,7 @@
 #' @param bed_include_path BED regions to include
 #' @param positions_to_exclude_path positions to exclude from training
 #' @param factor ratio between negative and position data
-#' @param mm_rate_max
+#' @param mm_rate_max maximum mismatch rate in position
 #'
 #' @return dataframe with training data for a bam file
 #' @export
@@ -27,7 +27,7 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
   positive_samples <-
     filter_mismatch_positions(
       read_positions = mismatch_positions_df,
-      bam_file = read_example_bam_file,
+      bam_file = bam_path,
       mm_rate_max = mm_rate_max,
       bed_include_path = bed_include_path,
       positions_to_exclude_path = positions_to_exclude_path
@@ -71,6 +71,8 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
 #' @param positions_to_exclude_path positions to exclude from training
 #'
 #' @return filtered read position dataframe
+#'
+#' @importFrom readr read_csv
 
 filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_path = NULL) {
   read_positions_filtered <-
@@ -85,7 +87,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
-  coverage_data <- Rsamtools::pileup(read_example_bam_file, pileupParam = pp) %>%
+  coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp) %>%
     rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
 
   # Filter heterozygote positions
@@ -119,9 +121,9 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
       region_data <-
         read_positions_filtered %>%
         filter(
-          (bed_line[[1]] == chr &
-            bed_line[[2]] <= genomic_pos &
-            genomic_pos <= bed_line[[3]])
+          (bed_line[[1]] == .data$chr &
+            bed_line[[2]] <= .data$genomic_pos &
+            .data$genomic_pos <= bed_line[[3]])
         )
 
       read_positions_filtered_bed <- rbind(read_positions_filtered_bed, region_data)
