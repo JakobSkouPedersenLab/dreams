@@ -1,7 +1,8 @@
 on:
   workflow_run:
     workflows: ["R-CMD-check"]
-    types: [completed]
+    types:
+      - completed
 
 name: test-coverage
 

@@ -1,10 +1,9 @@
 
-
 #' Strand correct UMI features (ce and cd)
 #'
 #' @param df data.frame converted from lists-of-lists (scanBam)
 #'
-#' @return
+#' @return data.frame with corrected UMI features
 strand_correct_umi_features <- function(df) {
 
   # If UMI features not present -> return input
