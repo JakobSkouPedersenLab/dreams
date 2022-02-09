@@ -10,7 +10,7 @@ strand_correct_umi_features(df)
 \item{df}{data.frame converted from lists-of-lists (scanBam)}
 }
 \value{
-
+data.frame with corrected UMI features
 }
 \description{
 Strand correct UMI features (ce and cd)
