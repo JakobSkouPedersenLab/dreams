@@ -13,6 +13,9 @@
     <loc>https://dreamsteam.github.io/dreams/index.html</loc>
   </url>
   <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/bed_to_granges.html</loc>
+  </url>
+  <url>
     <loc>https://dreamsteam.github.io/dreams/reference/calc_string_entropy_k_mer.html</loc>
   </url>
   <url>
@@ -55,6 +58,6 @@
     <loc>https://dreamsteam.github.io/dreams/reference/sample_negative_read_positions.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/strand_correct_umi_features.html</loc>
+    <loc>https://dreamsteam.github.io/dreams/reference/strand_correct_features.html</loc>
   </url>
 </urlset>
