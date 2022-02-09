@@ -46,7 +46,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
   }
 
   if (nrow(bam_df) == 0) {
-    return(NULL)
+    return(data.frame())
   }
 
   # Make genomic position features

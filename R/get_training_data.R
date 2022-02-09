@@ -1,5 +1,72 @@
 #' Title
 #'
+#' @param bam_paths Paths to BAM files
+#' @param reference_path Path to reference file
+#' @param bed_include_path BED regions to include
+#' @param positions_to_exclude_paths positions to exclude from training with length equal to number of samples
+#' @param common_positions_to_exclude_paths positions to exclude from all samples
+#' @param factor ratio between negative and positive data
+#' @param mm_rate_max maximum mismatch rate in position
+#'
+#' @return dataframe with training data for a bam file
+get_training_data <- function(bam_paths,
+                              reference_path,
+                              bed_include_path = NULL,
+                              factor = 1,
+                              common_positions_to_exclude_paths = NULL,
+                              positions_to_exclude_paths = NULL,
+                              mm_rate_max = 1) {
+
+  # Check if there is a position exclude path for each bam file
+  if ((!is.null(positions_to_exclude_paths) &
+    (length(bam_paths) != length(positions_to_exclude_paths)))) {
+    stop("Wrong number of exclude paths")
+  }
+
+  training_data <- NULL
+  info <- NULL
+
+  for (bam_idx in 1:length(bam_paths)) {
+    bam_path <- bam_paths[[bam_idx]]
+
+    # Combine sample specific position exclusion with common exclusion
+    if (!is.null(positions_to_exclude_paths)) {
+      current_positions_to_exclude_paths <- c(common_positions_to_exclude_paths, positions_to_exclude_paths[[bam_idx]])
+    } else {
+      current_positions_to_exclude_paths <- common_positions_to_exclude_paths
+    }
+
+
+    # Get training data for single bam file
+    current_training_data <- get_training_data_from_bam(
+      bam_path = bam_path,
+      reference_path = reference_path,
+      bed_include_path = bed_include_path,
+      positions_to_exclude_paths = current_positions_to_exclude_paths,
+      factor = factor,
+      mm_rate_max = mm_rate_max
+    )
+
+    training_data <- rbind(training_data, current_training_data$data)
+    info <- rbind(info, current_training_data$info)
+  }
+
+  # Collect output info for beta calculation
+  output_info <- data.frame(
+    total_mismatches = sum(info$n_mismatches),
+    total_matches = sum(info$n_matches),
+    total_coverage = sum(info$total_coverage)
+  ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
+
+  return(list(
+    data = training_data,
+    info = output_info
+  ))
+}
+
+
+#' Title
+#'
 #' @param bam_path Path to BAM file
 #' @param reference_path Path to reference file
 #' @param bed_include_path BED regions to include
@@ -8,10 +75,7 @@
 #' @param mm_rate_max maximum mismatch rate in position
 #'
 #' @return dataframe with training data for a bam file
-#' @export
-#'
-#' @examples
-generate_training_samples <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
+get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
   bam_df <- load_BAM(bam_path)
 
   # Add genomic positions of mismatches
@@ -24,6 +88,7 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
       reference_path = reference_path
     )
 
+  # Filter mismatches
   mismatches <-
     filter_mismatch_positions(
       read_positions = mismatch_positions_df,
@@ -37,6 +102,7 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
   info <- mismatches$info
 
   n_samples <- nrow(positive_samples) * factor
+
 
   # Generate negative samples
   negative_read_positions_df <-
@@ -52,8 +118,8 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
       reference_path = reference_path
     )
 
-  info[["n_matches"]] <- nrow(negative_samples)
-  info[["beta"]] <- nrow(negative_samples) / (info$total_coverage - nrow(positive_samples))
+  info <- info %>% mutate(n_matches = nrow(negative_samples))
+  info <- info %>% mutate(beta = nrow(negative_samples) / (info$total_coverage - nrow(positive_samples)))
 
   output_data <- rbind(positive_samples, negative_samples)
 
@@ -87,6 +153,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     read_positions %>%
     filter(.data$obs != "N")
 
+  # Load coverage data
+
   included_regions_granges <- bed_to_granges(bed_include_path)
 
   pp <- Rsamtools::PileupParam(
@@ -109,29 +177,40 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   # Join with coverage dataframe - all positions if included_regions is NULL
 
-  read_position_filter <- read_positions_summarized %>%
+  # Remove positions with high mismatch rate in mismatch  and coverage data
+
+  read_position_mm_rate <- read_positions_summarized %>%
     inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
-    mutate(mm_rate = .data$n_mismatches / .data$coverage) %>%
+    mutate(mm_rate = .data$n_mismatches / .data$coverage)
+
+  read_position_filter <- read_position_mm_rate %>%
     filter(.data$mm_rate < mm_rate_max)
 
   read_positions_filtered <- read_positions_filtered %>%
     semi_join(read_position_filter, by = c("chr", "genomic_pos"))
 
+  coverage_data_filtered <- coverage_data %>%
+    anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
+
   # Remove unwanted positions based on exclude files
 
   if (!is.null(positions_to_exclude_paths)) {
     for (p in positions_to_exclude_paths) {
-      positions_to_exclude <- read_csv(p)
-
+      positions_to_exclude <- read_csv(p, show_col_types = FALSE)
 
       read_positions_filtered <- read_positions_filtered %>%
+        anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
+
+      coverage_data_filtered <- coverage_data_filtered %>%
         anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
     }
   }
 
-  beta_info <- list(
+  # Output beta info
+
+  beta_info <- data.frame(
     n_mismatches = nrow(read_positions_filtered),
-    total_coverage = sum(coverage_data$coverage)
+    total_coverage = sum(coverage_data_filtered$coverage)
   )
 
 
