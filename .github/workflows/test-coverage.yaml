@@ -1,7 +1,7 @@
 on:
- workflow_run:
-   workflows: ["R-CMD-check"]
-   types: [completed]
+  workflow_run:
+    workflows: ["R-CMD-check"]
+    types: [completed]
 
 name: test-coverage
 
@@ -17,11 +17,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v1
         with:
-        use-public-rspm: true
+          use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
-        extra-packages: covr
+          extra-packages: covr
 
       - name: Test coverage
         run: covr::codecov()
