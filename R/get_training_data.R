@@ -79,6 +79,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     read_positions %>%
     filter(.data$obs != "N")
 
+  included_regions_granges <- bed_to_granges(bed_include_path)
+
   pp <- Rsamtools::PileupParam(
     max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
@@ -87,50 +89,53 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
-  coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp) %>%
+  coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
 
   # Filter heterozygote positions
 
-  read_position_filter <- read_positions %>%
+  read_positions_summarized <- read_positions %>%
     group_by(.data$chr, .data$genomic_pos) %>%
     summarize(n_mismatches = n()) %>%
-    ungroup() %>%
-    left_join(coverage_data, by = c("chr", "genomic_pos")) %>%
+    ungroup()
+
+  # Join with coverage dataframe - all positions if included_regions is NULL
+
+  read_position_filter <- read_positions_summarized %>%
+    inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
     mutate(mm_rate = .data$n_mismatches / .data$coverage) %>%
     filter(.data$mm_rate < mm_rate_max)
 
-  # Remove unwanter positions
-
-  positions_to_exclude <- read_csv(positions_to_exclude_path)
-
   read_positions_filtered <- read_positions_filtered %>%
-    semi_join(read_position_filter, by = c("chr", "genomic_pos")) %>%
-    anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
+    semi_join(read_position_filter, by = c("chr", "genomic_pos"))
 
+  # Remove unwanted positions
 
-  if (!is.null(bed_include_path)) {
-    bed_include <- read_csv(bed_include_path)
-    read_positions_filtered_bed <- NULL
+  if (!is.null(positions_to_exclude_path)) {
+    positions_to_exclude <- read_csv(positions_to_exclude_path)
 
-    for (i in 1:nrow(bed_include)) {
-      # filter data for each line in BED
-
-      bed_line <- bed_include[i, ]
-
-      region_data <-
-        read_positions_filtered %>%
-        filter(
-          (bed_line[[1]] == .data$chr &
-            bed_line[[2]] <= .data$genomic_pos &
-            .data$genomic_pos <= bed_line[[3]])
-        )
-
-      read_positions_filtered_bed <- rbind(read_positions_filtered_bed, region_data)
-    }
-  } else {
-    read_positions_filtered_bed <- read_positions_filtered
+    read_positions_filtered %>%
+      anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
   }
 
-  return(read_positions_filtered_bed)
+  return(read_positions_filtered)
+}
+
+#' Title
+#'
+#' @param bed_path
+#'
+#' @return
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
+
+bed_to_granges <- function(bed_path) {
+  if (is.null(bed_path)) {
+    return(GRanges())
+  }
+
+  df <- readr::read_delim(bed_path, delim = "\t", col_names = c("chrom", "start", "end"), show_col_types = FALSE) %>% mutate(start = start + 1)
+
+  grange_from_bed <- makeGRangesFromDataFrame(df, start.field = "start", end.field = c("end", "stop"))
+
+  return(grange_from_bed)
 }

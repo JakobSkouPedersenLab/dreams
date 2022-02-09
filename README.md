@@ -4,6 +4,9 @@
 # dreams
 
 <!-- badges: start -->
+
+[![Codecov test
+coverage](https://codecov.io/gh/JakobSkouPedersenLab/dreams/branch/main/graph/badge.svg)](https://app.codecov.io/gh/JakobSkouPedersenLab/dreams?branch=main)
 <!-- badges: end -->
 
 The goal of dreams is to …
