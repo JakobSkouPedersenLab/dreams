@@ -1,63 +1,18 @@
 #' Title
 #'
-#' @param mutations
+#' @param mutations_df
 #' @param reads
+#' @param model
 #' @param beta
-#' @param use_warp_speed
-#' @param calc_ci
 #'
 #' @return
-#' @export
-call_cancer <- function(mutations, reads, beta, use_warp_speed = TRUE, calc_ci = FALSE) {
-  # Clean up mutations
-  mutations_df <- mutations %>%
-    rename(
-      chr = CHROM,
-      genomic_pos = POS,
-      ref = REF,
-      alt = ALT
-    )
-
-  # Summaries
-  total_coverage <- nrow(reads)
-  mutations_tested <- nrow(mutations_df)
-
-  # Template for empty output
-  empty_cancer_info <-
-    data.frame(
-      tf_est = 0, tf_min = 0, tf_max = 1,
-      r_est = 0, r_min = 0, r_max = 1,
-      Q_val = 0,
-      ll_A = NA,
-      ll_0 = NA,
-      mutations_tested = mutations_tested,
-      est_mutations_present = 0,
-      total_coverage = total_coverage,
-      total_count = 0,
-      p_val = 1,
-      EM_converged = NA,
-      EM_steps = NA,
-      fpeval = NA,
-      objfeval = NA
-    )
-
-  # If no mutations return empty result
-  if (mutations_tested == 0 | total_coverage == 0) {
-    return(
-      list(
-        cancer_info = empty_cancer_info,
-        mutation_info = NULL
-      )
-    )
-  }
-
-  # Prepare inputs for algorithm
+prepare_em_input <- function(mutations_df, reads, model, beta) {
   X_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
 
   mutations_w_cov_df <- NULL
-  for (i in 1:mutations_tested) {
+  for (i in 1:nrow(mutations_df)) {
     chr <- mutations_df[i, "chr"]
     genomic_pos <- mutations_df[i, "genomic_pos"]
     ref <- mutations_df[i, "ref"]
@@ -66,9 +21,9 @@ call_cancer <- function(mutations, reads, beta, use_warp_speed = TRUE, calc_ci =
     mut_reads_ref_alt <-
       reads %>%
       filter(
-        # Filter position
+        # Filter reads positions to mutation
         chr == !!chr, genomic_pos == !!genomic_pos,
-        # Filter mutation type (remove N and "other" alleles)
+        # Filter mutation type (remove N and "other" than ref/alt alleles)
         obs == !!ref | obs == !!alt
       )
 
@@ -104,10 +59,84 @@ call_cancer <- function(mutations, reads, beta, use_warp_speed = TRUE, calc_ci =
     error_mut_to_ref_list <- append(error_mut_to_ref_list, list(error_mut_to_ref))
   }
 
+  return(
+    list(
+      X_list = X_list,
+      error_ref_to_mut_list = error_ref_to_mut_list,
+      error_mut_to_ref_list = error_mut_to_ref_list
+    )
+  )
+}
+
+#' Title
+#'
+#' @param reads
+#' @param beta
+#' @param use_warp_speed
+#' @param calc_ci
+#' @param model
+#' @param mutations_df
+#'
+#' @return
+#' @export
+call_cancer <- function(mutations_df, reads, model, beta, use_warp_speed = TRUE, calc_ci = FALSE) {
+  # Clean up mutations
+  mutations_df <- mutations_df %>%
+    select(
+      "chr" = matches("chr|CHR"),
+      "genomic_pos" = matches("pos|POS"),
+      "ref" = matches("ref|ref"),
+      "alt" = matches("alt|ALT|obs|OBS")
+    )
+
+  # Stop if mutations do not have the expected columns
+  expected_columns <- c("chr", "genomic_pos", "ref", "alt")
+  if (!all(expected_columns %in% colnames(mutations_df))) {
+    stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
+  }
+
+  # Summaries
+  total_coverage <- nrow(reads)
+  mutations_tested <- nrow(mutations_df)
+
+  # Template for empty output
+  empty_cancer_info <-
+    data.frame(
+      tf_est = 0, tf_min = 0, tf_max = 1,
+      r_est = 0, r_min = 0, r_max = 1,
+      Q_val = 0,
+      ll_A = NA,
+      ll_0 = NA,
+      mutations_tested = mutations_tested,
+      est_mutations_present = 0,
+      total_coverage = total_coverage,
+      total_count = 0,
+      p_val = 1,
+      EM_converged = NA,
+      EM_steps = NA,
+      fpeval = NA,
+      objfeval = NA
+    )
+
+  # If no mutations return empty result
+  if (mutations_tested == 0 | total_coverage == 0) {
+    return(
+      list(
+        cancer_info = empty_cancer_info,
+        mutation_info = NULL
+      )
+    )
+  }
+
+  # Prepare inputs for algorithm
+  em_input <- prepare_em_input(mutations_df = mutations_df, reads = reads, model = model, beta = beta)
+
   # If no positions have relevant coverage (ref or alt) or count of mu is 0 for every candidate
-  n_mutaitons_w_relevant_coverage <- length(X_list)
-  mutations_counts <- sapply(X_list, sum)
-  if (n_mutaitons_w_relevant_coverage == 0 | all(mutations_counts == 0)) {
+  X_list <- em_input$X_list
+
+  no_mutaitons_has_relevant_coverage <- length(X_list) == 0
+  no_mutations_has_relevant_count <- all(sapply(X_list, sum) == 0)
+  if (no_mutaitons_has_relevant_coverage | no_mutations_has_relevant_count) {
     return(
       list(
         cancer_info = empty_cancer_info,
@@ -118,9 +147,9 @@ call_cancer <- function(mutations, reads, beta, use_warp_speed = TRUE, calc_ci =
 
   # EM algorithm
   EM_res <- EM_test(
-    X_list = X_list,
-    error_ref_to_mut_list = error_ref_to_mut_list,
-    error_mut_to_ref_list = error_mut_to_ref_list,
+    X_list = em_input$X_list,
+    error_ref_to_mut_list = em_input$error_ref_to_mut_list,
+    error_mut_to_ref_list = em_input$error_mut_to_ref_list,
     use_warp_speed = use_warp_speed,
     calc_ci = calc_ci
   )
