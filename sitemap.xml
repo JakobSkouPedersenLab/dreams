@@ -31,9 +31,6 @@
     <loc>https://dreamsteam.github.io/dreams/reference/filter_mismatch_positions.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/generate_training_samples.html</loc>
-  </url>
-  <url>
     <loc>https://dreamsteam.github.io/dreams/reference/get_match_genomic_pos_list.html</loc>
   </url>
   <url>
@@ -41,6 +38,12 @@
   </url>
   <url>
     <loc>https://dreamsteam.github.io/dreams/reference/get_reference_seq.html</loc>
+  </url>
+  <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/get_training_data.html</loc>
+  </url>
+  <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/get_training_data_from_bam.html</loc>
   </url>
   <url>
     <loc>https://dreamsteam.github.io/dreams/reference/index.html</loc>
