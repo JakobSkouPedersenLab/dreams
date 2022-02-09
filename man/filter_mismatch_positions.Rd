@@ -9,7 +9,7 @@ filter_mismatch_positions(
   bam_file,
   mm_rate_max = 1,
   bed_include_path = NULL,
-  positions_to_exclude_path = NULL
+  positions_to_exclude_paths = NULL
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ filter_mismatch_positions(
 
 \item{bed_include_path}{bed regions to include in training data}
 
-\item{positions_to_exclude_path}{positions to exclude from training}
+\item{positions_to_exclude_paths}{positions to exclude from training}
 }
 \value{
 filtered read position dataframe

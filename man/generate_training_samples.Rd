@@ -9,7 +9,7 @@ generate_training_samples(
   reference_path,
   bed_include_path = NULL,
   factor = 1,
-  positions_to_exclude_path = NULL,
+  positions_to_exclude_paths = NULL,
   mm_rate_max = 1
 )
 }
@@ -20,9 +20,9 @@ generate_training_samples(
 
 \item{bed_include_path}{BED regions to include}
 
-\item{factor}{ratio between negative and position data}
+\item{factor}{ratio between negative and positive data}
 
-\item{positions_to_exclude_path}{positions to exclude from training}
+\item{positions_to_exclude_paths}{positions to exclude from training}
 
 \item{mm_rate_max}{maximum mismatch rate in position}
 }
