@@ -1,0 +1,6 @@
+@HD	VN:1.6	SO:coordinate
+@SQ	SN:chr1	LN:10
+sample_1:1	99	chr1	6	60	4M	=	10	10	AAAA	NNNN	MD:Z:4	RG:Z:A	MI:Z:1	NM:i:0	cM:i:3	UQ:i:0	AS:i:10	MQ:i:60	MC:Z:6M
+sample_1:1	147	chr1	10	60	6M	=	6	-10	AAAAAA	NNNNNN	MD:Z:6	RG:Z:A	MI:Z:1	NM:i:0	cM:i:4	UQ:i:0	AS:i:10	MQ:i:60	MC:Z:4M
+sample_1:2	99	chr1	11	60	3M	=	14	6	AAT	NNN	MD:Z:2A	RG:Z:A	MI:Z:2	NM:i:0	cM:i:3	UQ:i:0	AS:i:10	MQ:i:60	MC:Z:3M
+sample_1:2	147	chr1	14	60	3M	=	11	-6	AAA	NNN	MD:Z:3	RG:Z:A	MI:Z:2	NM:i:0	cM:i:5	UQ:i:0	AS:i:10	MQ:i:60	MC:Z:3M

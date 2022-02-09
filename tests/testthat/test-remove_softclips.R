@@ -18,3 +18,20 @@ test_that("Simple example", {
 
   expect_equal(clipped_df,expected = output_df)
 })
+
+
+test_that("Simple example - no UMI", {
+
+  input_df = tibble::tibble(seq = "ATCG",
+                            qual = "FFFF",
+                            cigar = "1S3M")
+
+
+  output_df = tibble::tibble(seq = "TCG",
+                             qual = "FFF",
+                             cigar = "3M")
+
+  clipped_df = remove_softclips(input_df)
+
+  expect_equal(clipped_df,expected = output_df)
+})

@@ -4,10 +4,10 @@
 \alias{strand_correct_umi_features}
 \title{Strand correct UMI features (ce and cd)}
 \usage{
-strand_correct_umi_features(bam_df)
+strand_correct_umi_features(df)
 }
 \arguments{
-\item{bam_df}{}
+\item{df}{data.frame converted from lists-of-lists (scanBam)}
 }
 \value{
 

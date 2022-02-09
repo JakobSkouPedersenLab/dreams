@@ -7,12 +7,10 @@
 #' @return A new dataframe with softclipped bases removed
 #'
 remove_softclips <- function(df) {
-  # Extract seq and cigar
+  # Extract old seq, qual and cigar
   seq <- df$seq
   qual <- df$qual
   cigar <- df$cigar
-  cd <- df$cd
-  ce <- df$ce
 
   # Filter soft clips and remove from sequence string
   soft_clips_start <- ifelse(stringr::str_detect(cigar, "^[0-9]*S"),
@@ -25,31 +23,34 @@ remove_softclips <- function(df) {
     0
   )
 
-  trim_list <- function(x, start, end) {
-    return(x[(start + 1):(length(x) - end)])
-  }
-
-  # Trim cd
-  new_cd <- purrr::pmap(list(cd, soft_clips_start, soft_clips_end), trim_list)
-
-  # Trim ce
-  new_ce <- purrr::pmap(list(ce, soft_clips_start, soft_clips_end), trim_list)
-
-  # Trim sequence
+  # Trim sequence, qual and cigar
   new_seq <- substring(seq, soft_clips_start + 1, nchar(seq) - soft_clips_end)
-
-  # Trim qual
   new_qual <- substring(qual, soft_clips_start + 1, nchar(qual) - soft_clips_end)
-
-  # Remove soft clipped ends from cigar
   new_cigar <- stringr::str_remove_all(cigar, "^[0-9]*S|[0-9]*S$")
 
   # Update seq and cigar
   df$seq <- new_seq
   df$cigar <- new_cigar
   df$qual <- new_qual
-  df$cd <- new_cd
-  df$ce <- new_ce
 
+  # Handle UMI features if present
+  if (all(c("ce", "cd") %in% colnames(df))) {
+    trim_list <- function(x, start, end) {
+      return(x[(start + 1):(length(x) - end)])
+    }
+    # Extract old ce and cd
+    cd <- df$cd
+    ce <- df$ce
+
+    # Trim UMI features
+    new_cd <- purrr::pmap(list(cd, soft_clips_start, soft_clips_end), trim_list)
+    new_ce <- purrr::pmap(list(ce, soft_clips_start, soft_clips_end), trim_list)
+
+    # Update cd and ce
+    df$cd <- new_cd
+    df$ce <- new_ce
+  }
+
+  # Return updated df
   return(df)
 }
