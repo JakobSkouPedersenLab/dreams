@@ -4,10 +4,17 @@
 \alias{strand_correct_features}
 \title{Strand correct UMI features (ce and cd)}
 \usage{
+<<<<<<< HEAD:man/strand_correct_features.Rd
 strand_correct_features(raw_bam_df)
 }
 \arguments{
 \item{raw_bam_df}{data.frame converted from lists-of-lists (scanBam)}
+=======
+strand_correct_umi_features(df)
+}
+\arguments{
+\item{df}{data.frame converted from lists-of-lists (scanBam)}
+>>>>>>> e5c1ca443b87c7b4978f606eb9a13f43014826dc:man/strand_correct_umi_features.Rd
 }
 \value{
 strand corrected bam

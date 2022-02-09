@@ -19,7 +19,7 @@ test_that("Mini example - Load", {
 
   # Check columns
   expected_standard_columns <- c("qname", "rname", "flag", "strand", "pos", "qwidth", "mapq", "cigar", "mpos", "isize", "seq", "qual", "MD", "chr")
-  expected_umi_columns <- c("ce", "cd", "cE", "cD", "chr")
+  expected_umi_columns <- c("ce", "cd", "cE", "cD")
 
   expect_true(all(expected_standard_columns %in% colnames(bam_df)))
   expect_true(all(expected_umi_columns %in% colnames(bam_df)))
@@ -34,6 +34,19 @@ test_that("Mini example - Load", {
   ))
   # MD Tag
   expect_equal(bam_df$MD, c("4", "6", "2A", "3"))
+})
+
+test_that("Mini example (no UMI) - Load", {
+  mini_bam_no_umifile <- system.file("extdata", "mini_example_no_umi.bam", package = "dreams")
+  bam_df <- load_BAM(mini_bam_no_umifile)
+
+  # Check number of reads
+  expect_equal(nrow(bam_df), 4)
+
+  # Check UMI not part of columns
+  expected_umi_columns <- c("ce", "cd", "cE", "cD")
+
+  expect_false(any(expected_umi_columns %in% colnames(bam_df)))
 })
 
 test_that("Mini example - Load positions", {
