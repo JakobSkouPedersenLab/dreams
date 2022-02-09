@@ -24,7 +24,7 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
       reference_path = reference_path
     )
 
-  positive_samples <-
+   mismatches <-
     filter_mismatch_positions(
       read_positions = mismatch_positions_df,
       bam_file = bam_path,
@@ -33,7 +33,8 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
       positions_to_exclude_path = positions_to_exclude_path
     )
 
-
+  positive_samples = mismatches$data
+  info = mismatches$info
 
   n_samples <- nrow(positive_samples) * factor
 
@@ -51,10 +52,15 @@ generate_training_samples <- function(bam_path, reference_path, bed_include_path
       reference_path = reference_path
     )
 
+  info[["n_matches"]] = nrow(negative_samples)
+  info[["beta"]] =  nrow(negative_samples) / (info$total_coverage - nrow(positive_samples))
 
   output_data <- rbind(positive_samples, negative_samples)
 
-  return(output_data)
+  output_list = list(data = output_data,
+                     info = info)
+
+  return(output_list)
 }
 
 
@@ -118,14 +124,21 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
       anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
   }
 
-  return(read_positions_filtered)
+  beta_info <- list(
+    n_mismatches = nrow(read_positions_filtered),
+    total_coverage = sum(coverage_data$coverage)
+  )
+
+
+  return(list(
+    data = read_positions_filtered,
+    info = beta_info
+  ))
 }
 
 #' Title
-#'
-#' @param bed_path
-#'
-#' @return
+#' @param bed_path path to bed-file
+#' @return granges object
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 
 bed_to_granges <- function(bed_path) {
@@ -133,7 +146,7 @@ bed_to_granges <- function(bed_path) {
     return(GRanges())
   }
 
-  df <- readr::read_delim(bed_path, delim = "\t", col_names = c("chrom", "start", "end"), show_col_types = FALSE) %>% mutate(start = start + 1)
+  df <- readr::read_delim(bed_path, delim = "\t", col_names = c("chrom", "start", "end"), show_col_types = FALSE) %>% mutate(start = .data$start + 1)
 
   grange_from_bed <- makeGRangesFromDataFrame(df, start.field = "start", end.field = c("end", "stop"))
 

@@ -4,7 +4,7 @@
 #'
 #' @param raw_bam_df data.frame converted from lists-of-lists (scanBam)
 #'
-#' @return
+#' @return strand corrected bam
 strand_correct_features <- function(raw_bam_df) {
   raw_bam_df %>%
     mutate(

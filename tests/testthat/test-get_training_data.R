@@ -51,7 +51,7 @@ test_that("Individual example", {
       bed_include_path = bed_file_3
     )
 
-  n_samples <- nrow(filtered_mismatch_positions_df) * 1
+  n_samples <- nrow(filtered_mismatch_positions_df$data) * 1
 
   # Generate negative samples
   negative_read_positions_df <-
@@ -86,7 +86,7 @@ test_that("full example", {
     factor = factor,
     mm_rate_max = 0.51
   )
-  expect_true(nrow(samples_1) == n_errors + n_errors * factor)
+  expect_true(nrow(samples_1$data) == n_errors + n_errors * factor)
 
   n_errors <- 1
   factor <- 10
@@ -98,7 +98,7 @@ test_that("full example", {
     factor = factor,
     mm_rate_max = 0.51
   )
-  expect_true(nrow(samples_1) == n_errors + n_errors * factor)
+  expect_true(nrow(samples_1$data) == n_errors + n_errors * factor)
 })
 
 
