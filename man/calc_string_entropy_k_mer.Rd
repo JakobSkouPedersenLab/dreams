@@ -5,8 +5,6 @@
 \title{Title}
 \usage{
 calc_string_entropy_k_mer(s, k = 2, alphabet = c("A", "C", "G", "T", "N"))
-
-calc_string_entropy_k_mer(s, k = 2, alphabet = c("A", "C", "G", "T", "N"))
 }
 \arguments{
 \item{s}{string}
@@ -16,12 +14,8 @@ calc_string_entropy_k_mer(s, k = 2, alphabet = c("A", "C", "G", "T", "N"))
 \item{alphabet}{possible readings}
 }
 \value{
-
-
 shannon entropy
 }
 \description{
-Title
-
 Title
 }
