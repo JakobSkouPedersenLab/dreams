@@ -2,17 +2,11 @@
 
 #' Strand correct UMI features (ce and cd)
 #'
-#' @param df data.frame converted from lists-of-lists (scanBam)
+#' @param raw_bam_df data.frame converted from lists-of-lists (scanBam)
 #'
-#' @return
-strand_correct_umi_features <- function(df) {
-
-  # If UMI features not present -> return input
-  if (!all(c("ce", "cd") %in% colnames(df))) {
-    return(df)
-  }
-
-  df %>%
+#' @return strand corrected bam
+strand_correct_features <- function(raw_bam_df) {
+  raw_bam_df %>%
     mutate(
       ce = map2(
         .data$strand,
@@ -64,22 +58,15 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
   # Unpack tags
   for (i in 1:length(bam)) {
-    # Default tags
     bam[[i]]$MD <- str_to_upper(bam[[i]]$tag$MD)
+    bam[[i]]$ce <- bam[[i]]$tag$ce
+    bam[[i]]$cd <- bam[[i]]$tag$cd
+    bam[[i]]$cE <- bam[[i]]$tag$cE
+    bam[[i]]$cD <- bam[[i]]$tag$cD
+    bam[[i]]$tag <- NULL
     bam[[i]]$seq <- as.character(bam[[i]]$seq)
     bam[[i]]$qual <- as.character(bam[[i]]$qual)
     bam[[i]]$chr <- as.character(bam[[i]]$rname)
-
-    # UMI tags
-    umi_is_present <- all(!sapply(bam[[i]]$tag[c("ce", "cd", "cE", "cD")], is.null))
-    if (umi_is_present) {
-      bam[[i]]$ce <- bam[[i]]$tag$ce
-      bam[[i]]$cd <- bam[[i]]$tag$cd
-      bam[[i]]$cE <- bam[[i]]$tag$cE
-      bam[[i]]$cD <- bam[[i]]$tag$cD
-    }
-
-    bam[[i]]$tag <- NULL
 
     # Make genomic position into feature
     if (!is.null(chr) & !is.null(pos)) {
@@ -103,7 +90,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
         as.character(.data$strand) == "+", "fwd", "rev"
       )
     ) %>%
-    strand_correct_umi_features() %>%
+    strand_correct_features() %>%
     remove_softclips()
 
   return(bam_df)
