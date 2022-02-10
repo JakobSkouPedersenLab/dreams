@@ -22,58 +22,39 @@
 #' @export
 #'
 #' @examples
-train_model <- function(training_data, layers,
-                        model_features, lr, batch_size, epochs,
-                        model_file_path = NULL, log_file_path = NULL,
-                        decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
-                        validation_split = 0, ctx3_embed_dim = 3) {
-  training_data <- prepare_training_data(
-    training_data = training_data,
-    model_features = model_features
+train_model_old <- function(training_data,
+                            model_file_path, log_file_path,
+                            model_features, lr, decay, batch_size,
+                            epochs, l2_reg, L1_nodes, L2_nodes, L3_nodes,
+                            min_delta, patience, validation_split, ctx3_embed_dim) {
+  LogMetrics <- R6::R6Class(
+    "LogMetrics",
+    inherit = KerasCallback,
+    public =
+      list(
+        log_path = NULL,
+        init_time = Sys.time(),
+        initialize = function(log_path) {
+          self$log_path <- log_path
+        },
+        on_epoch_end = function(epoch, logs = list()) {
+
+          # Write log
+          log_df <- data.frame(
+            epoch = epoch,
+            time = difftime(Sys.time(), self$init_time, units = "secs"),
+            data.frame(logs),
+            lr = k_get_value(model$optimizer$lr)
+          )
+
+          if (epoch == 0) {
+            write_csv(x = log_df, file = self$log_path)
+          } else {
+            write_csv(x = log_df, file = self$log_path, append = TRUE)
+          }
+        }
+      )
   )
-
-  prepared_input <- prepare_input_layer(training_data$features,
-    ctx3_embed_dim = ctx3_embed_dim
-  )
-
-  model_structure <- generate_NN_structure(
-    inputs = prepared_input$inputs,
-    input_layer = prepared_input$input_layer,
-    layers = layers,
-    reg = l2_reg
-  )
-
-  model <- fit_model(
-    features = training_data$features,
-    labels = training_data$labels,
-    input_structure = model_structure,
-    lr = lr,
-    decay = decay,
-    batch_size = batch_size,
-    epochs = epochs,
-    min_delta = min_delta,
-    patience = patience,
-    validation_split = validation_split,
-    model_file_path = model_file_path,
-    log_file_path = log_file_path
-  )
-
-  # Save final model
-  save_model_hdf5(
-    object = model,
-    filepath = model_file_path
-  )
-
-  print("DONE TRAINING")
-
-
-  return(model)
-}
-
-
-
-
-prepare_training_data <- function(training_data, model_features) {
 
   # Load training data
   training_data <- training_data %>%
@@ -91,15 +72,6 @@ prepare_training_data <- function(training_data, model_features) {
     mutate(obs = as.numeric(factor(obs, levels = c("A", "T", "C", "G"))) - 1) %>%
     as.matrix() %>%
     to_categorical()
-
-  return(list(
-    features = training_data_features,
-    labels = training_data_labels
-  ))
-}
-
-
-prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 
 
   # Subset selected features into categorical and numeric
@@ -126,10 +98,6 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
     c(
       "trinucleotide_ctx"
     )
-
-  print("HEJ")
-
-  model_features <- names(training_data_features)
 
   numerical_variables <- intersect(model_features, all_numerical_variables)
   categorical_variables <- intersect(model_features, all_categorical_variables)
@@ -218,31 +186,25 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
     input_layer <- input_layer_list[[1]]
   }
 
-  return(list(
-    inputs = inputs,
-    input_layer = input_layer
-  ))
-}
-
-
-generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
-  hidden_layers <- input_layer
-
-  for (layer_idx in 1:length(layers)) {
-    layer_size <- layers[[layer_idx]]
-
-    hidden_layers <- hidden_layers %>%
-      layer_dense(
-        name = paste0("hidden_", layer_idx),
-        units = layer_size,
-        activation = "relu",
-        kernel_regularizer = regularizer_l2(reg),
-      )
-
-    print(hidden_layers)
-  }
-
-  outputs <- hidden_layers %>%
+  outputs <- input_layer %>%
+    layer_dense(
+      name = "hidden_1",
+      units = L1_nodes,
+      activation = "relu",
+      kernel_regularizer = regularizer_l2(l2_reg),
+    ) %>%
+    layer_dense(
+      name = "hidden_2",
+      units = L2_nodes,
+      activation = "relu",
+      kernel_regularizer = regularizer_l2(l2_reg)
+    ) %>%
+    layer_dense(
+      name = "hidden_3",
+      units = L3_nodes,
+      activation = "relu",
+      kernel_regularizer = regularizer_l2(l2_reg)
+    ) %>%
     layer_dense(
       name = "output",
       units = 4,
@@ -250,52 +212,6 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
     )
 
   model <- keras_model(inputs = inputs, outputs = outputs)
-
-
-  return(model)
-}
-
-fit_model <- function(features, labels, input_structure,
-                      lr,
-                      decay,
-                      batch_size,
-                      epochs,
-                      min_delta,
-                      patience,
-                      validation_split,
-                      model_file_path,
-                      log_file_path) {
-  model <- input_structure
-
-  LogMetrics <- R6::R6Class(
-    "LogMetrics",
-    inherit = KerasCallback,
-    public =
-      list(
-        log_path = NULL,
-        init_time = Sys.time(),
-        initialize = function(log_path) {
-          self$log_path <- log_path
-        },
-        on_epoch_end = function(epoch, logs = list()) {
-
-          # Write log
-          log_df <- data.frame(
-            epoch = epoch,
-            time = difftime(Sys.time(), self$init_time, units = "secs"),
-            data.frame(logs),
-            lr = k_get_value(model$optimizer$lr)
-          )
-
-          if (epoch == 0) {
-            write_csv(x = log_df, file = self$log_path)
-          } else {
-            write_csv(x = log_df, file = self$log_path, append = TRUE)
-          }
-        }
-      )
-  )
-
 
   # Callbacks
   # Create a training checkpoint for every 10 epochs
@@ -333,7 +249,7 @@ fit_model <- function(features, labels, input_structure,
   # Optimizer
   opt <- optimizer_adam(
     learning_rate = lr,
-    decay = decay
+    decay = 0
   )
 
   # Compile model
@@ -346,8 +262,8 @@ fit_model <- function(features, labels, input_structure,
 
   # Train model
   model %>% fit(
-    x = features,
-    y = labels,
+    x = training_data_features,
+    y = training_data_labels,
     validation_split = validation_split,
     epochs = epochs,
     batch_size = batch_size,
@@ -355,5 +271,16 @@ fit_model <- function(features, labels, input_structure,
     callbacks = callback_list
   )
 
+  # Save final model
+  save_model_hdf5(
+    object = model,
+    filepath = model_file_path
+  )
+
+  print("DONE TRAINING")
+
+
   return(model)
 }
+
+
