@@ -1,27 +1,23 @@
 
 #' Title
 #'
-#' @param training_data
-#' @param model_file_path
-#' @param log_file_path
-#' @param model_features
-#' @param lr
-#' @param decay
-#' @param batch_size
-#' @param epochs
-#' @param l2_reg
-#' @param L1_nodes
-#' @param L2_nodes
-#' @param L3_nodes
-#' @param min_delta
-#' @param patience
-#' @param validation_split
-#' @param ctx3_embed_dim
+#' @param training_data input training data
+#' @param model_file_path model output file path
+#' @param log_file_path model output log file path
+#' @param model_features selected features
+#' @param lr learning rate
+#' @param decay decay rate
+#' @param batch_size batch size
+#' @param epochs number of training epochs
+#' @param l2_reg level of L2 reg pr layer
+#' @param layers number of nodes in layers
+#' @param min_delta minimum delta for early stopping
+#' @param patience patient when reaching minimum delta
+#' @param validation_split validation split ratio
+#' @param ctx3_embed_dim number of dimensions to embed trinucleotide context to
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return trained model
+#' @importFrom keras save_model_hdf5
 train_model <- function(training_data, layers,
                         model_features, lr, batch_size, epochs,
                         model_file_path = NULL, log_file_path = NULL,
@@ -59,7 +55,7 @@ train_model <- function(training_data, layers,
   )
 
   # Save final model
-  save_model_hdf5(
+  keras::save_model_hdf5(
     object = model,
     filepath = model_file_path
   )
@@ -73,24 +69,32 @@ train_model <- function(training_data, layers,
 
 
 
+#' Title
+#'
+#' @param training_data training data
+#' @param model_features selected features
+#'
+#' @return prepared training data
+#' @importFrom keras to_categorical
+
 prepare_training_data <- function(training_data, model_features) {
 
   # Load training data
   training_data <- training_data %>%
-    select(all_of(model_features), obs) %>%
+    select(all_of(model_features), .data$obs) %>%
     sample_frac(1)
 
   # Split data in features and labels
   training_data_features <-
     training_data %>%
-    select(-obs)
+    select(-.data$obs)
 
   training_data_labels <-
     training_data %>%
-    select(obs) %>%
-    mutate(obs = as.numeric(factor(obs, levels = c("A", "T", "C", "G"))) - 1) %>%
+    select(.data$obs) %>%
+    mutate(obs = as.numeric(factor(.data$obs, levels = c("A", "T", "C", "G"))) - 1) %>%
     as.matrix() %>%
-    to_categorical()
+    keras::to_categorical()
 
   return(list(
     features = training_data_features,
@@ -99,6 +103,15 @@ prepare_training_data <- function(training_data, model_features) {
 }
 
 
+#' Title
+#'
+#' @param training_data_features training data features
+#' @param ctx3_embed_dim trinucleotide context embedding dimensions
+#'
+#' @return input layer
+#'
+#' @importFrom keras fit layer_dense_features layer_batch_normalization layer_concatenate
+#' @importFrom tfdatasets feature_spec step_numeric_column step_categorical_column_with_vocabulary_list step_embedding_column step_indicator_column
 prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 
 
@@ -127,7 +140,6 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "trinucleotide_ctx"
     )
 
-  print("HEJ")
 
   model_features <- names(training_data_features)
 
@@ -135,14 +147,13 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
   categorical_variables <- intersect(model_features, all_categorical_variables)
   embedded_variables_ctx3 <- intersect(model_features, all_embedded_variables_ctx3)
 
-  print("CREATE SPEC")
   # Create feature spec
   ft_spec_numeric <- training_data_features %>%
-    feature_spec(all_of(model_features)) %>%
-    step_numeric_column(
+    tfdatasets::feature_spec(all_of(model_features)) %>%
+    tfdatasets::step_numeric_column(
       all_of(numerical_variables)
     ) %>%
-    fit()
+    keras::fit()
 
   ctx3_vocabulary <-
     expand.grid(
@@ -150,40 +161,40 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
     ) %>% apply(1, paste0, collapse = "")
 
   ft_spec_embed_ctx3 <- training_data_features %>%
-    feature_spec(all_of(model_features)) %>%
-    step_categorical_column_with_vocabulary_list(
+    tfdatasets::feature_spec(all_of(model_features)) %>%
+    tfdatasets::step_categorical_column_with_vocabulary_list(
       all_of(embedded_variables_ctx3),
       vocabulary_list = ctx3_vocabulary
     ) %>%
-    step_embedding_column(
+    tfdatasets::step_embedding_column(
       all_of(embedded_variables_ctx3),
       dimension = ctx3_embed_dim
     ) %>%
-    fit()
+    keras::fit()
 
   ft_spec_categorical <- training_data_features %>%
-    feature_spec(all_of(model_features)) %>%
-    step_categorical_column_with_vocabulary_list(
+    tfdatasets::feature_spec(all_of(model_features)) %>%
+    tfdatasets::step_categorical_column_with_vocabulary_list(
       all_of(categorical_variables)
     ) %>%
-    step_indicator_column(
+    tfdatasets::step_indicator_column(
       all_of(categorical_variables)
     ) %>%
-    fit()
+    keras::fit()
 
 
   # Build NN model
-  inputs <- layer_input_from_dataset(training_data_features)
+  inputs <- tfdatasets::layer_input_from_dataset(training_data_features)
 
   input_layer_list <- list()
 
   if (!is.null(ft_spec_numeric$dense_features())) {
     numerical_layer <- inputs %>%
-      layer_dense_features(
+      keras::layer_dense_features(
         name = "input_numeric",
         ft_spec_numeric$dense_features()
       ) %>%
-      layer_batch_normalization()
+      keras::layer_batch_normalization()
 
     input_layer_list <- append(input_layer_list, numerical_layer)
   }
@@ -191,7 +202,7 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 
   if (!is.null(ft_spec_embed_ctx3$dense_features())) {
     embed_layer_ctx3 <- inputs %>%
-      layer_dense_features(
+      keras::layer_dense_features(
         name = "input_embed_ctx3",
         ft_spec_embed_ctx3$dense_features(),
         weights = list(matrix(0.01, nrow = length(ctx3_vocabulary), ncol = ctx3_embed_dim))
@@ -203,7 +214,7 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 
   if (!is.null(ft_spec_categorical$dense_features())) {
     categorical_layer <- inputs %>%
-      layer_dense_features(
+      keras::layer_dense_features(
         name = "input_categorical",
         ft_spec_categorical$dense_features()
       )
@@ -213,7 +224,7 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 
   # Concatenate inputs if necessary
   if (length(input_layer_list) > 1) {
-    input_layer <- layer_concatenate(input_layer_list)
+    input_layer <- keras::layer_concatenate(input_layer_list)
   } else {
     input_layer <- input_layer_list[[1]]
   }
@@ -225,6 +236,16 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 }
 
 
+#' Title
+#'
+#' @param inputs input structure
+#' @param input_layer input layer
+#' @param layers layer sizes
+#' @param reg regularization
+#'
+#' @return NN structure
+#' @importFrom keras layer_dense
+
 generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
   hidden_layers <- input_layer
 
@@ -232,28 +253,47 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
     layer_size <- layers[[layer_idx]]
 
     hidden_layers <- hidden_layers %>%
-      layer_dense(
+      keras::layer_dense(
         name = paste0("hidden_", layer_idx),
         units = layer_size,
         activation = "relu",
-        kernel_regularizer = regularizer_l2(reg),
+        kernel_regularizer = keras::regularizer_l2(reg),
       )
-
-    print(hidden_layers)
   }
 
   outputs <- hidden_layers %>%
-    layer_dense(
+    keras::layer_dense(
       name = "output",
       units = 4,
       activation = "softmax"
     )
 
-  model <- keras_model(inputs = inputs, outputs = outputs)
+  model <- keras::keras_model(inputs = inputs, outputs = outputs)
 
 
   return(model)
 }
+
+#' Title
+#'
+#' @param features input features
+#' @param labels input labels
+#' @param input_structure input structure
+#' @param lr learning rate
+#' @param decay decay rate
+#' @param batch_size batch size
+#' @param epochs number of training epochs
+#' @param min_delta minimum delta for early stopping
+#' @param patience patience for early stopping
+#' @param validation_split validation split
+#' @param model_file_path output model file path
+#' @param log_file_path output log file path
+#'
+#' @return fitted model
+#' @importFrom keras KerasCallback
+#' @importFrom readr write_csv
+#' @importFrom R6 R6Class
+
 
 fit_model <- function(features, labels, input_structure,
                       lr,
@@ -269,7 +309,7 @@ fit_model <- function(features, labels, input_structure,
 
   LogMetrics <- R6::R6Class(
     "LogMetrics",
-    inherit = KerasCallback,
+    inherit = keras::KerasCallback,
     public =
       list(
         log_path = NULL,
@@ -284,13 +324,13 @@ fit_model <- function(features, labels, input_structure,
             epoch = epoch,
             time = difftime(Sys.time(), self$init_time, units = "secs"),
             data.frame(logs),
-            lr = k_get_value(model$optimizer$lr)
+            lr = keras::k_get_value(model$optimizer$lr)
           )
 
           if (epoch == 0) {
-            write_csv(x = log_df, file = self$log_path)
+            readr::write_csv(x = log_df, file = self$log_path)
           } else {
-            write_csv(x = log_df, file = self$log_path, append = TRUE)
+            readr::write_csv(x = log_df, file = self$log_path, append = TRUE)
           }
         }
       )
@@ -300,7 +340,7 @@ fit_model <- function(features, labels, input_structure,
   # Callbacks
   # Create a training checkpoint for every 10 epochs
   checkpoint_callback <-
-    callback_model_checkpoint(
+    keras::callback_model_checkpoint(
       filepath = paste0(model_file_path, "_checkpoint"),
       monitor = "val_loss",
       save_freq = 10
@@ -318,7 +358,7 @@ fit_model <- function(features, labels, input_structure,
   # Add early stopping callback
   if (min_delta > 0) {
     early_stopping <-
-      callback_early_stopping(
+      keras::callback_early_stopping(
         monitor = "val_loss",
         min_delta = min_delta,
         patience = patience,
@@ -331,21 +371,21 @@ fit_model <- function(features, labels, input_structure,
   print("COMPILE AND TRAIN MODEL")
 
   # Optimizer
-  opt <- optimizer_adam(
+  opt <- keras::optimizer_adam(
     learning_rate = lr,
     decay = decay
   )
 
   # Compile model
   model %>%
-    compile(
+    keras::compile(
       loss = "categorical_crossentropy",
       optimizer = opt,
       metrics = "accuracy"
     )
 
   # Train model
-  model %>% fit(
+  model %>% keras::fit(
     x = features,
     y = labels,
     validation_split = validation_split,

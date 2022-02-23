@@ -34,7 +34,10 @@ Imports:
     stringi,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    keras,
+    tfdatasets,
+    R6
 Suggests: 
     covr,
     testthat (>= 3.0.0)
