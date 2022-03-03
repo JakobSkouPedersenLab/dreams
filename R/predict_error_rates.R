@@ -48,6 +48,7 @@ predict_error_rates <- function(read_positions_df, model, beta) {
   # Predict error rates for read positions from trained DREAM model
 
   # TODO: add modelr
+  # Link: https://rdrr.io/cran/modelr/man/add_predictions.html
 
   prediction <- model %>%
     predict(read_positions_df) %>%
