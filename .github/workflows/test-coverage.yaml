@@ -24,6 +24,11 @@ jobs:
         with:
           extra-packages: covr
 
+      - name: Install Keras
+        run: |
+          Rscript -e "reticulate::install_miniconda()"
+          Rscript -e "keras::install_keras()"
+
       - name: Test coverage
         run: covr::codecov()
         shell: Rscript {0}
