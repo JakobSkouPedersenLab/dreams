@@ -39,7 +39,8 @@ Imports:
     tfdatasets,
     R6,
     tensorflow,
-    reticulate
+    reticulate,
+    progress
 Suggests: 
     covr,
     testthat (>= 3.0.0)
