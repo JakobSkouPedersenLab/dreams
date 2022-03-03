@@ -38,7 +38,8 @@ Imports:
     keras,
     tfdatasets,
     R6,
-    tensorflow
+    tensorflow,
+    reticulate
 Suggests: 
     covr,
     testthat (>= 3.0.0)

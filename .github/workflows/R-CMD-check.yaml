@@ -40,4 +40,9 @@ jobs:
         with:
           extra-packages: rcmdcheck
 
+      - name: Install Keras
+        run: |
+          Rscript -e "reticulate::install_miniconda()"
+          Rscript -e "keras::install_keras()"
+
       - uses: r-lib/actions/check-r-package@v1
