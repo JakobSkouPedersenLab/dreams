@@ -31,6 +31,12 @@
     <loc>https://dreamsteam.github.io/dreams/reference/filter_mismatch_positions.html</loc>
   </url>
   <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/fit_model.html</loc>
+  </url>
+  <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/generate_NN_structure.html</loc>
+  </url>
+  <url>
     <loc>https://dreamsteam.github.io/dreams/reference/get_match_genomic_pos_list.html</loc>
   </url>
   <url>
@@ -55,6 +61,12 @@
     <loc>https://dreamsteam.github.io/dreams/reference/pipe.html</loc>
   </url>
   <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/prepare_input_layer.html</loc>
+  </url>
+  <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/prepare_training_data.html</loc>
+  </url>
+  <url>
     <loc>https://dreamsteam.github.io/dreams/reference/remove_softclips.html</loc>
   </url>
   <url>
@@ -62,5 +74,8 @@
   </url>
   <url>
     <loc>https://dreamsteam.github.io/dreams/reference/strand_correct_umi_features.html</loc>
+  </url>
+  <url>
+    <loc>https://dreamsteam.github.io/dreams/reference/train_model.html</loc>
   </url>
 </urlset>
