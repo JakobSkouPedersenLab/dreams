@@ -37,7 +37,8 @@ Imports:
     tidyr,
     keras,
     tfdatasets,
-    R6
+    R6,
+    tensorflow
 Suggests: 
     covr,
     testthat (>= 3.0.0)
