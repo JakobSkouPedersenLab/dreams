@@ -224,11 +224,9 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   }
 
   start_values <- get_starting_values(observed_signal, X_list, error_mut_to_ref_list, error_ref_to_mut_list)
-  print("Starting values")
-  print(start_values)
 
   # Run EM algorithm
-  turboem_res <- turboem(
+  turboem_res <- turboEM::turboem(
     par = start_values,
     fixptfn = em_update,
     objfn = em_objective,
@@ -253,9 +251,6 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
 
   tf_est <- turboem_res$par[1]
   r_est <- turboem_res$par[2]
-
-  print("Estimated values")
-  print(c(tf_est = tf_est, r_est = r_est))
 
   # Check if 0 is better fit
   ll_0 <- log_likelihood(

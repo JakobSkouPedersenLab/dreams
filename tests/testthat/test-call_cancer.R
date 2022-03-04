@@ -39,7 +39,15 @@ test_that("test ...", {
       alt = "A"
     )
 
-  model = system.file("extdata", "mini_example.bam", package = "dreams")
+  reads_df = data.frame(
+    ref = c("A","A"),
+    obs = c("A","G")
+  )
 
-  call_cancer(mutations_df = mutations_df, reads = data.frame(), model = NULL, beta = NULL)
+  model_path = system.file("extdata", "model_test.h5", package = "dreams")
+
+  model = keras::load_model_hdf5(model_path)
+
+  expect_equal(names(call_cancer(mutations_df = mutations_df, reads = reads_df, model = model, beta = 1)), c("cancer_info", "mutation_info"))
+
 })

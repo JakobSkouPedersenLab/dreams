@@ -156,7 +156,7 @@ call_cancer <- function(mutations_df, reads, model, beta, use_warp_speed = TRUE,
 
   res <- list(
     cancer_info = EM_res$cancer_info,
-    mutation_info = bind_cols(mutations_w_cov_df, EM_res$mutation_info)
+    mutation_info = EM_res$mutation_info
   )
 
   return(res)
