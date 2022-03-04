@@ -1,4 +1,9 @@
-url: https://dreamsteam.github.io/dreams
+url: https://https://jakobskoupedersenlab.github.io/dreams/
+navbar:
+  components:
+    home:
+       icon: "fas fa-chess-rook fa-lg"
+       href: index.html
 template:
   bootstrap: 5
 
