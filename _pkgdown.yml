@@ -1,4 +1,4 @@
 url: https://dreamsteam.github.io/dreams
 template:
   bootstrap: 5
-
+  bootswatch: quartz

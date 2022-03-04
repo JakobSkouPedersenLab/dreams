@@ -15,3 +15,4 @@ A new dataframe with softclipped bases removed
 \description{
 Remove softclips
 }
+\keyword{internal}

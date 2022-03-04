@@ -1,36 +1,4 @@
 
-#' Strand correct UMI features (ce and cd)
-#'
-#' @param df data.frame converted from lists-of-lists (scanBam)
-#'
-#' @return data.frame with corrected UMI features
-strand_correct_umi_features <- function(df) {
-
-  # If UMI features not present -> return input
-  if (!all(c("ce", "cd") %in% colnames(df))) {
-    return(df)
-  }
-
-  df %>%
-    mutate(
-      ce = map2(
-        .data$strand,
-        .data$ce,
-        function(strand, ce) {
-          if (strand == "rev") rev(ce) else ce
-        }
-      ),
-      cd = map2(
-        .data$strand,
-        .data$cd,
-        function(strand, cd) {
-          if (strand == "rev") rev(cd) else cd
-        }
-      )
-    )
-}
-
-
 #' Load .BAM file into R as tibble
 #'
 #' @param BamPath Path to .BAM-file
@@ -106,4 +74,35 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     remove_softclips()
 
   return(bam_df)
+}
+
+#' Strand correct UMI features (ce and cd)
+#'
+#' @param df data.frame converted from lists-of-lists (scanBam)
+#'
+#' @return data.frame with corrected UMI features
+strand_correct_umi_features <- function(df) {
+
+  # If UMI features not present -> return input
+  if (!all(c("ce", "cd") %in% colnames(df))) {
+    return(df)
+  }
+
+  df %>%
+    mutate(
+      ce = map2(
+        .data$strand,
+        .data$ce,
+        function(strand, ce) {
+          if (strand == "rev") rev(ce) else ce
+        }
+      ),
+      cd = map2(
+        .data$strand,
+        .data$cd,
+        function(strand, cd) {
+          if (strand == "rev") rev(cd) else cd
+        }
+      )
+    )
 }

@@ -18,3 +18,4 @@ get_reference_seq(chr, genomic_pos, buffer, reference_path)
 \description{
 Get reference sequence
 }
+\keyword{internal}

@@ -1,5 +1,5 @@
 
-#' Title
+#' Train model
 #'
 #' @param training_data input training data
 #' @param model_file_path model output file path
@@ -16,8 +16,12 @@
 #' @param validation_split validation split ratio
 #' @param ctx3_embed_dim number of dimensions to embed trinucleotide context to
 #'
-#' @return trained model
+#' @return trained model in hdf5 format
+#' @keywords model training
 #' @importFrom keras save_model_hdf5
+#' @export
+#' @family Train model
+#' @seealso [get_training_data()] Function for getting training data
 train_model <- function(training_data, layers,
                         model_features, lr, batch_size, epochs,
                         model_file_path = NULL, log_file_path = NULL,
@@ -69,12 +73,13 @@ train_model <- function(training_data, layers,
 
 
 
-#' Title
+#' Prepare training data
 #'
 #' @param training_data training data
 #' @param model_features selected features
 #'
 #' @return prepared training data
+#' @keywords internal
 #' @importFrom keras to_categorical
 
 prepare_training_data <- function(training_data, model_features) {
@@ -109,6 +114,7 @@ prepare_training_data <- function(training_data, model_features) {
 #' @param ctx3_embed_dim trinucleotide context embedding dimensions
 #'
 #' @return input layer
+#' @keywords internal
 #'
 #' @importFrom keras fit layer_dense_features layer_batch_normalization layer_concatenate
 #' @importFrom tfdatasets feature_spec step_numeric_column step_categorical_column_with_vocabulary_list step_embedding_column step_indicator_column
@@ -244,6 +250,7 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 #' @param reg regularization
 #'
 #' @return NN structure
+#' @keywords internal
 #' @importFrom keras layer_dense
 
 generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
@@ -261,12 +268,12 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
       )
   }
 
-  outputs <- hidden_layers %>%
-    keras::layer_dense(
-      name = "output",
-      units = 4,
-      activation = "softmax"
-    )
+  outputs <- keras::layer_dense(
+    object = hidden_layers,
+    name = "output",
+    units = 4,
+    activation = "softmax"
+  )
 
   model <- keras::keras_model(inputs = inputs, outputs = outputs)
 
@@ -290,6 +297,7 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
 #' @param log_file_path output log file path
 #'
 #' @return fitted model
+#' @keywords internal
 #' @importFrom keras KerasCallback
 #' @importFrom readr write_csv
 #' @importFrom R6 R6Class
