@@ -34,21 +34,21 @@ train_model(
 
 \item{epochs}{Integer. Number of training epochs.}
 
-\item{model_file_path}{String. Model output file path.}
+\item{model_file_path}{String. Model output file path. Default is \code{NULL}.}
 
-\item{log_file_path}{String. Path to model output log file.}
+\item{log_file_path}{String. Path to model output log file. Default is \code{NULL}.}
 
-\item{decay}{Numeric value between 0 and 1. Decay rate.}
+\item{decay}{Numeric value between 0 and 1. Decay rate. Default is 0.}
 
-\item{min_delta}{Numeric value between 0 and 1. Minimum delta for early stopping.}
+\item{min_delta}{Numeric value between 0 and 1. Minimum delta for early stopping. Default is 0.}
 
-\item{patience}{Integer. Patience when reaching minimum delta.}
+\item{patience}{Integer. Patience when reaching minimum delta. Default is 0.}
 
-\item{l2_reg}{Numeric value between 0 and 1. Level of L2 regularization per layer.}
+\item{l2_reg}{Numeric value between 0 and 1. Level of L2 regularization per layer. Default is 0.}
 
-\item{validation_split}{Numeric value between 0 and 1. Validation split ratio.}
+\item{validation_split}{Numeric value between 0 and 1. Validation split ratio. Default is 0.}
 
-\item{ctx3_embed_dim}{Integer. Number of dimensions to embed trinucleotide context to.}
+\item{ctx3_embed_dim}{Integer. Number of dimensions to embed trinucleotide context to. Default is 3.}
 }
 \value{
 Trained model in hdf5 format.
