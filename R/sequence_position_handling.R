@@ -2,6 +2,7 @@
 #'
 #' @param df dataframe_with_bam_data
 #' @return df
+#' @keywords internal
 #' @importFrom rlang .data
 #' @importFrom purrr map pmap pmap_dbl pmap_lgl
 #' @importFrom stringr str_extract_all str_remove_all str_locate_all
@@ -80,6 +81,7 @@ correct_pos_idx_w_cigar <- function(df) {
 #' @param MDtag MDtag from BAM column
 #'
 #' @return genomic positions
+#' @keywords internal
 #' @importFrom stringr str_extract_all
 #' @importFrom stringr str_count
 #' @importFrom stringr str_which
@@ -113,6 +115,7 @@ get_mismatch_genomic_pos_list <- function(pos, MDtag) {
 #' @param MDtag mdtag list
 #'
 #' @return match_positions
+#' @keywords internal
 get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
   # Remove insert from cigar
   cigar_inserts_removed <- cigar %>% str_remove_all(pattern = "[\\d]+I")
@@ -188,6 +191,7 @@ sample_negative_read_positions <- function(bam_df, n_samples) {
 #' @param bam_df dataframe from load_BAM
 #'
 #' @return mismatch_positions
+#' @keywords internal
 #' @importFrom tidyr unnest
 extract_mismatch_positions <- function(bam_df) {
   mismatch_positions <-

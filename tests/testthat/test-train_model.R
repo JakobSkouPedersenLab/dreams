@@ -103,8 +103,7 @@ test_that("Train model example with several feature types", {
     epochs = 5,
     model_file_path = "~/Desktop/model.test",
     log_file_path = "~/Desktop/log.test",
-    validation_split = 0.1,
-    min_delta = 0.001
+    validation_split = 0.1
   )
 
   predict(
@@ -113,6 +112,28 @@ test_that("Train model example with several feature types", {
   )
 })
 
+test_that("Train model example with one layer", {
+  read_example_training_data <- system.file("extdata", "training_data.csv", package = "dreams")
+
+  training_data <- read.csv(read_example_training_data) %>% select(ref, read_index, trinucleotide_ctx, obs)
+
+  model <- train_model(
+    training_data = training_data,
+    model_features = c("ref", "read_index", "trinucleotide_ctx"),
+    layers = c(8),
+    lr = 0.0005,
+    batch_size = 10,
+    epochs = 5,
+    model_file_path = "~/Desktop/model.test",
+    log_file_path = "~/Desktop/log.test",
+    validation_split = 0.1
+  )
+
+  predict(
+    model,
+    training_data
+  )
+})
 
 
 test_that("simple example", {

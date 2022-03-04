@@ -15,3 +15,4 @@ granges object
 \description{
 Title
 }
+\keyword{internal}

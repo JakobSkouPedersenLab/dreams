@@ -5,6 +5,7 @@
 #' @param alphabet possible readings
 #'
 #' @return shannon entropy
+#' @keywords internal
 #'
 #' @importFrom stringi stri_count_fixed
 calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
@@ -36,6 +37,7 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #' @param add_umi_features Check if umi information is available
 #'
 #' @return dataframe with read positions
+#' @keywords internal
 #'
 #' @importFrom purrr map2_int
 extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
@@ -141,6 +143,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
 #' @param reference_path reference genome fa
 #'
 #' @importFrom Rsamtools FaFile getSeq
+#' @keywords internal
 
 get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
   FaFile <- FaFile(reference_path)

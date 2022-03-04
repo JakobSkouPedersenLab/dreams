@@ -2,7 +2,7 @@
 % Please edit documentation in R/train_model.R
 \name{train_model}
 \alias{train_model}
-\title{Title}
+\title{Train model}
 \usage{
 train_model(
   training_data,
@@ -51,8 +51,14 @@ train_model(
 \item{ctx3_embed_dim}{number of dimensions to embed trinucleotide context to}
 }
 \value{
-trained model
+trained model in hdf5 format
 }
 \description{
-Title
+Train model
 }
+\seealso{
+\code{\link[=get_training_data]{get_training_data()}} Function for getting training data
+}
+\concept{Train model}
+\keyword{model}
+\keyword{training}

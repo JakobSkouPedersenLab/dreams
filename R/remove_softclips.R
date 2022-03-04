@@ -3,7 +3,8 @@
 #' Remove softclips
 #'
 #' @param df A dataframe from load_BAM
-#'
+#' @keywords internal
+
 #' @return A new dataframe with softclipped bases removed
 #'
 remove_softclips <- function(df) {

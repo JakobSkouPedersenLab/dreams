@@ -19,3 +19,4 @@ shannon entropy
 \description{
 Title
 }
+\keyword{internal}

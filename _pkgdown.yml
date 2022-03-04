@@ -8,4 +8,4 @@ navbar:
        href: index.html
 template:
   bootstrap: 5
-
+  bootswatch: quartz

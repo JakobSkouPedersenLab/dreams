@@ -8,6 +8,7 @@
 #' @param factor ratio between negative and positive data
 #' @param mm_rate_max maximum mismatch rate in position
 #'
+#' @export
 #' @return dataframe with training data for a bam file
 get_training_data <- function(bam_paths,
                               reference_path,
@@ -73,6 +74,7 @@ get_training_data <- function(bam_paths,
 #' @param positions_to_exclude_paths positions to exclude from training
 #' @param factor ratio between negative and positive data
 #' @param mm_rate_max maximum mismatch rate in position
+#' @keywords internal
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
@@ -143,6 +145,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 #' @param mm_rate_max maximum mm_rate for positions
 #' @param bed_include_path bed regions to include in training data
 #' @param positions_to_exclude_paths positions to exclude from training
+#' @keywords internal
 #'
 #' @return filtered read position dataframe
 #'
@@ -223,6 +226,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 #' Title
 #' @param bed_path path to bed-file
 #' @return granges object
+#' @keywords internal
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 
 bed_to_granges <- function(bed_path) {

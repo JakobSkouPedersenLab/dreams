@@ -2,7 +2,7 @@
 % Please edit documentation in R/train_model.R
 \name{prepare_training_data}
 \alias{prepare_training_data}
-\title{Title}
+\title{Prepare training data}
 \usage{
 prepare_training_data(training_data, model_features)
 }
@@ -15,5 +15,6 @@ prepare_training_data(training_data, model_features)
 prepared training data
 }
 \description{
-Title
+Prepare training data
 }
+\keyword{internal}
