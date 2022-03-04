@@ -39,6 +39,11 @@ test_that("separate train model example", {
     model,
     prepared_training_data$features
   )
+
+  keras::save_model_hdf5(
+    object = model,
+    filepath = "inst/extdata/model_test.h5"
+  )
 })
 
 test_that("Train model example", {

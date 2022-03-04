@@ -164,6 +164,7 @@ get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
 #' @param n_samples number of samples
 #'
 #' @return negative_read_positions
+#' @keywords internal
 #'
 #' @importFrom purrr map_dbl
 sample_negative_read_positions <- function(bam_df, n_samples) {

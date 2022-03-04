@@ -6,6 +6,7 @@
 #' @param pos Vector of positions of interest (numeric)
 #'
 #' @return .BAM file in tibble format
+#' @keywords internal
 #'
 #' @import stringr dplyr
 #' @importFrom Rsamtools ScanBamParam BamFile scanBam
@@ -14,6 +15,7 @@
 #' @importFrom IRanges IRanges
 #' @importFrom tibble as_tibble
 #' @importFrom rlang .data
+#'
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
   # Get reference to BamFile
@@ -81,6 +83,8 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 #' @param df data.frame converted from lists-of-lists (scanBam)
 #'
 #' @return data.frame with corrected UMI features
+#' @keywords internal
+#'
 strand_correct_umi_features <- function(df) {
 
   # If UMI features not present -> return input

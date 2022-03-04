@@ -2,7 +2,7 @@
 % Please edit documentation in R/train_model.R
 \name{train_model}
 \alias{train_model}
-\title{Train model}
+\title{Train error model}
 \usage{
 train_model(
   training_data,
@@ -22,39 +22,39 @@ train_model(
 )
 }
 \arguments{
-\item{training_data}{input training data}
+\item{training_data}{\code{data.frame} Input training data (Generated from \code{\link[=get_training_data]{get_training_data()}})}
 
-\item{layers}{number of nodes in layers}
+\item{layers}{Numeric vector. Number of nodes in each layer.}
 
-\item{model_features}{selected features}
+\item{model_features}{Vector of feature names. Selected features for model training.}
 
-\item{lr}{learning rate}
+\item{lr}{Numeric value between 0 and 1. Learning rate.}
 
-\item{batch_size}{batch size}
+\item{batch_size}{Integer. Batch size.}
 
-\item{epochs}{number of training epochs}
+\item{epochs}{Integer. Number of training epochs.}
 
-\item{model_file_path}{model output file path}
+\item{model_file_path}{String. Model output file path.}
 
-\item{log_file_path}{model output log file path}
+\item{log_file_path}{String. Path to model output log file.}
 
-\item{decay}{decay rate}
+\item{decay}{Numeric value between 0 and 1. Decay rate.}
 
-\item{min_delta}{minimum delta for early stopping}
+\item{min_delta}{Numeric value between 0 and 1. Minimum delta for early stopping.}
 
-\item{patience}{patient when reaching minimum delta}
+\item{patience}{Integer. Patience when reaching minimum delta.}
 
-\item{l2_reg}{level of L2 reg pr layer}
+\item{l2_reg}{Numeric value between 0 and 1. Level of L2 regularization per layer.}
 
-\item{validation_split}{validation split ratio}
+\item{validation_split}{Numeric value between 0 and 1. Validation split ratio.}
 
-\item{ctx3_embed_dim}{number of dimensions to embed trinucleotide context to}
+\item{ctx3_embed_dim}{Integer. Number of dimensions to embed trinucleotide context to.}
 }
 \value{
-trained model in hdf5 format
+Trained model in hdf5 format.
 }
 \description{
-Train model
+Train error model
 }
 \seealso{
 \code{\link[=get_training_data]{get_training_data()}} Function for getting training data

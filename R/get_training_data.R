@@ -1,15 +1,16 @@
-#' Title
+#' Extract training data from BAM files
 #'
-#' @param bam_paths Paths to BAM files
-#' @param reference_path Path to reference file
-#' @param bed_include_path BED regions to include
-#' @param positions_to_exclude_paths positions to exclude from training with length equal to number of samples
-#' @param common_positions_to_exclude_paths positions to exclude from all samples
-#' @param factor ratio between negative and positive data
-#' @param mm_rate_max maximum mismatch rate in position
+#' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract training data from.
+#' @param reference_path String. Path to reference genome fasta file.
+#' @param bed_include_path String. Path to bed-file with regions to include.
+#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples.
+#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples.
+#' @param factor Number between 0 and 1. Ratio between negative and positive data.
+#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position.
 #'
 #' @export
-#' @return dataframe with training data for a bam file
+#' @return \code{data.frame} with training data for a bam file
+#' @seealso [train_model()] Function for training model
 get_training_data <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,

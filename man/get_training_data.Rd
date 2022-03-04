@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_training_data.R
 \name{get_training_data}
 \alias{get_training_data}
-\title{Title}
+\title{Extract training data from BAM files}
 \usage{
 get_training_data(
   bam_paths,
@@ -15,23 +15,26 @@ get_training_data(
 )
 }
 \arguments{
-\item{bam_paths}{Paths to BAM files}
+\item{bam_paths}{Vector of strings. Paths to \code{.bam} files to extract training data from.}
 
-\item{reference_path}{Path to reference file}
+\item{reference_path}{String. Path to reference genome fasta file.}
 
-\item{bed_include_path}{BED regions to include}
+\item{bed_include_path}{String. Path to bed-file with regions to include.}
 
-\item{factor}{ratio between negative and positive data}
+\item{factor}{Number between 0 and 1. Ratio between negative and positive data.}
 
-\item{common_positions_to_exclude_paths}{positions to exclude from all samples}
+\item{common_positions_to_exclude_paths}{Vector of strings. List of files with positions to exclude from all samples.}
 
-\item{positions_to_exclude_paths}{positions to exclude from training with length equal to number of samples}
+\item{positions_to_exclude_paths}{Vector of strings. List of files with positions to exclude from training with length equal to number of samples.}
 
-\item{mm_rate_max}{maximum mismatch rate in position}
+\item{mm_rate_max}{Number between 0 and 1. Maximum mismatch rate in position.}
 }
 \value{
-dataframe with training data for a bam file
+\code{data.frame} with training data for a bam file
 }
 \description{
-Title
+Extract training data from BAM files
+}
+\seealso{
+\code{\link[=train_model]{train_model()}} Function for training model
 }

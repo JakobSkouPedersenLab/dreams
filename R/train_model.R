@@ -1,22 +1,22 @@
 
-#' Train model
+#' Train error model
 #'
-#' @param training_data input training data
-#' @param model_file_path model output file path
-#' @param log_file_path model output log file path
-#' @param model_features selected features
-#' @param lr learning rate
-#' @param decay decay rate
-#' @param batch_size batch size
-#' @param epochs number of training epochs
-#' @param l2_reg level of L2 reg pr layer
-#' @param layers number of nodes in layers
-#' @param min_delta minimum delta for early stopping
-#' @param patience patient when reaching minimum delta
-#' @param validation_split validation split ratio
-#' @param ctx3_embed_dim number of dimensions to embed trinucleotide context to
+#' @param training_data \code{data.frame} Input training data (Generated from [get_training_data()])
+#' @param layers Numeric vector. Number of nodes in each layer.
+#' @param model_features Vector of feature names. Selected features for model training.
+#' @param lr Numeric value between 0 and 1. Learning rate.
+#' @param batch_size Integer. Batch size.
+#' @param epochs Integer. Number of training epochs.
+#' @param model_file_path String. Model output file path.
+#' @param log_file_path String. Path to model output log file.
+#' @param decay Numeric value between 0 and 1. Decay rate.
+#' @param l2_reg Numeric value between 0 and 1. Level of L2 regularization per layer.
+#' @param min_delta Numeric value between 0 and 1. Minimum delta for early stopping.
+#' @param patience Integer. Patience when reaching minimum delta.
+#' @param validation_split Numeric value between 0 and 1. Validation split ratio.
+#' @param ctx3_embed_dim Integer. Number of dimensions to embed trinucleotide context to.
 #'
-#' @return trained model in hdf5 format
+#' @return Trained model in hdf5 format.
 #' @keywords model training
 #' @importFrom keras save_model_hdf5
 #' @export

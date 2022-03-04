@@ -15,3 +15,4 @@ data.frame with corrected UMI features
 \description{
 Strand correct UMI features (ce and cd)
 }
+\keyword{internal}

@@ -19,3 +19,4 @@ load_BAM(BamPath, chr = NULL, pos = NULL)
 \description{
 Load .BAM file into R as tibble
 }
+\keyword{internal}
