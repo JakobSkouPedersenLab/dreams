@@ -85,7 +85,7 @@ call_cancer <- function(mutations_df, reads, model, beta, use_warp_speed = TRUE,
     select(
       "chr" = matches("chr|CHR"),
       "genomic_pos" = matches("pos|POS"),
-      "ref" = matches("ref|ref"),
+      "ref" = matches("ref|REF"),
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
