@@ -1,81 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dreamsteam.github.io/dreams/404.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/404.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/LICENSE.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/authors.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/authors.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/index.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/index.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/bed_to_granges.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/bed_to_granges.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/calc_string_entropy_k_mer.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/calc_string_entropy_k_mer.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/correct_pos_idx_w_cigar.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/correct_pos_idx_w_cigar.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/extract_features_from_bam.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/extract_features_from_bam.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/extract_mismatch_positions.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/extract_mismatch_positions.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/filter_mismatch_positions.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/filter_mismatch_positions.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/fit_model.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/fit_model.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/generate_NN_structure.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/generate_NN_structure.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/get_match_genomic_pos_list.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_match_genomic_pos_list.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/get_mismatch_genomic_pos_list.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_mismatch_genomic_pos_list.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/get_reference_seq.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_reference_seq.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/get_training_data.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_training_data.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/get_training_data_from_bam.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_training_data_from_bam.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/index.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/load_BAM.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/load_BAM.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/pipe.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/pipe.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/prepare_input_layer.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/prepare_input_layer.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/prepare_training_data.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/prepare_training_data.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/remove_softclips.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/remove_softclips.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/sample_negative_read_positions.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/sample_negative_read_positions.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/strand_correct_umi_features.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/strand_correct_umi_features.html</loc>
   </url>
   <url>
-    <loc>https://dreamsteam.github.io/dreams/reference/train_model.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/train_model.html</loc>
   </url>
 </urlset>
