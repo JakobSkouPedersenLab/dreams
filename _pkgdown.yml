@@ -1,8 +1,10 @@
 url: https://https://jakobskoupedersenlab.github.io/dreams/
 navbar:
+  structure:
+     left:  [home, intro, reference, articles, tutorials, news]
   components:
     home:
-       icon: "fas fa-chess-rook fa-lg"
+       icon: "fa-solid fa-cloud-moon"
        href: index.html
 template:
   bootstrap: 5

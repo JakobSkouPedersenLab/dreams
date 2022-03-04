@@ -15,11 +15,11 @@ The goal of dreams is to …
 ## Installation
 
 You can install the development version of dreams from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/JakobSkouPedersenLab/dreams) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("DreamsTeam/dreams")
+devtools::install_github("JakobSkouPedersenLab/dreams")
 ```
 
 ## Example
