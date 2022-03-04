@@ -3,10 +3,10 @@
 #' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract training data from.
 #' @param reference_path String. Path to reference genome fasta file.
 #' @param bed_include_path String. Path to bed-file with regions to include.
-#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples.
-#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples.
-#' @param factor Number between 0 and 1. Ratio between negative and positive data.
-#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position.
+#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.
+#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
+#' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
+#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
 #'
 #' @export
 #' @return \code{data.frame} with training data for a bam file

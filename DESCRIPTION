@@ -40,7 +40,8 @@ Imports:
     R6,
     tensorflow,
     reticulate,
-    progress
+    progress,
+    rsconnect
 Suggests: 
     knitr,
     covr,
