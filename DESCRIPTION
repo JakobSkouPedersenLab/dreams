@@ -26,7 +26,6 @@ Imports:
     dplyr,
     GenomicRanges,
     IRanges,
-    keras,
     magrittr,
     modelr,
     purrr,

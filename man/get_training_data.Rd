@@ -19,7 +19,7 @@ get_training_data(
 
 \item{reference_path}{String. Path to reference genome fasta file.}
 
-\item{bed_include_path}{String. Path to bed-file with regions to include.}
+\item{bed_include_path}{String. Path to bed-file with regions to include. Default is \code{NULL}.}
 
 \item{factor}{Number between 0 and 1. Ratio between negative and positive data. Default is 1.}
 

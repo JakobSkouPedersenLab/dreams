@@ -192,7 +192,7 @@ test_that("separate train simple example", {
     input_structure = NN_model,
     lr = 0.01,
     batch_size = 4,
-    epochs = 100,
+    epochs = 10,
     model_file_path = "~/Desktop/model.test",
     log_file_path = "~/Desktop/log.test",
     decay = 0, min_delta = 0, patience = 0, validation_split = 0.0
@@ -209,3 +209,12 @@ test_that("separate train simple example", {
 
 
 })
+
+
+test_that("load_test_model", {
+
+  model = keras::load_model_hdf5("inst/extdata/model_test.h5")
+
+
+})
+
