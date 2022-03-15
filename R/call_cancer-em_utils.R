@@ -40,10 +40,13 @@ em_objective <- function(par, X_list, error_ref_to_mut_list, error_mut_to_ref_li
   return(-ll)
 }
 
-get_starting_values <- function(observed_signal, X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+get_starting_values <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+  raw_observed_signal <- X_list %>% sapply(mean)
+  observed_signal <- is.nan(raw_observed_signal) %>% ifelse(0, raw_observed_signal)
+
   # Find good starting values
   # (Heuristic) Limits for parameters
-  tf_max <- min(max(observed_signal) * 2, 1)
+  tf_max <- min(max(observed_signal) * 2, 2)
 
   r_max <- max(1 / length(X_list), mean(observed_signal > 0))
 
@@ -79,46 +82,8 @@ get_starting_values <- function(observed_signal, X_list, error_mut_to_ref_list, 
   return(c(tf_start = tf_start, r_start = r_start))
 }
 
-run_EM_full <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
-  if (any(sapply(X_list, length) == 0)) {
-    stop("Error with X_list: Positions with 0 coverage")
-  }
-
-  observed_signal <- sapply(X_list, mean)
-
-  # If no signal, return simple results:
-  if (sum(observed_signal) == 0) {
-    r <- 0
-    tf <- 0
-
-    ll <- log_likelihood(
-      X_list = X_list,
-      error_mut_to_ref_list = error_mut_to_ref_list,
-      error_ref_to_mut_list = error_ref_to_mut_list,
-      r = r,
-      tf = tf
-    )
-
-    res <- list(
-      tf = tf,
-      r = r,
-      P_mut_is_present = rep(0, length(error_mut_to_ref_list)),
-      EM_steps = 1,
-      fpeval = 0,
-      objfeval = 1,
-      EM_converged = TRUE,
-      hist = list(
-        r_t_hist = r,
-        tf_t_hist = tf,
-        P_Y_t_hist = rep(0, length(error_mut_to_ref_list)),
-        ll_t_hist = ll
-      )
-    )
-
-    return(res)
-  }
-
-  start_values <- get_starting_values(observed_signal, X_list, error_mut_to_ref_list, error_ref_to_mut_list)
+run_full_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+  start_values <- get_starting_values(X_list, error_mut_to_ref_list, error_ref_to_mut_list)
 
   tf_t <- start_values["tf_start"]
   r_t <- start_values["r_start"]
@@ -185,8 +150,8 @@ run_EM_full <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
 
   # Gather results
   res <- list(
-    tf = tf_t,
-    r = r_t,
+    tf_est = tf_t,
+    r_est = r_t,
     P_mut_is_present = P_Y_t_vec,
     EM_steps = EM_steps,
     fpeval = EM_steps,
@@ -199,46 +164,27 @@ run_EM_full <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
       ll_t_hist = ll_t_hist
     )
   )
+
+  return(res)
 }
 
-run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
-  if (any(sapply(X_list, length) == 0)) {
-    stop("Error with X_list: Positions with 0 coverage")
-  }
-
-  observed_signal <- sapply(X_list, mean)
-
-  # If no signal, return simple results:
-  if (sum(observed_signal) == 0) {
-    res <- list(
-      tf = 0,
-      r = 0,
-      P_mut_is_present = rep(0, length(error_mut_to_ref_list)),
-      EM_steps = 1,
-      fpeval = 0,
-      objfeval = 1,
-      EM_converged = TRUE
-    )
-
-    return(res)
-  }
-
-  start_values <- get_starting_values(observed_signal, X_list, error_mut_to_ref_list, error_ref_to_mut_list)
-  print("Starting values")
-  print(start_values)
-
+run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   # Run EM algorithm
-  turboem_res <- turboem(
+  start_values <- get_starting_values(X_list, error_mut_to_ref_list, error_ref_to_mut_list)
+
+  turboem_res <- turboEM::turboem(
     par = start_values,
     fixptfn = em_update,
     objfn = em_objective,
     pconstr = function(par) {
       lower <- c(0, 0)
-      upper <- c(1, 1)
-      return(all(lower <= par & par <= upper))
+      upper <- c(2, 1)
+      is_in_parameter_space <- all(lower < par & par < upper)
+      return(is_in_parameter_space)
     },
     project = function(par) {
-      pmax(1e-8, pmin(par, 1))
+      par_project <- pmax(1e-8, pmin(par, c(2 - 1e-8, 1 - 1e-8)))
+      return(par_project)
     },
     method = "squarem",
     X_list = X_list,
@@ -253,9 +199,6 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
 
   tf_est <- turboem_res$par[1]
   r_est <- turboem_res$par[2]
-
-  print("Estimated values")
-  print(c(tf_est = tf_est, r_est = r_est))
 
   # Check if 0 is better fit
   ll_0 <- log_likelihood(
@@ -289,8 +232,8 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   )
 
   res <- list(
-    tf = tf_est,
-    r = r_est,
+    tf_est = tf_est,
+    r_est = r_est,
     P_mut_is_present = P_Y_t_vec,
     EM_steps = turboem_res$itr,
     fpeval = turboem_res$fpeval,
@@ -301,99 +244,45 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   return(res)
 }
 
-EM_test <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list, use_warp_speed = TRUE, calc_ci = FALSE) {
+get_em_parameter_estimates <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list, use_warp_speed) {
+  observed_mut <- X_list %>%
+    sapply(sum) %>%
+    sum()
+  total_observed_positions <- X_list %>%
+    sapply(length) %>%
+    sum()
+  mut_ratio <- observed_mut / total_observed_positions
 
-  # Estimate parameters
+  # If no or only mut signal, return simple result:
+  if (observed_mut == 0) {
+    res <- list(
+      tf_est = 0,
+      r_est = 0,
+      P_mut_is_present = rep(0, length(error_mut_to_ref_list)),
+      EM_steps = 1,
+      fpeval = 0,
+      objfeval = 1,
+      EM_converged = TRUE
+    )
+
+    return(res)
+  } else if (mut_ratio == 1) {
+    res <- list(
+      tf_est = 2,
+      r_est = 1,
+      P_mut_is_present = rep(1, length(error_mut_to_ref_list)),
+      EM_steps = 1,
+      fpeval = 0,
+      objfeval = 1,
+      EM_converged = TRUE
+    )
+
+    return(res)
+  }
+
   if (use_warp_speed) {
-    EM_res <- run_EM(
-      X_list = X_list,
-      error_ref_to_mut_list = error_ref_to_mut_list,
-      error_mut_to_ref_list = error_mut_to_ref_list
-    )
+    return(run_turbo_em(X_list, error_mut_to_ref_list, error_ref_to_mut_list))
   } else {
-    EM_res <- run_EM_full(
-      X_list = X_list,
-      error_ref_to_mut_list = error_ref_to_mut_list,
-      error_mut_to_ref_list = error_mut_to_ref_list
-    )
+    return(run_full_em(X_list, error_mut_to_ref_list, error_ref_to_mut_list))
   }
-
-
-  # Confidence intervals
-  if (calc_ci) {
-    tf_CI <- get_tf_CI(
-      X_list = X_list,
-      error_mut_to_ref_list = error_mut_to_ref_list,
-      error_ref_to_mut_list = error_ref_to_mut_list,
-      r_est = EM_res$r, tf_est = EM_res$tf,
-      alpha = 0.01
-    )
-    r_CI <- get_r_CI(
-      X_list = X_list,
-      error_mut_to_ref_list = error_mut_to_ref_list,
-      error_ref_to_mut_list = error_ref_to_mut_list,
-      r_est = EM_res$r, tf_est = EM_res$tf,
-      alpha = 0.01
-    )
-  } else {
-    tf_CI <- list(tf_min = NA, tf_max = NA)
-    r_CI <- list(r_min = NA, r_max = NA)
-  }
-
-  # Test significance
-  ll_0 <- log_likelihood(
-    X_list = X_list,
-    error_mut_to_ref_list = error_mut_to_ref_list,
-    error_ref_to_mut_list = error_ref_to_mut_list,
-    r = 0,
-    tf = 0
-  )
-
-  ll_A <- log_likelihood(
-    X_list = X_list,
-    error_mut_to_ref_list = error_mut_to_ref_list,
-    error_ref_to_mut_list = error_ref_to_mut_list,
-    r = EM_res$r,
-    tf = EM_res$tf
-  )
-
-  Q_val <- -2 * (ll_0 - ll_A)
-  p_val <- pchisq(Q_val, 2, lower.tail = FALSE)
-
-  # Collect cancer information
-  cancer_info <-
-    data.frame(
-      tf_est = EM_res$tf, tf_min = tf_CI$tf_min, tf_max = tf_CI$tf_max,
-      r_est = EM_res$r, r_min = r_CI$r_min, r_max = r_CI$r_max,
-      Q_val = Q_val,
-      ll_A = ll_A,
-      ll_0 = ll_0,
-      mutations_tested = length(X_list),
-      est_mutations_present = sum(EM_res$P_mut_is_present),
-      p_val = p_val,
-      total_coverage = sum(sapply(X_list, length)),
-      total_count = sum(sapply(X_list, sum)),
-      EM_converged = EM_res$EM_converged,
-      EM_steps = EM_res$EM_steps,
-      fpeval = EM_res$fpeval,
-      objfeval = EM_res$objfeval
-    )
-
-  # Collect mutation information
-  mutation_info <-
-    data.frame(
-      P_mut_is_present = EM_res$P_mut_is_present,
-      obs_freq = sapply(X_list, mean),
-      exp_count = sapply(error_ref_to_mut_list, sum),
-      count = sapply(X_list, sum),
-      coverage = sapply(X_list, length)
-    )
-
-  return(
-    list(
-      cancer_info = cancer_info,
-      mutation_info = mutation_info
-    )
-  )
 }
-

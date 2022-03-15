@@ -20,9 +20,9 @@ update_P_Z <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_li
     function(x, err_RM, err_MR) {
       log(r) +
         sum(log(tf / 2 * err_MR[x == 0] +
-                  (1 - tf / 2) * (1 - err_RM[x == 0]))) +
+          (1 - tf / 2) * (1 - err_RM[x == 0]))) +
         sum(log(tf / 2 * (1 - err_MR[x == 1]) +
-                  (1 - tf / 2) * err_RM[x == 1]))
+          (1 - tf / 2) * err_RM[x == 1]))
     }
   )
 
@@ -56,8 +56,8 @@ update_P <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_list
     ),
     function(x, err_RM) {
       ifelse(x == 0,
-             (1 - tf / 2) * (1 - err_RM),
-             (1 - tf / 2) * err_RM
+        (1 - tf / 2) * (1 - err_RM),
+        (1 - tf / 2) * err_RM
       )
     }
   )
@@ -69,8 +69,8 @@ update_P <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_list
     ),
     function(x, err_MR) {
       ifelse(x == 0,
-             tf / 2 * err_MR,
-             tf / 2 * (1 - err_MR)
+        tf / 2 * err_MR,
+        tf / 2 * (1 - err_MR)
       )
     }
   )
@@ -188,7 +188,8 @@ log_likelihood <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list,
   return(ll)
 }
 
-get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha = 0.01) {
+#' @importFrom stats qchisq uniroot
+get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha) {
   ll_max <- log_likelihood(
     X_list = X_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
@@ -261,7 +262,8 @@ get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_es
   ))
 }
 
-get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha = 0.01) {
+#' @importFrom stats qchisq uniroot
+get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha) {
   ll_max <- log_likelihood(
     X_list = X_list,
     error_mut_to_ref_list = error_mut_to_ref_list,

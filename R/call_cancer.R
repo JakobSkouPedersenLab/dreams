@@ -1,62 +1,69 @@
-#' Title
-#'
-#' @param mutations_df
-#' @param reads
-#' @param model
-#' @param beta
-#'
-#' @return
-prepare_em_input <- function(mutations_df, reads, model, beta) {
+
+# Template for empty output
+empty_cancer_info <- function(mutations_df, X_list) {
+  data.frame(
+    tf_est = 0, tf_min = 0, tf_max = 1,
+    r_est = 0, r_min = 0, r_max = 1,
+    Q_val = 0,
+    ll_A = NA,
+    ll_0 = NA,
+    mutations_tested = nrow(mutations_df),
+    est_mutations_present = 0,
+    total_coverage = sum(sapply(X_list, length)),
+    total_count = 0,
+    EM_converged = NA,
+    EM_steps = NA,
+    fpeval = NA,
+    objfeval = NA,
+    p_val = 1,
+    cancer_detected = FALSE
+  )
+}
+
+prepare_em_input <- function(mutations_df, reads_df, model, beta) {
   X_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
 
-  mutations_w_cov_df <- NULL
-  for (i in 1:nrow(mutations_df)) {
-    chr <- mutations_df[i, "chr"]
-    genomic_pos <- mutations_df[i, "genomic_pos"]
-    ref <- mutations_df[i, "ref"]
-    alt <- mutations_df[i, "alt"]
+  if (nrow(mutations_df) >= 1) {
+    for (i in 1:nrow(mutations_df)) {
+      chr <- mutations_df[i, "chr"]
+      genomic_pos <- mutations_df[i, "genomic_pos"]
+      ref <- mutations_df[i, "ref"]
+      alt <- mutations_df[i, "alt"]
 
-    mut_reads_ref_alt <-
-      reads %>%
-      filter(
-        # Filter reads positions to mutation
-        chr == !!chr, genomic_pos == !!genomic_pos,
-        # Filter mutation type (remove N and "other" than ref/alt alleles)
-        obs == !!ref | obs == !!alt
-      )
+      mut_reads_ref_alt <-
+        reads_df %>%
+        filter(
+          # Filter reads positions to mutation
+          .data$chr == !!chr, .data$genomic_pos == !!genomic_pos,
+          # Filter mutation type (remove N and "other" than ref/alt alleles)
+          .data$obs == !!ref | .data$obs == !!alt
+        )
 
-    # If no relevant coverage - skip to next mutation
-    if (nrow(mut_reads_ref_alt) == 0) {
-      next
+      # Add to list
+      X <- mut_reads_ref_alt$obs == alt
+      X_list <- append(X_list, list(X))
+
+      # Error rates
+      error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
+      error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+
+      # Pick relevant error rates for ref and alt
+      error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
+      error_ref_to_mut_raw <- error_ref_df[[paste0(alt, "_corrected")]]
+
+      error_mut_to_ref_raw <- error_mut_df[[paste0(ref, "_corrected")]]
+      error_mut_to_mut_raw <- error_mut_df[[paste0(alt, "_corrected")]]
+
+      # Normalize
+      error_ref_to_mut <- error_ref_to_mut_raw / (error_ref_to_ref_raw + error_ref_to_mut_raw)
+      error_mut_to_ref <- error_mut_to_ref_raw / (error_mut_to_ref_raw + error_mut_to_mut_raw)
+
+      # Add to list
+      error_ref_to_mut_list <- append(error_ref_to_mut_list, list(error_ref_to_mut))
+      error_mut_to_ref_list <- append(error_mut_to_ref_list, list(error_mut_to_ref))
     }
-
-    # Save mutation
-    mutations_w_cov_df <- rbind(mutations_w_cov_df, mutations_df[i, ])
-
-    # Add to list
-    X <- mut_reads_ref_alt$obs == alt
-    X_list <- append(X_list, list(X))
-
-    # Error rates
-    error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
-    error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
-
-    # Pick relevant error rates for ref and alt
-    error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
-    error_ref_to_mut_raw <- error_ref_df[[paste0(alt, "_corrected")]]
-
-    error_mut_to_ref_raw <- error_mut_df[[paste0(ref, "_corrected")]]
-    error_mut_to_mut_raw <- error_mut_df[[paste0(alt, "_corrected")]]
-
-    # Normalize
-    error_ref_to_mut <- error_ref_to_mut_raw / (error_ref_to_ref_raw + error_ref_to_mut_raw)
-    error_mut_to_ref <- error_mut_to_ref_raw / (error_mut_to_ref_raw + error_mut_to_mut_raw)
-
-    # Add to list
-    error_ref_to_mut_list <- append(error_ref_to_mut_list, list(error_ref_to_mut))
-    error_mut_to_ref_list <- append(error_mut_to_ref_list, list(error_mut_to_ref))
   }
 
   return(
@@ -70,94 +77,143 @@ prepare_em_input <- function(mutations_df, reads, model, beta) {
 
 #' Title
 #'
-#' @param reads
+#' @param mutations_df
+#' @param reads_df
 #' @param beta
 #' @param use_warp_speed
-#' @param calc_ci
+#' @param calculate_confidence_intervals
 #' @param model
-#' @param mutations_df
 #'
 #' @return
 #' @export
-call_cancer <- function(mutations_df, reads, model, beta, use_warp_speed = TRUE, calc_ci = FALSE) {
+call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, use_warp_speed = TRUE, calculate_confidence_intervals = FALSE) {
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
-      "chr" = matches("chr|CHR"),
+      "chr" = matches("chr|CHR|CHROM"),
       "genomic_pos" = matches("pos|POS"),
       "ref" = matches("ref|REF"),
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
   # Stop if mutations do not have the expected columns
-  expected_columns <- c("chr", "genomic_pos", "ref", "alt")
-  if (!all(expected_columns %in% colnames(mutations_df))) {
+  mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
+  if (!all(mutations_expected_columns %in% colnames(mutations_df))) {
     stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
   }
 
-  # Summaries
-  total_coverage <- nrow(reads)
-  mutations_tested <- nrow(mutations_df)
-
-  # Template for empty output
-  empty_cancer_info <-
-    data.frame(
-      tf_est = 0, tf_min = 0, tf_max = 1,
-      r_est = 0, r_min = 0, r_max = 1,
-      Q_val = 0,
-      ll_A = NA,
-      ll_0 = NA,
-      mutations_tested = mutations_tested,
-      est_mutations_present = 0,
-      total_coverage = total_coverage,
-      total_count = 0,
-      p_val = 1,
-      EM_converged = NA,
-      EM_steps = NA,
-      fpeval = NA,
-      objfeval = NA
-    )
-
-  # If no mutations return empty result
-  if (mutations_tested == 0 | total_coverage == 0) {
-    return(
-      list(
-        cancer_info = empty_cancer_info,
-        mutation_info = NULL
-      )
-    )
+  # Stop if reads do not have the expected columns
+  reads_expected_columns <- c("chr", "genomic_pos", "ref", "obs")
+  if (!all(reads_expected_columns %in% colnames(reads_df))) {
+    stop("reads_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
   }
 
   # Prepare inputs for algorithm
-  em_input <- prepare_em_input(mutations_df = mutations_df, reads = reads, model = model, beta = beta)
-
-  # If no positions have relevant coverage (ref or alt) or count of mu is 0 for every candidate
+  em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = reads_df, model = model, beta = beta)
   X_list <- em_input$X_list
+  error_ref_to_mut_list <- em_input$error_ref_to_mut_list
+  error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
-  no_mutaitons_has_relevant_coverage <- length(X_list) == 0
-  no_mutations_has_relevant_count <- all(sapply(X_list, sum) == 0)
-  if (no_mutaitons_has_relevant_coverage | no_mutations_has_relevant_count) {
+  # If no mutations return empty result
+  if (nrow(mutations_df) == 0) {
     return(
       list(
-        cancer_info = empty_cancer_info,
-        mutation_info = NULL
+        cancer_info = empty_cancer_info(mutations_df, em_input),
+        mutation_info = data.frame()
       )
     )
   }
 
   # EM algorithm
-  EM_res <- EM_test(
-    X_list = em_input$X_list,
-    error_ref_to_mut_list = em_input$error_ref_to_mut_list,
-    error_mut_to_ref_list = em_input$error_mut_to_ref_list,
-    use_warp_speed = use_warp_speed,
-    calc_ci = calc_ci
+  em_res <- get_em_parameter_estimates(
+    X_list = X_list,
+    error_ref_to_mut_list = error_ref_to_mut_list,
+    error_mut_to_ref_list = error_mut_to_ref_list,
+    use_warp_speed = use_warp_speed
   )
 
-  res <- list(
-    cancer_info = EM_res$cancer_info,
-    mutation_info = bind_cols(mutations_w_cov_df, EM_res$mutation_info)
+  # Confidence intervals
+  if (calculate_confidence_intervals) {
+    tf_CI <- get_tf_CI(
+      X_list = X_list,
+      error_mut_to_ref_list = error_mut_to_ref_list,
+      error_ref_to_mut_list = error_ref_to_mut_list,
+      r_est = em_res$r_est,
+      tf_est = em_res$tf_est,
+      alpha = alpha
+    )
+    r_CI <- get_r_CI(
+      X_list = X_list,
+      error_mut_to_ref_list = error_mut_to_ref_list,
+      error_ref_to_mut_list = error_ref_to_mut_list,
+      r_est = em_res$r_est,
+      tf_est = em_res$tf_est,
+      alpha = alpha
+    )
+  } else {
+    tf_CI <- list(tf_min = NA, tf_max = NA)
+    r_CI <- list(r_min = NA, r_max = NA)
+  }
+
+  # Test significance
+  ll_0 <- log_likelihood(
+    X_list = X_list,
+    error_mut_to_ref_list = error_mut_to_ref_list,
+    error_ref_to_mut_list = error_ref_to_mut_list,
+    r = 0,
+    tf = 0
   )
 
-  return(res)
+  ll_A <- log_likelihood(
+    X_list = X_list,
+    error_mut_to_ref_list = error_mut_to_ref_list,
+    error_ref_to_mut_list = error_ref_to_mut_list,
+    r = em_res$r_est,
+    tf = em_res$tf_est
+  )
+
+  Q_val <- -2 * (ll_0 - ll_A)
+  p_val <- stats::pchisq(Q_val, 2, lower.tail = FALSE)
+
+  # Collect cancer information
+  cancer_info <-
+    data.frame(
+      tf_est = em_res$tf_est,
+      tf_min = tf_CI$tf_min, tf_max = tf_CI$tf_max,
+      r_est = em_res$r_est,
+      r_min = r_CI$r_min, r_max = r_CI$r_max,
+      Q_val = Q_val,
+      ll_A = ll_A,
+      ll_0 = ll_0,
+      mutations_tested = length(X_list),
+      est_mutations_present = sum(em_res$P_mut_is_present),
+      total_coverage = sum(sapply(X_list, length)),
+      total_count = sum(sapply(X_list, sum)),
+      EM_converged = em_res$EM_converged,
+      EM_steps = em_res$EM_steps,
+      fpeval = em_res$fpeval,
+      objfeval = em_res$objfeval,
+      p_val = p_val,
+      cancer_detected = p_val <= alpha
+    )
+
+  # Collect mutation information
+  mutation_info <-
+    dplyr::bind_cols(
+      mutations_df,
+      data.frame(
+        P_mut_is_present = em_res$P_mut_is_present,
+        exp_count = sapply(error_ref_to_mut_list, sum),
+        count = sapply(X_list, sum),
+        coverage = sapply(X_list, length),
+        obs_freq = sapply(X_list, mean)
+      )
+    )
+
+  return(
+    list(
+      cancer_info = cancer_info,
+      mutation_info = mutation_info
+    )
+  )
 }

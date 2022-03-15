@@ -6,15 +6,16 @@
 \usage{
 call_cancer(
   mutations_df,
-  reads,
+  reads_df,
   model,
   beta,
+  alpha = 0.05,
   use_warp_speed = TRUE,
-  calc_ci = FALSE
+  calculate_confidence_intervals = FALSE
 )
 }
 \arguments{
-\item{mutations_df}{}
+\item{model}{}
 }
 \value{
 

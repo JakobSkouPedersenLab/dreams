@@ -36,7 +36,6 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    keras,
     tfdatasets,
     R6,
     tensorflow,
