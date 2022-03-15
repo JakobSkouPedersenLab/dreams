@@ -7,6 +7,7 @@
 #' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
 #' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
 #' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
+#' @param verbose TODO: Write this
 #'
 #' @export
 #' @return \code{data.frame} with training data for a bam file
@@ -34,7 +35,7 @@ get_training_data <- function(bam_paths,
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
 
-    if (verbose == T) {
+    if (verbose) {
       cat("file ", bam_idx, "/", n_bam_files, "\n")
     }
 

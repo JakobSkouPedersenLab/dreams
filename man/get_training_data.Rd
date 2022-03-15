@@ -11,7 +11,8 @@ get_training_data(
   factor = 1,
   common_positions_to_exclude_paths = NULL,
   positions_to_exclude_paths = NULL,
-  mm_rate_max = 1
+  mm_rate_max = 1,
+  verbose = F
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ get_training_data(
 \item{positions_to_exclude_paths}{Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.}
 
 \item{mm_rate_max}{Number between 0 and 1. Maximum mismatch rate in position. Default is 1.}
+
+\item{verbose}{TODO: Write this}
 }
 \value{
 \code{data.frame} with training data for a bam file
