@@ -2,36 +2,37 @@ limit_0_1 <- function(x) {
   return(pmax(pmin(x, 1), 0))
 }
 
+#' @import dplyr
 correct_errors_predictions <- function(error_df, beta) {
   error_df %>%
     mutate(
       error_prob_sample = case_when(
-        ref == "A" ~ 1 - A,
-        ref == "C" ~ 1 - C,
-        ref == "T" ~ 1 - T,
-        ref == "G" ~ 1 - G
+        .data$ref == "A" ~ 1 - A,
+        .data$ref == "C" ~ 1 - C,
+        .data$ref == "T" ~ 1 - T,
+        .data$ref == "G" ~ 1 - G
       ),
-      error_prob_corrected = beta * error_prob_sample / (beta * error_prob_sample - error_prob_sample + 1),
-      A_corrected = ifelse(ref == "A",
-        1 - error_prob_corrected,
-        error_prob_corrected * A / (error_prob_sample)
+      error_prob_corrected = beta * .data$error_prob_sample / (beta * .data$error_prob_sample - .data$error_prob_sample + 1),
+      A_corrected = ifelse(.data$ref == "A",
+        1 - .data$error_prob_corrected,
+        .data$error_prob_corrected * .data$A / (.data$error_prob_sample)
       ),
-      C_corrected = ifelse(ref == "C",
-        1 - error_prob_corrected,
-        error_prob_corrected * C / (error_prob_sample)
+      C_corrected = ifelse(.data$ref == "C",
+        1 - .data$error_prob_corrected,
+        .data$error_prob_corrected * .data$C / (.data$error_prob_sample)
       ),
-      G_corrected = ifelse(ref == "G",
-        1 - error_prob_corrected,
-        error_prob_corrected * G / (error_prob_sample)
+      G_corrected = ifelse(.data$ref == "G",
+        1 - .data$error_prob_corrected,
+        .data$error_prob_corrected * .data$G / (.data$error_prob_sample)
       ),
-      T_corrected = ifelse(ref == "T",
-        1 - error_prob_corrected,
-        error_prob_corrected * T / (error_prob_sample)
+      T_corrected = ifelse(.data$ref == "T",
+        1 - .data$error_prob_corrected,
+        .data$error_prob_corrected * .data$T / (.data$error_prob_sample)
       ),
-      A_corrected = limit_0_1(ifelse(is.nan(A_corrected), 0, A_corrected)),
-      C_corrected = limit_0_1(ifelse(is.nan(C_corrected), 0, C_corrected)),
-      G_corrected = limit_0_1(ifelse(is.nan(G_corrected), 0, G_corrected)),
-      T_corrected = limit_0_1(ifelse(is.nan(T_corrected), 0, T_corrected))
+      A_corrected = ifelse(is.nan(.data$A_corrected), 0, .data$A_corrected) %>% limit_0_1(),
+      C_corrected = ifelse(is.nan(.data$C_corrected), 0, .data$C_corrected) %>% limit_0_1(),
+      G_corrected = ifelse(is.nan(.data$G_corrected), 0, .data$G_corrected) %>% limit_0_1(),
+      T_corrected = ifelse(is.nan(.data$T_corrected), 0, .data$T_corrected) %>% limit_0_1()
     )
 }
 
@@ -44,27 +45,42 @@ correct_errors_predictions <- function(error_df, beta) {
 #' @return
 #' @export
 #' @importFrom modelr add_predictions
+#' @importFrom stats predict
 predict_error_rates <- function(read_positions_df, model, beta) {
+
   # Predict error rates for read positions from trained DREAM model
 
   # TODO: add modelr
   # Link: https://rdrr.io/cran/modelr/man/add_predictions.html
 
-  prediction <- model %>%
-    predict(read_positions_df) %>%
-    data.frame() %>%
-    rename(
-      A = X1,
-      T = X2,
-      C = X3,
-      G = X4
-    )
+  if (nrow(read_positions_df) == 0) {
+    prediction <-
+      data.frame(
+        A = numeric(),
+        T = numeric(),
+        C = numeric(),
+        G = numeric()
+      )
+  } else {
+    prediction <- model %>%
+      predict(read_positions_df) %>%
+      data.frame() %>%
+      rename(
+        A = .data$X1,
+        T = .data$X2,
+        C = .data$X3,
+        G = .data$X4
+      )
+  }
 
+
+
+  # TODO: Are ref already available?
   prediction$ref <- read_positions_df$ref
 
   corrected_errors <- prediction %>%
     correct_errors_predictions(beta = beta) %>%
-    select(-ref)
+    select(-.data$ref)
 
   predicted_errors <- bind_cols(read_positions_df, corrected_errors)
 
