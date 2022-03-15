@@ -42,7 +42,8 @@ Imports:
     reticulate,
     progress,
     rsconnect,
-    turboEM
+    turboEM,
+    keras
 Suggests: 
     knitr,
     covr,
