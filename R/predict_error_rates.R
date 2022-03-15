@@ -36,14 +36,6 @@ correct_errors_predictions <- function(error_df, beta) {
     )
 }
 
-#' Title
-#'
-#' @param read_positions_df
-#' @param model
-#' @param beta
-#'
-#' @return
-#' @export
 #' @importFrom modelr add_predictions
 #' @importFrom stats predict
 predict_error_rates <- function(read_positions_df, model, beta) {

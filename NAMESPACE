@@ -3,7 +3,6 @@
 export("%>%")
 export(call_cancer)
 export(get_training_data)
-export(predict_error_rates)
 export(train_model)
 import(dplyr)
 import(stringr)
