@@ -166,23 +166,25 @@ test_that("One mutation - no reads", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  res <- call_cancer(mutations_df = one_mutations_df, reads_df = empty_reads_df, model = model, beta = 1)
+  res <- call_cancer(mutations_df = one_mutations_df, reads_df = empty_reads_df, model = model, beta = 0.01)
 
   # Cancer info
   expect_equal(res$cancer_info$mutations_tested, 1)
   expect_equal(res$cancer_info$total_coverage, 0)
+  expect_equal(res$cancer_info$EM_converged, TRUE)
   expect_equal(res$cancer_info$p_val, 1)
-  expect_equal(res$cancer_info$EM_converged, NA)
+  expect_equal(res$cancer_info$cancer_detected, FALSE)
 
   # Mutations info
   expect_equal(nrow(res$mutation_info), 1)
   expect_equal(res$mutation_info$chr, "chr1")
-  expect_equal(res$mutation_info$obs_freq, 0)
-  expect_equal(res$mutation_info$P_mut_is_present, NA)
+  expect_equal(res$mutation_info$obs_freq, NaN)
+  expect_equal(res$mutation_info$P_mut_is_present, 0)
   expect_equal(res$mutation_info$count, 0)
+  expect_equal(res$mutation_info$coverage, 0)
 })
 
-test_that("Two mutations - one read in anptother position", {
+test_that("Two mutations - one read in another position", {
   two_mutations_df <-
     data.frame(
       CHROM = c("chr1", "chr2"),
@@ -208,13 +210,13 @@ test_that("Two mutations - one read in anptother position", {
   expect_equal(res$cancer_info$mutations_tested, 2)
   expect_equal(res$cancer_info$total_coverage, 0)
   expect_equal(res$cancer_info$p_val, 1)
-  expect_equal(res$cancer_info$EM_converged, NA)
+  expect_equal(res$cancer_info$EM_converged, TRUE)
 
   # Mutations info
   expect_equal(nrow(res$mutation_info), 2)
   expect_equal(res$mutation_info$chr, c("chr1", "chr2"))
-  expect_equal(res$mutation_info$obs_freq, c(0, 0))
-  expect_equal(res$mutation_info$P_mut_is_present, c(NA, NA))
+  expect_equal(res$mutation_info$obs_freq, c(NaN, NaN))
+  expect_equal(res$mutation_info$P_mut_is_present, c(0, 0))
 })
 
 test_that("Small example", {

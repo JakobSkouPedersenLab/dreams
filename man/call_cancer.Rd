@@ -9,6 +9,7 @@ call_cancer(
   reads_df,
   model,
   beta,
+  alpha = 0.05,
   use_warp_speed = TRUE,
   calculate_confidence_intervals = FALSE
 )

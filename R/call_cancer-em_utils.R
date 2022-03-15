@@ -82,42 +82,8 @@ get_starting_values <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_
   return(c(tf_start = tf_start, r_start = r_start))
 }
 
-run_EM_full <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
-  observed_signal <- sapply(X_list, mean)
-
-  # If no signal, return simple results:
-  if (sum(observed_signal) == 0) {
-    r <- 0
-    tf <- 0
-
-    ll <- log_likelihood(
-      X_list = X_list,
-      error_mut_to_ref_list = error_mut_to_ref_list,
-      error_ref_to_mut_list = error_ref_to_mut_list,
-      r = r,
-      tf = tf
-    )
-
-    res <- list(
-      tf = tf,
-      r = r,
-      P_mut_is_present = rep(0, length(error_mut_to_ref_list)),
-      EM_steps = 1,
-      fpeval = 0,
-      objfeval = 1,
-      EM_converged = TRUE,
-      hist = list(
-        r_t_hist = r,
-        tf_t_hist = tf,
-        P_Y_t_hist = rep(0, length(error_mut_to_ref_list)),
-        ll_t_hist = ll
-      )
-    )
-
-    return(res)
-  }
-
-  start_values <- get_starting_values(observed_signal, X_list, error_mut_to_ref_list, error_ref_to_mut_list)
+run_full_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+  start_values <- get_starting_values(X_list, error_mut_to_ref_list, error_ref_to_mut_list)
 
   tf_t <- start_values["tf_start"]
   r_t <- start_values["r_start"]
@@ -184,8 +150,8 @@ run_EM_full <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
 
   # Gather results
   res <- list(
-    tf = tf_t,
-    r = r_t,
+    tf_est = tf_t,
+    r_est = r_t,
     P_mut_is_present = P_Y_t_vec,
     EM_steps = EM_steps,
     fpeval = EM_steps,
@@ -198,44 +164,11 @@ run_EM_full <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
       ll_t_hist = ll_t_hist
     )
   )
+
+  return(res)
 }
 
-run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
-  observed_mut <- X_list %>%
-    sapply(sum) %>%
-    sum()
-  total_observed_positions <- X_list %>%
-    sapply(length) %>%
-    sum()
-  mut_ratio <- observed_mut / total_observed_positions
-
-  # If no or only mut signal, return simple result:
-  if (mut_ratio == 0) {
-    res <- list(
-      tf = 0,
-      r = 0,
-      P_mut_is_present = rep(0, length(error_mut_to_ref_list)),
-      EM_steps = 1,
-      fpeval = 0,
-      objfeval = 1,
-      EM_converged = TRUE
-    )
-
-    return(res)
-  } else if (mut_ratio == 1) {
-    res <- list(
-      tf = 2,
-      r = 1,
-      P_mut_is_present = rep(1, length(error_mut_to_ref_list)),
-      EM_steps = 1,
-      fpeval = 0,
-      objfeval = 1,
-      EM_converged = TRUE
-    )
-
-    return(res)
-  }
-
+run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   # Run EM algorithm
   start_values <- get_starting_values(X_list, error_mut_to_ref_list, error_ref_to_mut_list)
 
@@ -299,8 +232,8 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   )
 
   res <- list(
-    tf = tf_est,
-    r = r_est,
+    tf_est = tf_est,
+    r_est = r_est,
     P_mut_is_present = P_Y_t_vec,
     EM_steps = turboem_res$itr,
     fpeval = turboem_res$fpeval,
@@ -309,4 +242,47 @@ run_EM <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   )
 
   return(res)
+}
+
+get_em_parameter_estimates <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list, use_warp_speed) {
+  observed_mut <- X_list %>%
+    sapply(sum) %>%
+    sum()
+  total_observed_positions <- X_list %>%
+    sapply(length) %>%
+    sum()
+  mut_ratio <- observed_mut / total_observed_positions
+
+  # If no or only mut signal, return simple result:
+  if (observed_mut == 0) {
+    res <- list(
+      tf_est = 0,
+      r_est = 0,
+      P_mut_is_present = rep(0, length(error_mut_to_ref_list)),
+      EM_steps = 1,
+      fpeval = 0,
+      objfeval = 1,
+      EM_converged = TRUE
+    )
+
+    return(res)
+  } else if (mut_ratio == 1) {
+    res <- list(
+      tf_est = 2,
+      r_est = 1,
+      P_mut_is_present = rep(1, length(error_mut_to_ref_list)),
+      EM_steps = 1,
+      fpeval = 0,
+      objfeval = 1,
+      EM_converged = TRUE
+    )
+
+    return(res)
+  }
+
+  if (use_warp_speed) {
+    return(run_turbo_em(X_list, error_mut_to_ref_list, error_ref_to_mut_list))
+  } else {
+    return(run_full_em(X_list, error_mut_to_ref_list, error_ref_to_mut_list))
+  }
 }
