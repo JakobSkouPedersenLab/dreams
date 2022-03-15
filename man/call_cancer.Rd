@@ -2,7 +2,7 @@
 % Please edit documentation in R/call_cancer.R
 \name{call_cancer}
 \alias{call_cancer}
-\title{Title}
+\title{Call cancer from read positions}
 \usage{
 call_cancer(
   mutations_df,
@@ -10,16 +10,32 @@ call_cancer(
   model,
   beta,
   alpha = 0.05,
-  use_warp_speed = TRUE,
-  calculate_confidence_intervals = FALSE
+  calculate_confidence_intervals = FALSE,
+  use_warp_speed = TRUE
 )
 }
 \arguments{
-\item{model}{}
+\item{mutations_df}{A \code{data.frame()} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
+
+\item{reads_df}{A \code{data.frame()} with read-positions}
+
+\item{model}{A dreams model (TODO: Link)}
+
+\item{beta}{Down sampling parameter from (TODO: Link)}
+
+\item{alpha}{Alpha-level used for testing and confidence intervals. . Default is 0.05.}
+
+\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated?. Default is FALSE.}
+
+\item{use_warp_speed}{Logical. Should turboEM be used for EM algorithm? Default is TRUE.
+
+TODO: Make sub list of items in data.frames}
 }
 \value{
-
+A \code{list()} with:
+\item{cancer_info}{A \code{data.frame()} with results for cancer calling across all mutations}
+\item{mutation_info}{A \code{data.frame()} with information about the individual mutations}
 }
 \description{
-Title
+Call cancer from read positions
 }

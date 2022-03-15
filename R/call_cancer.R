@@ -75,18 +75,25 @@ prepare_em_input <- function(mutations_df, reads_df, model, beta) {
   )
 }
 
-#' Title
+#' Call cancer from read positions
 #'
-#' @param mutations_df
-#' @param reads_df
-#' @param beta
-#' @param use_warp_speed
-#' @param calculate_confidence_intervals
-#' @param model
+#' @param mutations_df A \code{data.frame()} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)
+#' @param reads_df A \code{data.frame()} with read-positions
+#' @param model A dreams model (TODO: Link)
+#' @param beta Down sampling parameter from (TODO: Link)
+#' @param alpha Alpha-level used for testing and confidence intervals. . Default is 0.05.
+#' @param calculate_confidence_intervals Logical. Should confidence intervals be calculated?. Default is FALSE.
+#' @param use_warp_speed Logical. Should turboEM be used for EM algorithm? Default is TRUE.
 #'
+#'
+#' TODO: Make sub list of items in data.frames
 #' @return
+#' A \code{list()} with:
+#'   \item{cancer_info}{A \code{data.frame()} with results for cancer calling across all mutations}
+#'   \item{mutation_info}{A \code{data.frame()} with information about the individual mutations}
+#'
 #' @export
-call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, use_warp_speed = TRUE, calculate_confidence_intervals = FALSE) {
+call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_warp_speed = TRUE) {
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
