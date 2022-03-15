@@ -209,12 +209,3 @@ test_that("separate train simple example", {
 
 
 })
-
-
-test_that("load_test_model", {
-
-  model = keras::load_model_hdf5("inst/extdata/model_test.h5")
-
-
-})
-

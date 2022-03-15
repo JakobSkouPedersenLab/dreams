@@ -17,7 +17,8 @@ get_training_data <- function(bam_paths,
                               factor = 1,
                               common_positions_to_exclude_paths = NULL,
                               positions_to_exclude_paths = NULL,
-                              mm_rate_max = 1) {
+                              mm_rate_max = 1,
+                              verbose = F) {
 
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
@@ -28,8 +29,14 @@ get_training_data <- function(bam_paths,
   training_data <- NULL
   info <- NULL
 
-  for (bam_idx in 1:length(bam_paths)) {
+  n_bam_files = length(bam_paths)
+
+  for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
+
+    if (verbose == T) {
+      cat("file ", bam_idx, "/", n_bam_files, "\n")
+    }
 
     # Combine sample specific position exclusion with common exclusion
     if (!is.null(positions_to_exclude_paths)) {
