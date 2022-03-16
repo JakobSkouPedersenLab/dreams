@@ -82,9 +82,7 @@ get_starting_values <- function(obs_is_mut_list, error_mut_to_ref_list, error_re
   return(c(tf_start = tf_start, r_start = r_start))
 }
 
-run_full_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
-  start_values <- get_starting_values(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
-
+run_full_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   tf_t <- start_values["tf_start"]
   r_t <- start_values["r_start"]
 
@@ -152,7 +150,6 @@ run_full_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut
   res <- list(
     tf_est = tf_t,
     r_est = r_t,
-    P_mut_is_present = P_Y_t_vec,
     EM_steps = EM_steps,
     fpeval = EM_steps,
     objfeval = EM_steps,
@@ -168,10 +165,7 @@ run_full_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut
   return(res)
 }
 
-run_turbo_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
-  # Run EM algorithm
-  start_values <- get_starting_values(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
-
+run_turbo_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   turboem_res <- turboEM::turboem(
     par = start_values,
     fixptfn = em_update,
@@ -197,44 +191,9 @@ run_turbo_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mu
       )
   )
 
-  tf_est <- turboem_res$par[1]
-  r_est <- turboem_res$par[2]
-
-  # Check if 0 is better fit
-  ll_0 <- log_likelihood(
-    obs_is_mut_list = obs_is_mut_list,
-    error_mut_to_ref_list = error_mut_to_ref_list,
-    error_ref_to_mut_list = error_ref_to_mut_list,
-    r = 0,
-    tf = 0
-  )
-
-  ll_em <- log_likelihood(
-    obs_is_mut_list = obs_is_mut_list,
-    error_mut_to_ref_list = error_mut_to_ref_list,
-    error_ref_to_mut_list = error_ref_to_mut_list,
-    r = r_est,
-    tf = tf_est
-  )
-
-  if (ll_0 >= ll_em) {
-    tf_est <- 0
-    r_est <- 0
-  }
-
-  # Get guess for hidden state
-  P_Y_t_vec <- update_P_Z(
-    tf = tf_est,
-    r = r_est,
-    error_mut_to_ref_list = error_mut_to_ref_list,
-    error_ref_to_mut_list = error_ref_to_mut_list,
-    obs_is_mut_list = obs_is_mut_list
-  )
-
   res <- list(
-    tf_est = tf_est,
-    r_est = r_est,
-    P_mut_is_present = P_Y_t_vec,
+    tf_est = turboem_res$par[1],
+    r_est = turboem_res$par[2],
     EM_steps = turboem_res$itr,
     fpeval = turboem_res$fpeval,
     objfeval = turboem_res$objfeval,
@@ -251,7 +210,7 @@ get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, e
   total_observed_positions <- obs_is_mut_list %>%
     sapply(length) %>%
     sum()
-  mut_ratio <- observed_mut / total_observed_positions
+  total_mut_ratio <- observed_mut / total_observed_positions
 
   # If no or only mut signal, return simple result:
   if (observed_mut == 0) {
@@ -266,7 +225,7 @@ get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, e
     )
 
     return(res)
-  } else if (mut_ratio == 1) {
+  } else if (total_mut_ratio == 1) {
     res <- list(
       tf_est = 2,
       r_est = 1,
@@ -280,9 +239,48 @@ get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, e
     return(res)
   }
 
+  # Get starting values
+  start_values <- get_starting_values(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
+
+  # Run EM algorithm
   if (use_warp_speed) {
-    return(run_turbo_em(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list))
+    em_res <- run_turbo_em(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
   } else {
-    return(run_full_em(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list))
+    em_res <- run_full_em(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
   }
+
+  # Check if 0 is better fit
+  ll_0 <- log_likelihood(
+    obs_is_mut_list = obs_is_mut_list,
+    error_mut_to_ref_list = error_mut_to_ref_list,
+    error_ref_to_mut_list = error_ref_to_mut_list,
+    r = 0,
+    tf = 0
+  )
+
+  ll_em <- log_likelihood(
+    obs_is_mut_list = obs_is_mut_list,
+    error_mut_to_ref_list = error_mut_to_ref_list,
+    error_ref_to_mut_list = error_ref_to_mut_list,
+    r = em_res$r_est,
+    tf = em_res$tf_est
+  )
+
+  if (ll_0 >= ll_em) {
+    em_res$tf_est <- 0
+    em_res$r_est <- 0
+  }
+
+  # Get guess for hidden state
+  P_Z1_vec <- update_P_Z(
+    tf = em_res$tf_est,
+    r = em_res$r_est,
+    error_mut_to_ref_list = error_mut_to_ref_list,
+    error_ref_to_mut_list = error_ref_to_mut_list,
+    obs_is_mut_list = obs_is_mut_list
+  )
+
+  em_res$P_mut_is_present <- P_Z1_vec
+
+  return(em_res)
 }

@@ -72,6 +72,16 @@ prepare_em_input <- function(mutations_df, reads_df, model, beta) {
 #'
 #' @export
 call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_warp_speed = TRUE) {
+  # If no mutations return empty result
+  if (nrow(mutations_df) == 0) {
+    return(
+      list(
+        cancer_info = data.frame(),
+        mutation_info = data.frame()
+      )
+    )
+  }
+
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
@@ -99,15 +109,6 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
-  # If no mutations return empty result
-  if (nrow(mutations_df) == 0) {
-    return(
-      list(
-        cancer_info = data.frame(),
-        mutation_info = data.frame()
-      )
-    )
-  }
 
   # EM algorithm
   em_res <- get_em_parameter_estimates(
