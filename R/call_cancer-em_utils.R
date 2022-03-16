@@ -1,8 +1,8 @@
-em_update <- function(par, X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
+em_update <- function(par, obs_is_mut_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   # Unpack par
   tf <- par[1]
   r <- par[2]
-  n_frag_vec <- sapply(X_list, length)
+  n_frag_vec <- sapply(obs_is_mut_list, length)
 
   # E-step
   P_list <- update_P(
@@ -10,7 +10,7 @@ em_update <- function(par, X_list, error_ref_to_mut_list, error_mut_to_ref_list)
     r = r,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
-    X_list = X_list
+    obs_is_mut_list = obs_is_mut_list
   )
 
   P_Z1_vec <- P_list$P_Z1_vec
@@ -23,13 +23,13 @@ em_update <- function(par, X_list, error_ref_to_mut_list, error_mut_to_ref_list)
   return(c(tf_new, r_new))
 }
 
-em_objective <- function(par, X_list, error_ref_to_mut_list, error_mut_to_ref_list) {
+em_objective <- function(par, obs_is_mut_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   # Unpack par
   tf <- par[1]
   r <- par[2]
 
   ll <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     tf = tf,
@@ -40,15 +40,15 @@ em_objective <- function(par, X_list, error_ref_to_mut_list, error_mut_to_ref_li
   return(-ll)
 }
 
-get_starting_values <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
-  raw_observed_signal <- X_list %>% sapply(mean)
+get_starting_values <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+  raw_observed_signal <- obs_is_mut_list %>% sapply(mean)
   observed_signal <- is.nan(raw_observed_signal) %>% ifelse(0, raw_observed_signal)
 
   # Find good starting values
   # (Heuristic) Limits for parameters
   tf_max <- min(max(observed_signal) * 2, 2)
 
-  r_max <- max(1 / length(X_list), mean(observed_signal > 0))
+  r_max <- max(1 / length(obs_is_mut_list), mean(observed_signal > 0))
 
   # Grid size
   tf_n_start_guess <- 7
@@ -64,7 +64,7 @@ get_starting_values <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_
     tf_r_grid,
     function(tf, r) {
       log_likelihood(
-        X_list = X_list,
+        obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
         error_ref_to_mut_list = error_ref_to_mut_list,
         r = r,
@@ -82,8 +82,8 @@ get_starting_values <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_
   return(c(tf_start = tf_start, r_start = r_start))
 }
 
-run_full_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
-  start_values <- get_starting_values(X_list, error_mut_to_ref_list, error_ref_to_mut_list)
+run_full_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+  start_values <- get_starting_values(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
 
   tf_t <- start_values["tf_start"]
   r_t <- start_values["r_start"]
@@ -92,7 +92,7 @@ run_full_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   r_t_hist <- r_t
 
   ll_t_hist <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     tf = tf_t,
@@ -116,19 +116,19 @@ run_full_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
       r = r_t,
       error_mut_to_ref_list = error_mut_to_ref_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
-      X_list = X_list
+      obs_is_mut_list = obs_is_mut_list
     )
 
     P_Y_t_vec <- P_t_list$P_Z1_vec
     P_Y_given_Z1_list <- P_t_list$P_Y_given_Z1_list
 
     # M-step
-    n_frag_vec <- sapply(X_list, length)
+    n_frag_vec <- sapply(obs_is_mut_list, length)
     tf_t <- update_tf(P_Y_given_Z1_list, P_Y_t_vec, n_frag_vec)
     r_t <- update_r(P_Y_t_vec)
 
     ll_t <- log_likelihood(
-      X_list = X_list,
+      obs_is_mut_list = obs_is_mut_list,
       error_mut_to_ref_list = error_mut_to_ref_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
       r = r_t,
@@ -168,9 +168,9 @@ run_full_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   return(res)
 }
 
-run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+run_turbo_em <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   # Run EM algorithm
-  start_values <- get_starting_values(X_list, error_mut_to_ref_list, error_ref_to_mut_list)
+  start_values <- get_starting_values(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
 
   turboem_res <- turboEM::turboem(
     par = start_values,
@@ -187,7 +187,7 @@ run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
       return(par_project)
     },
     method = "squarem",
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     control.run =
@@ -202,7 +202,7 @@ run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
 
   # Check if 0 is better fit
   ll_0 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = 0,
@@ -210,7 +210,7 @@ run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   )
 
   ll_em <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = r_est,
@@ -228,7 +228,7 @@ run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
     r = r_est,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
-    X_list = X_list
+    obs_is_mut_list = obs_is_mut_list
   )
 
   res <- list(
@@ -244,11 +244,11 @@ run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
   return(res)
 }
 
-get_em_parameter_estimates <- function(X_list, error_ref_to_mut_list, error_mut_to_ref_list, use_warp_speed) {
-  observed_mut <- X_list %>%
+get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, error_mut_to_ref_list, use_warp_speed) {
+  observed_mut <- obs_is_mut_list %>%
     sapply(sum) %>%
     sum()
-  total_observed_positions <- X_list %>%
+  total_observed_positions <- obs_is_mut_list %>%
     sapply(length) %>%
     sum()
   mut_ratio <- observed_mut / total_observed_positions
@@ -281,8 +281,8 @@ get_em_parameter_estimates <- function(X_list, error_ref_to_mut_list, error_mut_
   }
 
   if (use_warp_speed) {
-    return(run_turbo_em(X_list, error_mut_to_ref_list, error_ref_to_mut_list))
+    return(run_turbo_em(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list))
   } else {
-    return(run_full_em(X_list, error_mut_to_ref_list, error_ref_to_mut_list))
+    return(run_full_em(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list))
   }
 }

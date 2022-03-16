@@ -1,7 +1,7 @@
-update_P_Z <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_list) {
+update_P_Z <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, obs_is_mut_list) {
   log_Q_Z0 <- pmap_dbl(
     tibble(
-      x = X_list,
+      x = obs_is_mut_list,
       err_RM = error_ref_to_mut_list,
     ),
     function(x, err_RM) {
@@ -13,7 +13,7 @@ update_P_Z <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_li
 
   log_Q_Z1 <- pmap_dbl(
     tibble(
-      x = X_list,
+      x = obs_is_mut_list,
       err_RM = error_ref_to_mut_list,
       err_MR = error_mut_to_ref_list
     ),
@@ -36,7 +36,7 @@ update_P_Z <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_li
   return(P_Z1)
 }
 
-update_P <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_list) {
+update_P <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, obs_is_mut_list) {
 
   # Get probabilities for site mutation state (Z)
   P_Z1_vec <- update_P_Z(
@@ -44,14 +44,14 @@ update_P <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_list
     r = r,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
-    X_list = X_list
+    obs_is_mut_list = obs_is_mut_list
   )
 
   # Get probabilities for fragment state given site state (Y given Z)
   # Get scaled probabilities (Q1 + Q2 = c)
   Q_Y0_given_Z1_list <- pmap(
     tibble(
-      x = X_list,
+      x = obs_is_mut_list,
       err_RM = error_ref_to_mut_list,
     ),
     function(x, err_RM) {
@@ -64,7 +64,7 @@ update_P <- function(tf, r, error_mut_to_ref_list, error_ref_to_mut_list, X_list
 
   Q_Y1_given_Z1_list <- pmap(
     tibble(
-      x = X_list,
+      x = obs_is_mut_list,
       err_MR = error_mut_to_ref_list,
     ),
     function(x, err_MR) {
@@ -133,10 +133,10 @@ update_tf <- function(P_Y_given_Z1_list, P_Z1_vec, n_frag_vec) {
   return(tf_new)
 }
 
-log_likelihood <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r, tf) {
+log_likelihood <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list, r, tf) {
   # Input check
-  if (!is.list(X_list)) {
-    stop("X_list is not a list")
+  if (!is.list(obs_is_mut_list)) {
+    stop("obs_is_mut_list is not a list")
   }
   if (!is.list(error_mut_to_ref_list)) {
     stop("error_mut_to_ref_list is not a list")
@@ -144,7 +144,7 @@ log_likelihood <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list,
   if (!is.list(error_ref_to_mut_list)) {
     stop("error_ref_to_mut_list is not a list")
   }
-  if (!all(sapply(X_list, length) == sapply(error_mut_to_ref_list, length))) {
+  if (!all(sapply(obs_is_mut_list, length) == sapply(error_mut_to_ref_list, length))) {
     stop("Dimensions of list inputs are not equal")
   }
   if (is.nan(tf) || is.na(tf) || tf < 0 || 1 < (tf / 2)) {
@@ -154,7 +154,7 @@ log_likelihood <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list,
   ll_m_vec <-
     pmap_dbl(
       tibble(
-        X = X_list,
+        X = obs_is_mut_list,
         err_MR = error_mut_to_ref_list,
         err_RM = error_ref_to_mut_list
       ),
@@ -189,9 +189,9 @@ log_likelihood <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list,
 }
 
 #' @importFrom stats qchisq uniroot
-get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha) {
+get_tf_CI <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha) {
   ll_max <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = r_est,
@@ -200,7 +200,7 @@ get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_es
 
   # Find minimum
   ll_0 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = r_est,
@@ -213,7 +213,7 @@ get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_es
   } else {
     tf_min <- uniroot(function(x) {
       ll_A <- log_likelihood(
-        X_list = X_list,
+        obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
         error_ref_to_mut_list = error_ref_to_mut_list,
         r = r_est,
@@ -228,7 +228,7 @@ get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_es
 
   # Find maximum
   ll_1 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = r_est,
@@ -242,7 +242,7 @@ get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_es
     upper_start <- min(tf_est * 2 + 1e-8, 1)
     tf_max <- uniroot(function(x) {
       ll_A <- log_likelihood(
-        X_list = X_list,
+        obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
         error_ref_to_mut_list = error_ref_to_mut_list,
         r = r_est,
@@ -263,9 +263,9 @@ get_tf_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_es
 }
 
 #' @importFrom stats qchisq uniroot
-get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha) {
+get_r_CI <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est, tf_est, alpha) {
   ll_max <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = r_est,
@@ -274,7 +274,7 @@ get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est
 
   # Find minimum
   ll_0 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = 0,
@@ -287,7 +287,7 @@ get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est
   } else {
     r_min <- uniroot(function(x) {
       ll_A <- log_likelihood(
-        X_list = X_list,
+        obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
         error_ref_to_mut_list = error_ref_to_mut_list,
         r = x,
@@ -302,7 +302,7 @@ get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est
 
   # Find maximum
   ll_1 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = 1,
@@ -315,7 +315,7 @@ get_r_CI <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list, r_est
   } else {
     r_max <- uniroot(function(x) {
       ll_A <- log_likelihood(
-        X_list = X_list,
+        obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
         error_ref_to_mut_list = error_ref_to_mut_list,
         r = x,

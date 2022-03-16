@@ -199,7 +199,7 @@ call_mutations <- function(mutations_df, all_reads, model, beta, alpha = 0.05, u
   # Prepare EM input
   em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = all_reads, model = model, beta = beta)
 
-  X_list <- em_input$X_list
+  obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
@@ -211,7 +211,7 @@ call_mutations <- function(mutations_df, all_reads, model, beta, alpha = 0.05, u
     alt <- mutations_df$alt[i]
 
     # Read information
-    sample_mutations <- X_list[[i]]
+    sample_mutations <- obs_is_mut_list[[i]]
     error_ref_to_mut <- error_ref_to_mut_list[[i]]
     error_mut_to_ref <- error_mut_to_ref_list[[i]]
 
@@ -304,7 +304,7 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
 
   # Prepare inputs for algorithm
   em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = reads_df, model = model, beta = beta)
-  X_list <- em_input$X_list
+  obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
@@ -320,7 +320,7 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
 
   # EM algorithm
   em_res <- get_em_parameter_estimates(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     use_warp_speed = use_warp_speed
@@ -329,7 +329,7 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
   # Confidence intervals
   if (calculate_confidence_intervals) {
     tf_CI <- get_tf_CI(
-      X_list = X_list,
+      obs_is_mut_list = obs_is_mut_list,
       error_mut_to_ref_list = error_mut_to_ref_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
       r_est = em_res$r_est,
@@ -337,7 +337,7 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
       alpha = alpha
     )
     r_CI <- get_r_CI(
-      X_list = X_list,
+      obs_is_mut_list = obs_is_mut_list,
       error_mut_to_ref_list = error_mut_to_ref_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
       r_est = em_res$r_est,
@@ -351,7 +351,7 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
 
   # Test significance
   ll_0 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = 0,
@@ -359,7 +359,7 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
   )
 
   ll_A <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = em_res$r_est,
@@ -379,9 +379,9 @@ call_mutations_new <- function(mutations_df, reads_df, model, beta, alpha = 0.05
       ll_0 = ll_0,
       est_mutations_present = sum(em_res$P_mut_is_present),
       exp_count = sapply(error_ref_to_mut_list, sum),
-      count = sapply(X_list, sum),
-      coverage = sapply(X_list, length),
-      obs_freq = sapply(X_list, mean),
+      count = sapply(obs_is_mut_list, sum),
+      coverage = sapply(obs_is_mut_list, length),
+      obs_freq = sapply(obs_is_mut_list, mean),
       EM_converged = em_res$EM_converged,
       EM_steps = em_res$EM_steps,
       fpeval = em_res$fpeval,

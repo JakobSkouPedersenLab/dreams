@@ -1,27 +1,5 @@
-
-# Template for empty output
-empty_cancer_info <- function(mutations_df, X_list) {
-  data.frame(
-    tf_est = 0, tf_min = 0, tf_max = 1,
-    r_est = 0, r_min = 0, r_max = 1,
-    Q_val = 0,
-    ll_A = NA,
-    ll_0 = NA,
-    mutations_tested = nrow(mutations_df),
-    est_mutations_present = 0,
-    total_coverage = sum(sapply(X_list, length)),
-    total_count = 0,
-    EM_converged = NA,
-    EM_steps = NA,
-    fpeval = NA,
-    objfeval = NA,
-    p_val = 1,
-    cancer_detected = FALSE
-  )
-}
-
 prepare_em_input <- function(mutations_df, reads_df, model, beta) {
-  X_list <- list()
+  obs_is_mut_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
 
@@ -43,7 +21,7 @@ prepare_em_input <- function(mutations_df, reads_df, model, beta) {
 
       # Add to list
       X <- mut_reads_ref_alt$obs == alt
-      X_list <- append(X_list, list(X))
+      obs_is_mut_list <- append(obs_is_mut_list, list(X))
 
       # Error rates
       error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
@@ -68,7 +46,7 @@ prepare_em_input <- function(mutations_df, reads_df, model, beta) {
 
   return(
     list(
-      X_list = X_list,
+      obs_is_mut_list = obs_is_mut_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
       error_mut_to_ref_list = error_mut_to_ref_list
     )
@@ -117,7 +95,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
 
   # Prepare inputs for algorithm
   em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = reads_df, model = model, beta = beta)
-  X_list <- em_input$X_list
+  obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
@@ -125,8 +103,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
   if (nrow(mutations_df) == 0) {
     return(
       list(
-        # TODO: Check behavior of empty_cancer_info()
-        cancer_info = empty_cancer_info(mutations_df, X_list),
+        cancer_info = data.frame(),
         mutation_info = data.frame()
       )
     )
@@ -134,7 +111,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
 
   # EM algorithm
   em_res <- get_em_parameter_estimates(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     use_warp_speed = use_warp_speed
@@ -143,7 +120,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
   # Confidence intervals
   if (calculate_confidence_intervals) {
     tf_CI <- get_tf_CI(
-      X_list = X_list,
+      obs_is_mut_list = obs_is_mut_list,
       error_mut_to_ref_list = error_mut_to_ref_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
       r_est = em_res$r_est,
@@ -151,7 +128,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
       alpha = alpha
     )
     r_CI <- get_r_CI(
-      X_list = X_list,
+      obs_is_mut_list = obs_is_mut_list,
       error_mut_to_ref_list = error_mut_to_ref_list,
       error_ref_to_mut_list = error_ref_to_mut_list,
       r_est = em_res$r_est,
@@ -165,7 +142,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
 
   # Test significance
   ll_0 <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = 0,
@@ -173,7 +150,7 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
   )
 
   ll_A <- log_likelihood(
-    X_list = X_list,
+    obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = em_res$r_est,
@@ -193,10 +170,10 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
       Q_val = Q_val,
       ll_A = ll_A,
       ll_0 = ll_0,
-      mutations_tested = length(X_list),
+      mutations_tested = length(obs_is_mut_list),
       est_mutations_present = sum(em_res$P_mut_is_present),
-      total_coverage = sum(sapply(X_list, length)),
-      total_count = sum(sapply(X_list, sum)),
+      total_coverage = sum(sapply(obs_is_mut_list, length)),
+      total_count = sum(sapply(obs_is_mut_list, sum)),
       EM_converged = em_res$EM_converged,
       EM_steps = em_res$EM_steps,
       fpeval = em_res$fpeval,
@@ -212,9 +189,9 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
       data.frame(
         P_mut_is_present = em_res$P_mut_is_present,
         exp_count = sapply(error_ref_to_mut_list, sum),
-        count = sapply(X_list, sum),
-        coverage = sapply(X_list, length),
-        obs_freq = sapply(X_list, mean)
+        count = sapply(obs_is_mut_list, sum),
+        coverage = sapply(obs_is_mut_list, length),
+        obs_freq = sapply(obs_is_mut_list, mean)
       )
     )
 
