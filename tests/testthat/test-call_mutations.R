@@ -48,6 +48,50 @@ test_that("Small example", {
 })
 
 
+test_that("Snapshot", {
+  three_mutations_df <-
+    data.frame(
+      CHROM = c("chr1", "chr2", "chr3"),
+      POS = c(10, 13, 17),
+      REF = "A",
+      ALT = "T"
+    )
+
+  # Reads on Mut 1,2 - No reads on Mut 3 - And random read
+  cov_1 = 17
+  count_1 = 1
+  cov_2 = 43
+  count_2 = 3
+
+  some_reads_df <-
+    data.frame(
+      chr =
+        c(
+          rep("chr1", cov_1),
+          rep("chr2", cov_2)
+        ),
+      genomic_pos =
+        c(
+          rep(10, cov_1),
+          rep(13, cov_2)
+        ),
+      ref = "A",
+      obs =
+        c(
+          rep("A", cov_1 - count_1), rep("T", count_1),
+          rep("A", cov_2 - count_2), rep("T", count_2)
+        )
+    )
+
+  model_path <- system.file("extdata", "model_test.h5", package = "dreams")
+  model <- keras::load_model_hdf5(model_path)
+
+  res <- call_mutations(mutations_df = three_mutations_df, all_reads = some_reads_df, model = model, beta = 0.01, alpha = 0.05)
+
+  expect_snapshot(res)
+})
+
+
 
 
 
@@ -81,7 +125,6 @@ observed_mut_pos <- 1 - rbinom(mut_reads, 1, err_mut_to_ref[-(1:ref_reads)])
 sample_mutations <- c(observed_ref_pos, observed_mut_pos)
 
 # Do simple test
-em_test_mutation_old(sample_mutations, err_ref_to_mut, err_mut_to_ref, use_warp_speed = TRUE)
 em_test_mutation(sample_mutations, err_ref_to_mut, err_mut_to_ref, use_warp_speed = TRUE)
 
 
@@ -111,7 +154,7 @@ em_sim <- function(n, max_err, tf, use_warp_speed) {
 
 # Simulate and estimate tf using fast algorithm
 tf <- 0.002
-max_err = 0.001
+max_err <- 0.001
 fast_em_sim_res <- bind_rows(replicate(1, em_sim(n = 1000, max_err = max_err, tf = tf, use_warp_speed = TRUE), simplify = FALSE))
 
 hist(fast_em_sim_res$tumor_freq, breaks = 50, freq = FALSE)
@@ -178,4 +221,3 @@ plot(em_compare_sim_res$EM_steps_fast, em_compare_sim_res$EM_steps_slow)
 abline(a = 0, b = 1)
 
 par(mfrow = c(1, 1))
-

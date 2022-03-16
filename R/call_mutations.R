@@ -196,50 +196,44 @@ call_mutations <- function(mutations_df, all_reads, model, beta, alpha = 0.05, u
     return(data.frame())
   }
 
+  # Prepare EM input
+  em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = all_reads, model = model, beta = beta)
+
+  X_list <- em_input$X_list
+  error_ref_to_mut_list <- em_input$error_ref_to_mut_list
+  error_mut_to_ref_list <- em_input$error_mut_to_ref_list
+
   for (i in 1:nrow(mutations_df)) {
+    # Mutation information
     chr <- mutations_df$chr[i]
     genomic_pos <- as.numeric(as.character(mutations_df$genomic_pos[i]))
     ref <- mutations_df$ref[i]
     alt <- mutations_df$alt[i]
 
-    reads <- all_reads %>% filter(chr == !!chr, genomic_pos == !!genomic_pos)
-    full_coverage <- nrow(reads)
+    # Read information
+    sample_mutations <- X_list[[i]]
+    error_ref_to_mut <- error_ref_to_mut_list[[i]]
+    error_mut_to_ref <- error_mut_to_ref_list[[i]]
 
-    # Prepare EM input
-    em_input <- prepare_em_input(mutations_df = mutations_df[i, ], reads_df = reads, model = model, beta = beta)
+    full_coverage <- all_reads %>%
+      filter(chr == !!chr, genomic_pos == !!genomic_pos) %>%
+      nrow()
 
-    X_list <- em_input$X_list
-    error_ref_to_mut_list <- em_input$error_ref_to_mut_list
-    error_mut_to_ref_list <- em_input$error_mut_to_ref_list
-
-
-    # if no reads cover position, skip to next mutation
-    # TODO
-    if (nrow(reads) == 0) {
-      new_row <- data.frame(
-        chr = chr, pos = genomic_pos, ref = ref, alt = alt,
-        tf_est = 0, p_val = 1,
-        EM_converged = FALSE, EM_steps = 0, fpeval = 0, objfeval = 0,
-        count = n_mut, exp_count = NA,
-        coverage = nrow(reads_ref_alt), full_coverage = full_coverage,
-        obs_freq = n_mut / nrow(reads_ref_alt),
-        Q_val = 0, ll_A = 0, ll_0 = 0,
-        mutation_detected = FALSE
-      )
-      res_df <- rbind(res_df, new_row)
-      next
-    }
 
     # No reads reads supporting reference or mutation
     # TODO
+    n_mut <- sum(sample_mutations)
+    coverage <- length(sample_mutations)
+    n_ref <- coverage - n_mut
+
     if (n_ref == 0 | n_mut == 0) {
       new_row <- data.frame(
         chr = chr, pos = genomic_pos, ref = ref, alt = alt,
         tf_est = 0, p_val = 1,
         EM_converged = FALSE, EM_steps = 0, fpeval = 0, objfeval = 0,
         count = n_mut, exp_count = NA,
-        coverage = nrow(reads_ref_alt), full_coverage = full_coverage,
-        obs_freq = n_mut / nrow(reads_ref_alt),
+        coverage = coverage, full_coverage = full_coverage,
+        obs_freq = n_mut / coverage,
         Q_val = 0, ll_A = 0, ll_0 = 0,
         mutation_detected = FALSE
       )
@@ -247,14 +241,10 @@ call_mutations <- function(mutations_df, all_reads, model, beta, alpha = 0.05, u
       next
     }
 
-    sample_mutations <- X_list[[1]]
-    error_ref_to_mut_norm <- error_ref_to_mut_list[[1]]
-    error_mut_to_ref_norm <- error_mut_to_ref_list[[1]]
-
 
     ##### EM Log-lik
 
-    em_res <- em_test_mutation(sample_mutations, error_ref_to_mut_norm, error_mut_to_ref_norm, use_warp_speed)
+    em_res <- em_test_mutation(sample_mutations, error_ref_to_mut, error_mut_to_ref, use_warp_speed)
 
     new_row <- data.frame(
       chr = chr, pos = genomic_pos, ref = ref, alt = alt,
@@ -263,11 +253,11 @@ call_mutations <- function(mutations_df, all_reads, model, beta, alpha = 0.05, u
       Q_val = em_res$Q_val,
       ll_A = em_res$ll_A,
       ll_0 = em_res$ll_0,
-      exp_count = sum(error_ref_to_mut_norm),
-      count = n_mut, # TODO: sapply(X_list, sum),
-      coverage = nrow(reads_ref_alt), # TODO: sapply(X_list, length),
+      exp_count = sum(error_ref_to_mut),
+      count = n_mut, # TODO: sapply(sample_mutations, sum),
+      coverage = length(sample_mutations),
       full_coverage = full_coverage,
-      obs_freq = sapply(X_list, mean),
+      obs_freq = mean(sample_mutations),
       EM_converged = em_res$EM_converged,
       EM_steps = em_res$EM_steps,
       fpeval = em_res$fpeval,
