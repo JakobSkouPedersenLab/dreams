@@ -179,11 +179,11 @@ run_turbo_em <- function(X_list, error_mut_to_ref_list, error_ref_to_mut_list) {
     pconstr = function(par) {
       lower <- c(0, 0)
       upper <- c(2, 1)
-      is_in_parameter_space <- all(lower < par & par < upper)
+      is_in_parameter_space <- all(lower <= par & par <= upper)
       return(is_in_parameter_space)
     },
     project = function(par) {
-      par_project <- pmax(1e-8, pmin(par, c(2 - 1e-8, 1 - 1e-8)))
+      par_project <- pmax(1e-8, pmin(par, c(2, 1)))
       return(par_project)
     },
     method = "squarem",

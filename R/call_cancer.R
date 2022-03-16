@@ -125,7 +125,8 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
   if (nrow(mutations_df) == 0) {
     return(
       list(
-        cancer_info = empty_cancer_info(mutations_df, em_input),
+        # TODO: Check behavior of empty_cancer_info()
+        cancer_info = empty_cancer_info(mutations_df, X_list),
         mutation_info = data.frame()
       )
     )

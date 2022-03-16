@@ -143,7 +143,6 @@ test_that("Only mutants reads", {
 
   # Expect no error
   expect_error(call_cancer(mutations_df = one_mutations_df, reads_df = observed_mutation_read_df, model = model, beta = 1), NA)
-
 })
 
 test_that("One mutation - no reads", {
@@ -268,7 +267,7 @@ test_that("Small example", {
   expect_equal(res$mutation_info$coverage, c(2, 3, 0))
 })
 
-test_that("Mutation with no data should not change output", {
+test_that("Adding mutation with no data should not change output", {
   one_mutations_df <-
     data.frame(
       CHROM = "chr1",
