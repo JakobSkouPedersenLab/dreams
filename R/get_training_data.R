@@ -11,7 +11,7 @@
 #'
 #' @export
 #' @return \code{data.frame} with training data for a bam file
-#' @seealso [train_model()] Function for training model
+#' @seealso [train_dreams_model()] Function for training model
 get_training_data <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,

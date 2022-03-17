@@ -7,12 +7,12 @@ test_that("Invalid mutations_df", {
     )
 
   expect_error(
-    call_cancer(mutations_df = mutations_no_alt_df, reads_df = data.frame(), model = NULL, beta = NULL),
+    call_cancer(mutations_df = mutations_no_alt_df, read_positions_df = data.frame(), model = NULL, beta = NULL),
     "mutations_df should have the columns .*"
   )
 })
 
-test_that("Invalid reads_df", {
+test_that("Invalid read_positions_df", {
   mutations_df <-
     data.frame(
       CHROM = "chr1",
@@ -28,8 +28,8 @@ test_that("Invalid reads_df", {
   )
 
   expect_error(
-    call_cancer(mutations_df = mutations_df, reads_df = reads_no_pos_df, model = NULL, beta = NULL),
-    "reads_df should have the columns \\['chr', genomic_pos', 'ref, 'obs'\\]"
+    call_cancer(mutations_df = mutations_df, read_positions_df = reads_no_pos_df, model = NULL, beta = NULL),
+    "read_positions_df should have the columns \\['chr', genomic_pos', 'ref, 'obs'\\]"
   )
 })
 
@@ -42,7 +42,7 @@ test_that("Empty call", {
       ALT = numeric()
     )
 
-  empty_reads_df <-
+  empty_read_positions_df <-
     data.frame(
       chr = numeric(),
       genomic_pos = numeric(),
@@ -50,7 +50,7 @@ test_that("Empty call", {
       obs = numeric()
     )
 
-  res <- call_cancer(mutations_df = empty_mutations_df, reads_df = empty_reads_df, model = NULL, beta = NULL)
+  res <- call_cancer(mutations_df = empty_mutations_df, read_positions_df = empty_read_positions_df, model = NULL, beta = NULL)
 
   expect_equal(res$mutation_info, data.frame())
   expect_equal(res$cancer_info, data.frame())
@@ -58,7 +58,7 @@ test_that("Empty call", {
 
 test_that("Equal columns in simple and empty calls", {
   # Empty reads
-  empty_reads_df <-
+  empty_read_positions_df <-
     data.frame(
       chr = numeric(),
       genomic_pos = numeric(),
@@ -79,11 +79,11 @@ test_that("Equal columns in simple and empty calls", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  one_mutation_no_reads_res <- call_cancer(mutations_df = one_mutations_df, reads_df = empty_reads_df, model = model, beta = 0.01)
+  one_mutation_no_reads_res <- call_cancer(mutations_df = one_mutations_df, read_positions_df = empty_read_positions_df, model = model, beta = 0.01)
 
 
   # One mutation with no count
-  no_count_reads_df <-
+  no_count_read_positions_df <-
     data.frame(
       chr = "chr1",
       genomic_pos = 10,
@@ -91,10 +91,10 @@ test_that("Equal columns in simple and empty calls", {
       obs = "A"
     )
 
-  one_mutation_no_count_res <- call_cancer(mutations_df = one_mutations_df, reads_df = no_count_reads_df, model = model, beta = 0.01)
+  one_mutation_no_count_res <- call_cancer(mutations_df = one_mutations_df, read_positions_df = no_count_read_positions_df, model = model, beta = 0.01)
 
   # One mutation with one count
-  one_count_reads_df <-
+  one_count_read_positions_df <-
     data.frame(
       chr = "chr1",
       genomic_pos = 10,
@@ -102,7 +102,7 @@ test_that("Equal columns in simple and empty calls", {
       obs = c("A", "T")
     )
 
-  one_mutation_one_count_res <- call_cancer(mutations_df = one_mutations_df, reads_df = one_count_reads_df, model = model, beta = 0.01)
+  one_mutation_one_count_res <- call_cancer(mutations_df = one_mutations_df, read_positions_df = one_count_read_positions_df, model = model, beta = 0.01)
 
 
   expect_equal(colnames(one_mutation_no_reads_res$cancer_info), colnames(one_mutation_no_count_res$cancer_info))
@@ -135,7 +135,7 @@ test_that("Only mutants reads", {
   model <- keras::load_model_hdf5(model_path)
 
   # Expect no error
-  expect_error(call_cancer(mutations_df = one_mutations_df, reads_df = observed_mutation_read_df, model = model, beta = 1), NA)
+  expect_error(call_cancer(mutations_df = one_mutations_df, read_positions_df = observed_mutation_read_df, model = model, beta = 1), NA)
 })
 
 test_that("One mutation - no reads", {
@@ -147,7 +147,7 @@ test_that("One mutation - no reads", {
       ALT = "T"
     )
 
-  empty_reads_df <-
+  empty_read_positions_df <-
     data.frame(
       chr = numeric(),
       genomic_pos = numeric(),
@@ -158,7 +158,7 @@ test_that("One mutation - no reads", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  res <- call_cancer(mutations_df = one_mutations_df, reads_df = empty_reads_df, model = model, beta = 0.01)
+  res <- call_cancer(mutations_df = one_mutations_df, read_positions_df = empty_read_positions_df, model = model, beta = 0.01)
 
   # Cancer info
   expect_equal(res$cancer_info$mutations_tested, 1)
@@ -185,7 +185,7 @@ test_that("Two mutations - one read in another position", {
       ALT = "T"
     )
 
-  some_reads_df <-
+  some_read_positions_df <-
     data.frame(
       chr = "chr3",
       genomic_pos = 10,
@@ -196,7 +196,7 @@ test_that("Two mutations - one read in another position", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  res <- call_cancer(mutations_df = two_mutations_df, reads_df = some_reads_df, model = model, beta = 1)
+  res <- call_cancer(mutations_df = two_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 1)
 
   # Cancer info
   expect_equal(res$cancer_info$mutations_tested, 2)
@@ -221,7 +221,7 @@ test_that("Small example", {
     )
 
   # Reads on Mut 1,2 - No reads on Mut 3 - And random read
-  some_reads_df <-
+  some_read_positions_df <-
     data.frame(
       chr =
         c(
@@ -247,7 +247,7 @@ test_that("Small example", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  res <- call_cancer(mutations_df = three_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01)
+  res <- call_cancer(mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01)
 
   # Cancer info
   expect_equal(res$cancer_info$mutations_tested, 3)
@@ -281,7 +281,7 @@ test_that("Adding mutation with no data should not change output", {
     )
 
   # Reads on Mut 1,2 - No reads on Mut 3 - And random read
-  some_reads_df <-
+  some_read_positions_df <-
     data.frame(
       chr = "chr1",
       genomic_pos = 10,
@@ -295,8 +295,8 @@ test_that("Adding mutation with no data should not change output", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  res_one_mutations <- call_cancer(mutations_df = one_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01)
-  res_two_mutations <- call_cancer(mutations_df = two_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01)
+  res_one_mutations <- call_cancer(mutations_df = one_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01)
+  res_two_mutations <- call_cancer(mutations_df = two_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01)
 
   # Is cancer results the same?
   expect_equal(res_one_mutations$cancer_info$tf_est, res_two_mutations$cancer_info$tf_est)

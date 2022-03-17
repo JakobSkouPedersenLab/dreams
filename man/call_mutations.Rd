@@ -6,7 +6,7 @@
 \usage{
 call_mutations(
   mutations_df,
-  reads_df,
+  read_positions_df,
   model,
   beta,
   alpha = 0.05,
@@ -17,9 +17,9 @@ call_mutations(
 \arguments{
 \item{mutations_df}{A \code{\link[=data.frame]{data.frame()}} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
 
-\item{reads_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions. TODO: Add function}
+\item{read_positions_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions. See \code{\link[=get_read_positions_from_BAM]{get_read_positions_from_BAM()}}}
 
-\item{model}{A dreams model. See \code{\link[=train_model]{train_model()}}.}
+\item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
 
 \item{beta}{Down sampling parameter from (TODO: Link)}
 
@@ -34,8 +34,8 @@ call_mutations(
 }
 \description{
 This function evaluate the presence (calls) of individual mutations from a predefined list.
-TODO: Align call_cancer and call_mutation
+TODO: Add describeIn instead
 }
 \seealso{
-\code{\link[=call_cancer]{call_cancer()}}, \code{\link[=train_model]{train_model()}}
+\code{\link[=call_cancer]{call_cancer()}}, \code{\link[=train_dreams_model]{train_dreams_model()}}
 }

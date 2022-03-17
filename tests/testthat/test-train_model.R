@@ -51,7 +51,7 @@ test_that("Train model example", {
 
   training_data <- read.csv(read_example_training_data) %>% select(ref, obs)
 
-  model <- train_model(
+  model <- train_dreams_model(
     training_data = training_data,
     model_features = c("ref"),
     layers = c(8, 4, 2),
@@ -75,7 +75,7 @@ test_that("Train model example with early stopping", {
 
   training_data <- read.csv(read_example_training_data) %>% select(ref, obs)
 
-  model <- train_model(
+  model <- train_dreams_model(
     training_data = training_data,
     model_features = c("ref"),
     layers = c(8, 4, 2),
@@ -99,7 +99,7 @@ test_that("Train model example with several feature types", {
 
   training_data <- read.csv(read_example_training_data) %>% select(ref, read_index, trinucleotide_ctx, obs)
 
-  model <- train_model(
+  model <- train_dreams_model(
     training_data = training_data,
     model_features = c("ref", "read_index", "trinucleotide_ctx"),
     layers = c(8, 4, 2),
@@ -122,7 +122,7 @@ test_that("Train model example with one layer", {
 
   training_data <- read.csv(read_example_training_data) %>% select(ref, read_index, trinucleotide_ctx, obs)
 
-  model <- train_model(
+  model <- train_dreams_model(
     training_data = training_data,
     model_features = c("ref", "read_index", "trinucleotide_ctx"),
     layers = c(8),
@@ -146,7 +146,7 @@ test_that("simple example", {
   training_data = data.frame(ref = c("A", "A", "A", "A"),
                              obs = c("A", "C", "G", "T"))
 
-  model <- train_model(
+  model <- train_dreams_model(
     training_data = training_data,
     model_features = c("ref"),
     layers = c(8, 4, 2),

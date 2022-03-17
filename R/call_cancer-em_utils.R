@@ -1,4 +1,4 @@
-prepare_em_input <- function(mutations_df, reads_df, model, beta) {
+prepare_em_input <- function(mutations_df, read_positions_df, model, beta) {
   obs_is_mut_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
@@ -11,7 +11,7 @@ prepare_em_input <- function(mutations_df, reads_df, model, beta) {
       alt <- mutations_df[i, "alt"]
 
       mut_reads_ref_alt <-
-        reads_df %>%
+        read_positions_df %>%
         filter(
           # Filter reads positions to mutation
           .data$chr == !!chr, .data$genomic_pos == !!genomic_pos,

@@ -39,5 +39,5 @@ get_training_data(
 Extract training data from BAM files
 }
 \seealso{
-\code{\link[=train_model]{train_model()}} Function for training model
+\code{\link[=train_dreams_model]{train_dreams_model()}} Function for training model
 }

@@ -6,7 +6,7 @@
 \usage{
 call_cancer(
   mutations_df,
-  reads_df,
+  read_positions_df,
   model,
   beta,
   alpha = 0.05,
@@ -17,9 +17,9 @@ call_cancer(
 \arguments{
 \item{mutations_df}{A \code{\link[=data.frame]{data.frame()}} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
 
-\item{reads_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions.}
+\item{read_positions_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions. See \code{\link[=get_read_positions_from_BAM]{get_read_positions_from_BAM()}}}
 
-\item{model}{A dreams model. See \code{\link[=train_model]{train_model()}}.}
+\item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
 
 \item{beta}{Down sampling parameter from (TODO: Link)}
 
@@ -40,5 +40,5 @@ A \code{list()} with:
 This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.
 }
 \seealso{
-\code{\link[=call_mutations]{call_mutations()}}, \code{\link[=train_model]{train_model()}}
+\code{\link[=call_mutations]{call_mutations()}}, \code{\link[=train_dreams_model]{train_dreams_model()}}
 }

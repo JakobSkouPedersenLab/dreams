@@ -3,8 +3,8 @@
 #' @description This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.
 #'
 #' @param mutations_df A [data.frame()] with candidate mutations (SNVs) (chromosome, positions, reference and alternative)
-#' @param reads_df A [data.frame()] with read-positions.
-#' @param model A dreams model. See [train_model()].
+#' @param read_positions_df A [data.frame()] with read-positions. See [get_read_positions_from_BAM()]
+#' @param model A dreams model. See [train_dreams_model()].
 #' @param beta Down sampling parameter from (TODO: Link)
 #' @param alpha Alpha-level used for testing and confidence intervals. Default is 0.05.
 #' @param use_turboem Logical. Should [turboEM::turboem()] be used for EM algorithm? Default is TRUE.
@@ -16,10 +16,10 @@
 #'   \item{cancer_info}{A [data.frame()] with results for cancer calling across all mutations}
 #'   \item{mutation_info}{A [data.frame()] with information about the individual mutations}
 #'
-#' @seealso [call_mutations()], [train_model()]
+#' @seealso [call_mutations()], [train_dreams_model()]
 #'
 #' @export
-call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
+call_cancer <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(
@@ -47,12 +47,12 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
 
   # Stop if reads do not have the expected columns
   reads_expected_columns <- c("chr", "genomic_pos", "ref", "obs")
-  if (!all(reads_expected_columns %in% colnames(reads_df))) {
-    stop("reads_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
+  if (!all(reads_expected_columns %in% colnames(read_positions_df))) {
+    stop("read_positions_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
   }
 
   # Prepare inputs for algorithm
-  em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = reads_df, model = model, beta = beta)
+  em_input <- prepare_em_input(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta)
   obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
