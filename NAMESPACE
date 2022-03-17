@@ -2,6 +2,7 @@
 
 export("%>%")
 export(call_cancer)
+export(call_mutations)
 export(get_training_data)
 export(train_model)
 import(dplyr)

@@ -11,31 +11,34 @@ call_cancer(
   beta,
   alpha = 0.05,
   calculate_confidence_intervals = FALSE,
-  use_warp_speed = TRUE
+  use_turboem = TRUE
 )
 }
 \arguments{
-\item{mutations_df}{A \code{data.frame()} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
+\item{mutations_df}{A \code{\link[=data.frame]{data.frame()}} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
 
-\item{reads_df}{A \code{data.frame()} with read-positions}
+\item{reads_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions.}
 
-\item{model}{A dreams model (TODO: Link)}
+\item{model}{A dreams model. See \code{\link[=train_model]{train_model()}}.}
 
 \item{beta}{Down sampling parameter from (TODO: Link)}
 
-\item{alpha}{Alpha-level used for testing and confidence intervals. . Default is 0.05.}
+\item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
-\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated?. Default is FALSE.}
-
-\item{use_warp_speed}{Logical. Should turboEM be used for EM algorithm? Default is TRUE.
+\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.
 
 TODO: Make sub list of items in data.frames}
+
+\item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
 }
 \value{
 A \code{list()} with:
-\item{cancer_info}{A \code{data.frame()} with results for cancer calling across all mutations}
-\item{mutation_info}{A \code{data.frame()} with information about the individual mutations}
+\item{cancer_info}{A \code{\link[=data.frame]{data.frame()}} with results for cancer calling across all mutations}
+\item{mutation_info}{A \code{\link[=data.frame]{data.frame()}} with information about the individual mutations}
 }
 \description{
-Call cancer from read positions
+This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.
+}
+\seealso{
+\code{\link[=call_mutations]{call_mutations()}}, \code{\link[=train_model]{train_model()}}
 }

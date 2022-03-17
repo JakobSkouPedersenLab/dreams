@@ -53,22 +53,11 @@ test_that("Empty call", {
   res <- call_cancer(mutations_df = empty_mutations_df, reads_df = empty_reads_df, model = NULL, beta = NULL)
 
   expect_equal(res$mutation_info, data.frame())
-  expect_equal(res$cancer_info$mutations_tested, 0)
-  expect_equal(res$cancer_info$total_coverage, 0)
-  expect_equal(res$cancer_info$p_val, 1)
-  expect_equal(res$cancer_info$EM_converged, NA)
+  expect_equal(res$cancer_info, data.frame())
 })
 
-test_that("Equal columns in simple and empty call", {
-  # Empty call
-  empty_mutations_df <-
-    data.frame(
-      CHROM = numeric(),
-      POS = numeric(),
-      REF = numeric(),
-      ALT = numeric()
-    )
-
+test_that("Equal columns in simple and empty calls", {
+  # Empty reads
   empty_reads_df <-
     data.frame(
       chr = numeric(),
@@ -77,9 +66,8 @@ test_that("Equal columns in simple and empty call", {
       obs = numeric()
     )
 
-  empty_res <- call_cancer(mutations_df = empty_mutations_df, reads_df = empty_reads_df, model = NULL, beta = NULL)
+  # One mutation with no reads
 
-  # One mutation with no count
   one_mutations_df <-
     data.frame(
       CHROM = "chr1",
@@ -88,6 +76,13 @@ test_that("Equal columns in simple and empty call", {
       ALT = "T"
     )
 
+  model_path <- system.file("extdata", "model_test.h5", package = "dreams")
+  model <- keras::load_model_hdf5(model_path)
+
+  one_mutation_no_reads_res <- call_cancer(mutations_df = one_mutations_df, reads_df = empty_reads_df, model = model, beta = 0.01)
+
+
+  # One mutation with no count
   no_count_reads_df <-
     data.frame(
       chr = "chr1",
@@ -96,11 +91,7 @@ test_that("Equal columns in simple and empty call", {
       obs = "A"
     )
 
-
-  model_path <- system.file("extdata", "model_test.h5", package = "dreams")
-  model <- keras::load_model_hdf5(model_path)
-
-  no_count_res <- call_cancer(mutations_df = one_mutations_df, reads_df = no_count_reads_df, model = model, beta = 0.01)
+  one_mutation_no_count_res <- call_cancer(mutations_df = one_mutations_df, reads_df = no_count_reads_df, model = model, beta = 0.01)
 
   # One mutation with one count
   one_count_reads_df <-
@@ -111,14 +102,16 @@ test_that("Equal columns in simple and empty call", {
       obs = c("A", "T")
     )
 
-  one_count_res <- call_cancer(mutations_df = one_mutations_df, reads_df = one_count_reads_df, model = model, beta = 0.01)
+  one_mutation_one_count_res <- call_cancer(mutations_df = one_mutations_df, reads_df = one_count_reads_df, model = model, beta = 0.01)
 
 
-  expect_equal(colnames(empty_res$cancer_info), colnames(no_count_res$cancer_info))
-  expect_equal(colnames(empty_res$cancer_info), colnames(one_count_res$cancer_info))
-  expect_equal(colnames(no_count_res$cancer_info), colnames(one_count_res$cancer_info))
+  expect_equal(colnames(one_mutation_no_reads_res$cancer_info), colnames(one_mutation_no_count_res$cancer_info))
+  expect_equal(colnames(one_mutation_no_reads_res$cancer_info), colnames(one_mutation_one_count_res$cancer_info))
+  expect_equal(colnames(one_mutation_no_count_res$cancer_info), colnames(one_mutation_one_count_res$cancer_info))
 
-  expect_equal(colnames(no_count_res$mutation_info), colnames(one_count_res$mutation_info))
+  expect_equal(colnames(one_mutation_no_reads_res$mutation_info), colnames(one_mutation_no_count_res$mutation_info))
+  expect_equal(colnames(one_mutation_no_reads_res$mutation_info), colnames(one_mutation_one_count_res$mutation_info))
+  expect_equal(colnames(one_mutation_no_count_res$mutation_info), colnames(one_mutation_one_count_res$mutation_info))
 })
 
 test_that("Only mutants reads", {
@@ -143,7 +136,6 @@ test_that("Only mutants reads", {
 
   # Expect no error
   expect_error(call_cancer(mutations_df = one_mutations_df, reads_df = observed_mutation_read_df, model = model, beta = 1), NA)
-
 })
 
 test_that("One mutation - no reads", {
@@ -268,7 +260,7 @@ test_that("Small example", {
   expect_equal(res$mutation_info$coverage, c(2, 3, 0))
 })
 
-test_that("Mutation with no data should not change output", {
+test_that("Adding mutation with no data should not change output", {
   one_mutations_df <-
     data.frame(
       CHROM = "chr1",
