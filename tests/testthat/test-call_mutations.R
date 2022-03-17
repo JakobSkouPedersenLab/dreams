@@ -162,7 +162,7 @@ test_that("Small example", {
 })
 
 
-test_that("Snapshot of bigger example", {
+test_that("Bigger example", {
   three_mutations_df <-
     data.frame(
       CHROM = c("chr1", "chr2", "chr3"),
@@ -204,15 +204,17 @@ test_that("Snapshot of bigger example", {
     mutations_df = three_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05,
     calculate_confidence_interval = TRUE
   )
-  expect_snapshot(res)
 
   slow_res <- call_mutations(
     mutations_df = three_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05,
     use_turboem = FALSE,
     calculate_confidence_interval = TRUE
   )
-  expect_snapshot(slow_res)
 
   expect_equal(slow_res %>% select(tf_est, tf_min, tf_min, p_val), res %>% select(tf_est, tf_min, tf_min, p_val))
+
+  # Snap shots
+  # expect_snapshot(res)
+  # expect_snapshot(slow_res)
 })
 
