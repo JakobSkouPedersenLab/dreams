@@ -5,9 +5,9 @@ get_starting_value_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref
   tf_guess <- max(1e-8, excess_signal * 2)
 
   # Improve guess if value close to 0 is better
-  ll_guess <- log_likelihood_vc(tf_guess, obs_is_mut, error_ref_to_mut = error_ref_to_mut, error_mut_to_ref = error_mut_to_ref)
-  ll_eps <- log_likelihood_vc(1e-8, obs_is_mut, error_ref_to_mut = error_ref_to_mut, error_mut_to_ref = error_mut_to_ref)
-  ll_0 <- log_likelihood_vc(0, obs_is_mut, error_ref_to_mut = error_ref_to_mut, error_mut_to_ref = error_mut_to_ref)
+  ll_guess <- log_likelihood(tf = tf_guess, obs_is_mut_list = obs_is_mut, error_ref_to_mut_list = error_ref_to_mut, error_mut_to_ref_list = error_mut_to_ref)
+  ll_eps <- log_likelihood(tf = 1e-8, obs_is_mut_list = obs_is_mut, error_ref_to_mut_list = error_ref_to_mut, error_mut_to_ref_list = error_mut_to_ref)
+  ll_0 <- log_likelihood(tf = 0, obs_is_mut_list = obs_is_mut, error_ref_to_mut_list = error_ref_to_mut, error_mut_to_ref_list = error_mut_to_ref)
 
   # Choose best starting value
   tf_start <- c(tf_guess, 1e-8, 0)[which.max(c(ll_guess, ll_eps, ll_0))]
@@ -17,27 +17,26 @@ get_starting_value_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref
 
 em_update_vc <- function(par, obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
   fixed_r <- 1
-  new_par <- em_update(c(par, fixed_r), list(obs_is_mut), list(error_ref_to_mut), list(error_mut_to_ref))
+  new_par <- em_update(
+    par = c(par, fixed_r),
+    obs_is_mut_list = list(obs_is_mut),
+    error_ref_to_mut_list = list(error_ref_to_mut),
+    error_mut_to_ref_list = list(error_mut_to_ref)
+  )
   return(new_par[1])
 }
 
 em_objective_vc <- function(par, obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
   fixed_r <- 1
-  em_objective(c(par, fixed_r), list(obs_is_mut), list(error_ref_to_mut), list(error_mut_to_ref))
-}
-
-log_likelihood_vc <- function(tf, obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
-  fixed_r <- 1
-  return(log_likelihood(
+  em_objective(
+    par = c(par, fixed_r),
     obs_is_mut_list = list(obs_is_mut),
-    error_mut_to_ref_list = list(error_mut_to_ref),
     error_ref_to_mut_list = list(error_ref_to_mut),
-    r = fixed_r,
-    tf = tf
-  ))
+    error_mut_to_ref_list = list(error_mut_to_ref)
+  )
 }
 
-get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, use_warp_speed, max_it = 5000) {
+get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, use_turboem, max_it = 5000) {
 
   # If no or only mut signal, return simple result:
   observed_mut <- sum(obs_is_mut)
@@ -68,7 +67,7 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
   # Get starting guess for tf
   tf_start <- get_starting_value_vc(obs_is_mut, error_ref_to_mut, error_mut_to_ref)
 
-  if (use_warp_speed) {
+  if (use_turboem) {
 
     # Start speed up version of EM algorithm
     turboem_res <- turboEM::turboem(
@@ -96,7 +95,7 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
         )
     )
 
-    tf_est <- turboem_res$par[1]
+    tf_est <- turboem_res$par[1] # Unpack parameter from array -> vector
     EM_steps <- turboem_res$itr
     fpeval <- turboem_res$fpeval
     objfeval <- turboem_res$objfeval
@@ -105,16 +104,16 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     # Start regular EM algorithm
     EM_converged <- FALSE
     EM_steps <- 0
-    tf <- tf_start
+    tf_i <- tf_start
 
     for (i in 1:max_it) {
       EM_steps <- EM_steps + 1
-      tf_old <- tf
+      tf_old <- tf_i
 
       # Update tf
-      tf <- em_update_vc(par = tf_old, obs_is_mut = obs_is_mut, error_ref_to_mut = error_ref_to_mut, error_mut_to_ref = error_mut_to_ref)
+      tf_i <- em_update_vc(par = tf_old, obs_is_mut = obs_is_mut, error_ref_to_mut = error_ref_to_mut, error_mut_to_ref = error_mut_to_ref)
 
-      if (abs(tf - tf_old) / (tf_old + 1e-8) < 1e-8 & EM_steps >= 5) {
+      if (abs(tf_i - tf_old) / (tf_old + 1e-8) < 1e-8 & EM_steps >= 5) {
         EM_converged <- TRUE
         break
       }
@@ -122,23 +121,22 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
 
     fpeval <- EM_steps
     objfeval <- EM_steps
-    tf_est <- tf
+    tf_est <- tf_i
   }
 
-
   # Check if 0 is better fit
-  ll_0 <- log_likelihood_vc(
-    obs_is_mut = obs_is_mut,
-    error_mut_to_ref = error_mut_to_ref,
-    error_ref_to_mut = error_ref_to_mut,
-    tf = 0
+  ll_0 <- log_likelihood(
+    tf = 0,
+    obs_is_mut_list = obs_is_mut,
+    error_mut_to_ref_list = error_mut_to_ref,
+    error_ref_to_mut_list = error_ref_to_mut
   )
 
-  ll_em <- log_likelihood_vc(
-    obs_is_mut = obs_is_mut,
-    error_mut_to_ref = error_mut_to_ref,
-    error_ref_to_mut = error_ref_to_mut,
-    tf = tf_est
+  ll_em <- log_likelihood(
+    tf = tf_est,
+    obs_is_mut_list = obs_is_mut,
+    error_mut_to_ref_list = error_mut_to_ref,
+    error_ref_to_mut_list = error_ref_to_mut,
   )
 
   if (ll_0 >= ll_em) {

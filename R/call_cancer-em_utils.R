@@ -1,3 +1,58 @@
+prepare_em_input <- function(mutations_df, reads_df, model, beta) {
+  obs_is_mut_list <- list()
+  error_ref_to_mut_list <- list()
+  error_mut_to_ref_list <- list()
+
+  if (nrow(mutations_df) >= 1) {
+    for (i in 1:nrow(mutations_df)) {
+      chr <- mutations_df[i, "chr"]
+      genomic_pos <- mutations_df[i, "genomic_pos"]
+      ref <- mutations_df[i, "ref"]
+      alt <- mutations_df[i, "alt"]
+
+      mut_reads_ref_alt <-
+        reads_df %>%
+        filter(
+          # Filter reads positions to mutation
+          .data$chr == !!chr, .data$genomic_pos == !!genomic_pos,
+          # Filter mutation type (remove N and "other" than ref/alt alleles)
+          .data$obs == !!ref | .data$obs == !!alt
+        )
+
+      # Add to list
+      X <- mut_reads_ref_alt$obs == alt
+      obs_is_mut_list <- append(obs_is_mut_list, list(X))
+
+      # Error rates
+      error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
+      error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+
+      # Pick relevant error rates for ref and alt
+      error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
+      error_ref_to_mut_raw <- error_ref_df[[paste0(alt, "_corrected")]]
+
+      error_mut_to_ref_raw <- error_mut_df[[paste0(ref, "_corrected")]]
+      error_mut_to_mut_raw <- error_mut_df[[paste0(alt, "_corrected")]]
+
+      # Normalize
+      error_ref_to_mut <- error_ref_to_mut_raw / (error_ref_to_ref_raw + error_ref_to_mut_raw)
+      error_mut_to_ref <- error_mut_to_ref_raw / (error_mut_to_ref_raw + error_mut_to_mut_raw)
+
+      # Add to list
+      error_ref_to_mut_list <- append(error_ref_to_mut_list, list(error_ref_to_mut))
+      error_mut_to_ref_list <- append(error_mut_to_ref_list, list(error_mut_to_ref))
+    }
+  }
+
+  return(
+    list(
+      obs_is_mut_list = obs_is_mut_list,
+      error_ref_to_mut_list = error_ref_to_mut_list,
+      error_mut_to_ref_list = error_mut_to_ref_list
+    )
+  )
+}
+
 em_update <- function(par, obs_is_mut_list, error_ref_to_mut_list, error_mut_to_ref_list) {
   # Unpack par
   tf <- par[1]
@@ -203,7 +258,7 @@ run_turbo_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, e
   return(res)
 }
 
-get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, error_mut_to_ref_list, use_warp_speed) {
+get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, error_mut_to_ref_list, use_turboem) {
   observed_mut <- obs_is_mut_list %>%
     sapply(sum) %>%
     sum()
@@ -243,7 +298,7 @@ get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, e
   start_values <- get_starting_values(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
 
   # Run EM algorithm
-  if (use_warp_speed) {
+  if (use_turboem) {
     em_res <- run_turbo_em(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
   } else {
     em_res <- run_full_em(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)

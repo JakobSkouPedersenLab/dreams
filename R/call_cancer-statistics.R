@@ -133,20 +133,24 @@ update_tf <- function(P_Y_given_Z1_list, P_Z1_vec, n_frag_vec) {
   return(tf_new)
 }
 
-log_likelihood <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list, r, tf) {
-  # Input check
+log_likelihood <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list, tf, r = 1) {
+  # Convert to lists if necessary
   if (!is.list(obs_is_mut_list)) {
-    stop("obs_is_mut_list is not a list")
+    obs_is_mut_list <- list(obs_is_mut_list)
   }
   if (!is.list(error_mut_to_ref_list)) {
-    stop("error_mut_to_ref_list is not a list")
+    error_mut_to_ref_list <- list(error_mut_to_ref_list)
   }
   if (!is.list(error_ref_to_mut_list)) {
-    stop("error_ref_to_mut_list is not a list")
+    error_ref_to_mut_list <- list(error_ref_to_mut_list)
   }
+
+  # Check input dimensions
   if (!all(sapply(obs_is_mut_list, length) == sapply(error_mut_to_ref_list, length))) {
     stop("Dimensions of list inputs are not equal")
   }
+
+  # Check model parameters
   if (is.nan(tf) || is.na(tf) || tf < 0 || 1 < (tf / 2)) {
     stop(paste("Illegal value of tf:", tf))
   }
@@ -227,19 +231,19 @@ get_tf_CI <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_l
   }
 
   # Find maximum
-  ll_1 <- log_likelihood(
+  ll_tf_2 <- log_likelihood(
     obs_is_mut_list = obs_is_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     r = r_est,
-    tf = 1
+    tf = 2
   )
-  Q_1 <- -2 * (ll_1 - ll_max)
+  Q_tf_2 <- -2 * (ll_tf_2 - ll_max)
 
-  if (Q_1 <= qchisq(1 - alpha, 1) | tf_est == 1) {
-    tf_max <- 1
+  if (Q_tf_2 <= qchisq(1 - alpha, 1) | tf_est == 2) {
+    tf_max <- 2
   } else {
-    upper_start <- min(tf_est * 2 + 1e-8, 1)
+    upper_start <- min(tf_est * 2 + 1e-8, 2)
     tf_max <- uniroot(function(x) {
       ll_A <- log_likelihood(
         obs_is_mut_list = obs_is_mut_list,
