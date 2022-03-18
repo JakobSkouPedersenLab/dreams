@@ -21,7 +21,6 @@ knitr::opts_chunk$set(
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
 
-The goal of DREAMS is to develop accurate error models for Next-generation sequencing data. The error model can be used for variant calling using the DREAMS-vc method and for calling cancer using the DREAMS-cc method. 
 
 ## Installation
 
