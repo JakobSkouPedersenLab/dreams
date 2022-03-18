@@ -31,7 +31,7 @@ test_that("separate train model example", {
     batch_size = 10,
     epochs = 5,
     model_file_path = "~/Desktop/model.test",
-    log_file_path = "~/Desktop/log.test",
+    #log_file_path = "~/Desktop/log.test",
     decay = 0, min_delta = 0, patience = 0, validation_split = 0.1
   )
 
@@ -40,10 +40,6 @@ test_that("separate train model example", {
     prepared_training_data$features
   )
 
-  keras::save_model_hdf5(
-    object = model,
-    filepath = "inst/extdata/model_test.h5"
-  )
 })
 
 test_that("Train model example", {
