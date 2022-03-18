@@ -60,7 +60,7 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha =
 
   # Add full coverage to mutations
   full_coverage_df <- read_positions_df %>%
-    count(chr, genomic_pos, name = "full_coverage")
+    count(.data$chr, .data$genomic_pos, name = "full_coverage")
 
   mutations_df <- mutations_df %>%
     left_join(full_coverage_df, by = c("chr", "genomic_pos"))
@@ -115,7 +115,7 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha =
     )
     Q_val <- -2 * (ll_0 - ll_A)
     df <- 1
-    p_val <- pchisq(Q_val, df, lower.tail = FALSE)
+    p_val <- stats::pchisq(Q_val, df, lower.tail = FALSE)
 
     # Add result to output
     new_row <- data.frame(
