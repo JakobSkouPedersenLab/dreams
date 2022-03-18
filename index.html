@@ -111,18 +111,20 @@
   
 <span class="co"># Call variants using DREAM-vc</span>
 
-<span class="va">variant_calls</span> <span class="op">=</span> <span class="fu">variant_caller</span><span class="op">(</span>
+<span class="va">variant_calls</span> <span class="op">=</span> <span class="fu">dream_vc</span><span class="op">(</span>
   bam_path <span class="op">=</span> <span class="st">"/path/test_bam_file"</span>,
   positions <span class="op">=</span> <span class="st">"positions_file"</span>,
-  <span class="va">model</span>
+  model <span class="op">=</span> <span class="va">model</span>,
+  <span class="va">...</span>
 <span class="op">)</span>
 
 <span class="co"># Call cancer using DREAM-cc</span>
 
-<span class="va">cancer_calls</span> <span class="op">=</span> <span class="fu">cancer_caller</span><span class="op">(</span>
+<span class="va">cancer_calls</span> <span class="op">=</span> <span class="fu">dream_cc</span><span class="op">(</span>
   bam_path <span class="op">=</span> <span class="st">"/path/test_bam_file"</span>,
   positions <span class="op">=</span> <span class="st">"positions_file"</span>,
-  <span class="va">model</span>
+  model <span class="op">=</span> <span class="va">model</span>,
+  <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
 </div>
 </div>
