@@ -27,7 +27,6 @@ train_model <- function(training_data, layers,
                         model_file_path = NULL, log_file_path = NULL,
                         decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
                         validation_split = 0, ctx3_embed_dim = 3) {
-
   training_data <- prepare_training_data(
     training_data = training_data,
     model_features = model_features
@@ -59,11 +58,13 @@ train_model <- function(training_data, layers,
     log_file_path = log_file_path
   )
 
-  # Save final model
-  keras::save_model_hdf5(
-    object = model,
-    filepath = model_file_path
-  )
+  if (is.null(model_file_path)) {
+    # Save final model
+    keras::save_model_hdf5(
+      object = model,
+      filepath = model_file_path
+    )
+  }
 
   print("DONE TRAINING")
 
@@ -313,7 +314,7 @@ fit_model <- function(features, labels, input_structure,
                       patience,
                       validation_split,
                       model_file_path,
-                      log_file_path) {
+                      log_file_path = NULL) {
   model <- input_structure
 
   LogMetrics <- R6::R6Class(
@@ -346,6 +347,8 @@ fit_model <- function(features, labels, input_structure,
   )
 
 
+
+
   # Callbacks
   # Create a training checkpoint for every 10 epochs
   checkpoint_callback <-
@@ -355,14 +358,23 @@ fit_model <- function(features, labels, input_structure,
       save_freq = 10
     )
 
-  # Log metrics and time
-  logger_callback <- LogMetrics$new(log_path = log_file_path)
 
-  # Collect callback in list
   callback_list <- list(
-    logger_callback,
     checkpoint_callback
   )
+
+  if (is.null(log_file_path)) {
+
+
+    # Log metrics and time
+    logger_callback <- LogMetrics$new(log_path = log_file_path)
+
+    # Collect callback in list
+    callback_list <- list(
+      callback_list,
+      checkpoint_callback
+    )
+  }
 
   # Add early stopping callback
   if (min_delta > 0) {
@@ -376,6 +388,7 @@ fit_model <- function(features, labels, input_structure,
       )
     callback_list <- append(callback_list, early_stopping)
   }
+
 
   print("COMPILE AND TRAIN MODEL")
 

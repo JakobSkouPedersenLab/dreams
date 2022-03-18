@@ -16,7 +16,7 @@ fit_model(
   patience,
   validation_split,
   model_file_path,
-  log_file_path
+  log_file_path = NULL
 )
 }
 \arguments{
