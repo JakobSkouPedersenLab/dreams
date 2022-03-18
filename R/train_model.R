@@ -22,7 +22,7 @@
 #' @export
 #' @family Train model
 #' @seealso [get_training_data()] Function for getting training data
-train_model <- function(training_data, layers,
+train_dreams_model <- function(training_data, layers,
                         model_features, lr, batch_size, epochs,
                         model_file_path = NULL, log_file_path = NULL,
                         decay = 0, min_delta = 0, patience = 0, l2_reg = 0,

@@ -1,25 +1,30 @@
 #' Call mutations from read positions
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' TODO: Align call_cancer and call_mutation
-#' @param mutations_df A [data.frame()] with candidate mutations (SNVs) (chromosome, positions, reference and alternative)
-#' @param reads_df A [data.frame()] with read-positions. TODO: Add function
-#' @param model A dreams model. See [train_model()].
-#' @param beta Down sampling parameter from (TODO: Link)
-#' @param alpha Alpha-level used for testing and confidence intervals. Default is 0.05.
-#' @param use_turboem Logical. Should [turboEM::turboem()] be used for EM algorithm? Default is TRUE.
-#' @param calculate_confidence_interval Logical. Should confidence intervals be calculated? Default is FALSE.
+#' @inheritParams call_cancer
 #'
-#' @return
+#' @return A [data.frame()] with information about the individual mutation calls, including:
+#' \describe{
+#'   \item{chr, genomic_pos}{The genomic position of the mutation.}
+#'   \item{ref, alt}{The reference and alternative allele.}
+#'   \item{EM_converged}{If the EM algorithm converged.}
+#'   \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+#'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
+#'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+#'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'   \item{count}{The count of the alternative allele.}
+#'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+#'   \item{full_coverage}{The total coverage of the position (for reference).}
+#'   \item{obs_freq}{The observed frequency of the alternative allele.}
+#'   \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+#'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+#'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
+#' }
 #'
-#'
-#'
-#'
-#'
-#' @seealso [call_cancer()], [train_model()]
+#' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export
-call_mutations <- function(mutations_df, reads_df, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_interval = FALSE) {
+call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -42,20 +47,20 @@ call_mutations <- function(mutations_df, reads_df, model, beta, alpha = 0.05, us
 
   # Stop if reads do not have the expected columns
   reads_expected_columns <- c("chr", "genomic_pos", "ref", "obs")
-  if (!all(reads_expected_columns %in% colnames(reads_df))) {
-    stop("reads_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
+  if (!all(reads_expected_columns %in% colnames(read_positions_df))) {
+    stop("read_positions_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
   }
 
   # Prepare EM input
-  em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = reads_df, model = model, beta = beta)
+  em_input <- prepare_em_input(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta)
 
   obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
   # Add full coverage to mutations
-  full_coverage_df <- reads_df %>%
-    count(chr, genomic_pos, name = "full_coverage")
+  full_coverage_df <- read_positions_df %>%
+    count(.data$chr, .data$genomic_pos, name = "full_coverage")
 
   mutations_df <- mutations_df %>%
     left_join(full_coverage_df, by = c("chr", "genomic_pos"))
@@ -80,7 +85,7 @@ call_mutations <- function(mutations_df, reads_df, model, beta, alpha = 0.05, us
     )
 
     # Confidence intervals
-    if (calculate_confidence_interval) {
+    if (calculate_confidence_intervals) {
       tf_CI <- get_tf_CI(
         obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
@@ -110,7 +115,7 @@ call_mutations <- function(mutations_df, reads_df, model, beta, alpha = 0.05, us
     )
     Q_val <- -2 * (ll_0 - ll_A)
     df <- 1
-    p_val <- pchisq(Q_val, df, lower.tail = FALSE)
+    p_val <- stats::pchisq(Q_val, df, lower.tail = FALSE)
 
     # Add result to output
     new_row <- data.frame(

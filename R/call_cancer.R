@@ -3,23 +3,48 @@
 #' @description This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.
 #'
 #' @param mutations_df A [data.frame()] with candidate mutations (SNVs) (chromosome, positions, reference and alternative)
-#' @param reads_df A [data.frame()] with read-positions.
-#' @param model A dreams model. See [train_model()].
-#' @param beta Down sampling parameter from (TODO: Link)
+#' @param read_positions_df A [data.frame()] with read-positions. See [get_read_positions_from_BAM()]
+#' @param model A dreams model. See [train_dreams_model()].
+#' @param beta Down sampling parameter from [get_training_data()] for correcting the error-rates from the DREAMS model.
 #' @param alpha Alpha-level used for testing and confidence intervals. Default is 0.05.
 #' @param use_turboem Logical. Should [turboEM::turboem()] be used for EM algorithm? Default is TRUE.
 #' @param calculate_confidence_intervals Logical. Should confidence intervals be calculated? Default is FALSE.
 #'
-#' TODO: Make sub list of items in data.frames
 #' @return
 #' A \code{list()} with:
-#'   \item{cancer_info}{A [data.frame()] with results for cancer calling across all mutations}
-#'   \item{mutation_info}{A [data.frame()] with information about the individual mutations}
+#' \itemize{
+#'   \item \strong{cancer_info} A [data.frame()] with results for cancer calling across all mutations:
+#'     \describe{
+#'       \item{tf_est}{The estiamted tumor fraction (allele fraction).}
+#'       \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+#'       \item{r_est, est_mutations_present}{The estiamted fraction/number of candidate mutations present in the sample.}
+#'       \item{r_min, r_max}{The confidence interval of \code{r_est}.}
+#'       \item{mutations_tested}{Number of candidate mutations tested.}
+#'       \item{total_coverage, total_count}{Total count and coverage across all mutations (only reference and alternative allele(s).}
+#'       \item{mutations_tested}{Number of candidate mutations tested.}
+#'       \item{EM_converged}{If the EM algorithm converged.}
+#'       \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+#'       \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+#'       \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+#'       \item{cancer_detected}{Whether cancer was detected at the supplied alpha level.}
+#'     }
 #'
-#' @seealso [call_mutations()], [train_model()]
+#'   \item \strong{mutation_info} A [data.frame()] with information about the individual mutations:
+#'       \describe{
+#'         \item{chr, genomic_pos}{The genomic position of the mutation.}
+#'         \item{ref, alt}{The reference and alternative allele.}
+#'         \item{P_mut_is_present}{The estimated probability the mutation is present in the sample.}
+#'         \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'         \item{count}{The count of the alternative allele.}
+#'         \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+#'         \item{obs_freq}{The observed frequency of the alternative allele.}
+#'      }
+#'
+#' }
+#' @seealso [call_mutations()], [train_dreams_model()]
 #'
 #' @export
-call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
+call_cancer <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(
@@ -47,12 +72,12 @@ call_cancer <- function(mutations_df, reads_df, model, beta, alpha = 0.05, calcu
 
   # Stop if reads do not have the expected columns
   reads_expected_columns <- c("chr", "genomic_pos", "ref", "obs")
-  if (!all(reads_expected_columns %in% colnames(reads_df))) {
-    stop("reads_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
+  if (!all(reads_expected_columns %in% colnames(read_positions_df))) {
+    stop("read_positions_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
   }
 
   # Prepare inputs for algorithm
-  em_input <- prepare_em_input(mutations_df = mutations_df, reads_df = reads_df, model = model, beta = beta)
+  em_input <- prepare_em_input(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta)
   obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list

@@ -170,13 +170,13 @@ get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
 sample_negative_read_positions <- function(bam_df, n_samples) {
 
   # Sample random reads according to fragment size
-  random_reads_df <-
+  random_read_positions_df <-
     bam_df %>%
     sample_n(size = n_samples, weight = abs(.data$isize), replace = T)
 
   # Sample random negative position per read
   negative_read_positions <-
-    random_reads_df %>%
+    random_read_positions_df %>%
     mutate(
       match_genomic_pos_list = get_match_genomic_pos_list(pos = .data$pos, cigar = .data$cigar, MDtag = .data$MD),
       genomic_pos = map_dbl(.data$match_genomic_pos_list, function(x) sample(x = x, size = 1))

@@ -7,12 +7,12 @@ test_that("Invalid mutations_df", {
     )
 
   expect_error(
-    call_mutations(mutations_df = mutations_no_alt_df, reads_df = data.frame(), model = NULL, beta = NULL),
+    call_mutations(mutations_df = mutations_no_alt_df, read_positions_df = data.frame(), model = NULL, beta = NULL),
     "mutations_df should have the columns .*"
   )
 })
 
-test_that("Invalid reads_df", {
+test_that("Invalid read_positions_df", {
   mutations_df <-
     data.frame(
       CHROM = "chr1",
@@ -28,8 +28,8 @@ test_that("Invalid reads_df", {
   )
 
   expect_error(
-    call_mutations(mutations_df = mutations_df, reads_df = reads_no_pos_df, model = NULL, beta = NULL),
-    "reads_df should have the columns \\['chr', genomic_pos', 'ref, 'obs'\\]"
+    call_mutations(mutations_df = mutations_df, read_positions_df = reads_no_pos_df, model = NULL, beta = NULL),
+    "read_positions_df should have the columns \\['chr', genomic_pos', 'ref, 'obs'\\]"
   )
 })
 
@@ -42,7 +42,7 @@ test_that("Empty call", {
       ALT = numeric()
     )
 
-  empty_reads_df <-
+  empty_read_positions_df <-
     data.frame(
       chr = numeric(),
       genomic_pos = numeric(),
@@ -50,7 +50,7 @@ test_that("Empty call", {
       obs = numeric()
     )
 
-  mutation_calls_df <- call_mutations(mutations_df = empty_mutations_df, reads_df = empty_reads_df, model = NULL, beta = NULL)
+  mutation_calls_df <- call_mutations(mutations_df = empty_mutations_df, read_positions_df = empty_read_positions_df, model = NULL, beta = NULL)
 
   expect_equal(mutation_calls_df, data.frame())
 })
@@ -65,7 +65,7 @@ test_that("Confidence interval", {
     )
 
   # Reads
-  some_reads_df <-
+  some_read_positions_df <-
     data.frame(
       chr = c("chr1", "chr1"),
       genomic_pos =
@@ -78,8 +78,8 @@ test_that("Confidence interval", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  without_ci_df <- call_mutations(mutations_df = one_mutation_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_interval = FALSE)
-  with_ci_df <- call_mutations(mutations_df = one_mutation_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_interval = TRUE)
+  without_ci_df <- call_mutations(mutations_df = one_mutation_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE)
+  with_ci_df <- call_mutations(mutations_df = one_mutation_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = TRUE)
 
   # CI present in result
   expect_true(all(c("tf_min", "tf_max") %in% colnames(without_ci_df)))
@@ -113,7 +113,7 @@ test_that("Only mutants reads", {
   model <- keras::load_model_hdf5(model_path)
 
   # Expect no error
-  expect_error(call_mutations(mutations_df = one_mutations_df, reads_df = observed_mutation_read_df, model = model, beta = 0.01), NA)
+  expect_error(call_mutations(mutations_df = one_mutations_df, read_positions_df = observed_mutation_read_df, model = model, beta = 0.01), NA)
 })
 
 test_that("Small example", {
@@ -126,7 +126,7 @@ test_that("Small example", {
     )
 
   # Reads on Mut 1,2 - No reads on Mut 3 - And random read
-  some_reads_df <-
+  some_read_positions_df <-
     data.frame(
       chr =
         c(
@@ -152,7 +152,7 @@ test_that("Small example", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  mutation_calls_df <- call_mutations(mutations_df = three_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05)
+  mutation_calls_df <- call_mutations(mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05)
 
   # Mutations info
   expect_equal(nrow(mutation_calls_df), 3)
@@ -162,7 +162,7 @@ test_that("Small example", {
 })
 
 
-test_that("Snapshot of bigger example", {
+test_that("Bigger example", {
   three_mutations_df <-
     data.frame(
       CHROM = c("chr1", "chr2", "chr3"),
@@ -177,7 +177,7 @@ test_that("Snapshot of bigger example", {
   cov_2 <- 43
   count_2 <- 3
 
-  some_reads_df <-
+  some_read_positions_df <-
     data.frame(
       chr =
         c(
@@ -201,18 +201,20 @@ test_that("Snapshot of bigger example", {
   model <- keras::load_model_hdf5(model_path)
 
   res <- call_mutations(
-    mutations_df = three_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05,
-    calculate_confidence_interval = TRUE
+    mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
+    calculate_confidence_intervals = TRUE
   )
-  expect_snapshot(res)
 
   slow_res <- call_mutations(
-    mutations_df = three_mutations_df, reads_df = some_reads_df, model = model, beta = 0.01, alpha = 0.05,
+    mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
     use_turboem = FALSE,
-    calculate_confidence_interval = TRUE
+    calculate_confidence_intervals = TRUE
   )
-  expect_snapshot(slow_res)
 
   expect_equal(slow_res %>% select(tf_est, tf_min, tf_min, p_val), res %>% select(tf_est, tf_min, tf_min, p_val))
+
+  # Snap shots
+  # expect_snapshot(res)
+  # expect_snapshot(slow_res)
 })
 

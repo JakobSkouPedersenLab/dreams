@@ -36,17 +36,12 @@ correct_errors_predictions <- function(error_df, beta) {
     )
 }
 
-#' @importFrom modelr add_predictions
 #' @importFrom stats predict
 predict_error_rates <- function(read_positions_df, model, beta) {
 
   # Predict error rates for read positions from trained DREAM model
-
-  # TODO: add modelr
-  # Link: https://rdrr.io/cran/modelr/man/add_predictions.html
-
   if (nrow(read_positions_df) == 0) {
-    prediction <-
+    predictions_df <-
       data.frame(
         A = numeric(),
         T = numeric(),
@@ -54,7 +49,7 @@ predict_error_rates <- function(read_positions_df, model, beta) {
         G = numeric()
       )
   } else {
-    prediction <- model %>%
+    predictions_df <- model %>%
       predict(read_positions_df) %>%
       data.frame() %>%
       rename(
@@ -65,16 +60,11 @@ predict_error_rates <- function(read_positions_df, model, beta) {
       )
   }
 
-
-
-  # TODO: Are ref already available?
-  prediction$ref <- read_positions_df$ref
-
-  corrected_errors <- prediction %>%
-    correct_errors_predictions(beta = beta) %>%
-    select(-.data$ref)
-
-  predicted_errors <- bind_cols(read_positions_df, corrected_errors)
+  # Add predictions to read positions and correct error rates with bea
+  predicted_errors <-
+    read_positions_df %>%
+    bind_cols(predictions_df) %>%
+    correct_errors_predictions(beta = beta)
 
   return(predicted_errors)
 }

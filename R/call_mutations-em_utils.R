@@ -68,6 +68,12 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
   tf_start <- get_starting_value_vc(obs_is_mut, error_ref_to_mut, error_mut_to_ref)
 
   if (use_turboem) {
+    if (!requireNamespace("turboEM", quietly = TRUE)) {
+      stop(
+        "Package \"turboEM\" must be installed to use this function.",
+        call. = FALSE
+      )
+    }
 
     # Start speed up version of EM algorithm
     turboem_res <- turboEM::turboem(
