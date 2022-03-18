@@ -1,4 +1,4 @@
-test_that("Simple example", {
+test_that("Empty call", {
   read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
   reference_path <- system.file("extdata", "ref.fasta", package = "dreams")
 
@@ -10,6 +10,11 @@ test_that("Simple example", {
   )
 
   expect_equal(nrow(no_coverage_df), 0)
+})
+
+test_that("Simple example", {
+  read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
+  reference_path <- system.file("extdata", "ref.fasta", package = "dreams")
 
   two_read_positions_df <- get_read_positions_from_BAM(
     bam_file_path = read_example_bam_file,

@@ -78,8 +78,8 @@ test_that("Confidence interval", {
   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
   model <- keras::load_model_hdf5(model_path)
 
-  without_ci_df <- call_mutations(mutations_df = one_mutation_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_interval = FALSE)
-  with_ci_df <- call_mutations(mutations_df = one_mutation_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_interval = TRUE)
+  without_ci_df <- call_mutations(mutations_df = one_mutation_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE)
+  with_ci_df <- call_mutations(mutations_df = one_mutation_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = TRUE)
 
   # CI present in result
   expect_true(all(c("tf_min", "tf_max") %in% colnames(without_ci_df)))

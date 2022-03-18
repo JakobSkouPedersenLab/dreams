@@ -85,7 +85,7 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha =
     )
 
     # Confidence intervals
-    if (calculate_confidence_interval) {
+    if (calculate_confidence_intervals) {
       tf_CI <- get_tf_CI(
         obs_is_mut_list = obs_is_mut_list,
         error_mut_to_ref_list = error_mut_to_ref_list,
