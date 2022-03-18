@@ -58,6 +58,9 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_mismatch_genomic_pos_list.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_read_positions_from_BAM.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_reference_seq.html</loc>
   </url>
   <url>
@@ -91,6 +94,6 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/strand_correct_umi_features.html</loc>
   </url>
   <url>
-    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/train_model.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/train_dreams_model.html</loc>
   </url>
 </urlset>

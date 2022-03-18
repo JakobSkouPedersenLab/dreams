@@ -62,7 +62,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">call_cancer</span><span class="op">(</span>
   <span class="va">mutations_df</span>,
-  <span class="va">reads_df</span>,
+  <span class="va">read_positions_df</span>,
   <span class="va">model</span>,
   <span class="va">beta</span>,
   alpha <span class="op">=</span> <span class="fl">0.05</span>,
@@ -75,31 +75,86 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>mutations_df</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with candidate mutations (SNVs) (chromosome, positions, reference and alternative)</p></dd>
-<dt>reads_df</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with read-positions.</p></dd>
+<dt>read_positions_df</dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with read-positions. See <code><a href="get_read_positions_from_BAM.html">get_read_positions_from_BAM()</a></code></p></dd>
 <dt>model</dt>
-<dd><p>A dreams model. See <code><a href="train_model.html">train_model()</a></code>.</p></dd>
+<dd><p>A dreams model. See <code><a href="train_dreams_model.html">train_dreams_model()</a></code>.</p></dd>
 <dt>beta</dt>
-<dd><p>Down sampling parameter from (TODO: Link)</p></dd>
+<dd><p>Down sampling parameter from <code><a href="get_training_data.html">get_training_data()</a></code> for correcting the error-rates from the DREAMS model.</p></dd>
 <dt>alpha</dt>
 <dd><p>Alpha-level used for testing and confidence intervals. Default is 0.05.</p></dd>
 <dt>calculate_confidence_intervals</dt>
-<dd><p>Logical. Should confidence intervals be calculated? Default is FALSE.</p>
-<p>TODO: Make sub list of items in data.frames</p></dd>
+<dd><p>Logical. Should confidence intervals be calculated? Default is FALSE.</p></dd>
 <dt>use_turboem</dt>
 <dd><p>Logical. Should <code><a href="https://rdrr.io/pkg/turboEM/man/turboem.html" class="external-link">turboEM::turboem()</a></code> be used for EM algorithm? Default is TRUE.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> with:</p>
-<dl><dt>cancer_info</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with results for cancer calling across all mutations</p></dd>
-<dt>mutation_info</dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with information about the individual mutations</p></dd>
-</dl></div>
+    <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> with:</p><ul><li><p><strong>cancer_info</strong> A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with results for cancer calling across all mutations:</p><dl><dt>tf_est</dt>
+<dd><p>The estiamted tumor fraction (allele fraction).</p></dd>
+
+<dt>tf_min, tf_max</dt>
+<dd><p>The confidence interval of <code>tf_est</code>.</p></dd>
+
+<dt>r_est, est_mutations_present</dt>
+<dd><p>The estiamted fraction/number of candidate mutations present in the sample.</p></dd>
+
+<dt>r_min, r_max</dt>
+<dd><p>The confidence interval of <code>r_est</code>.</p></dd>
+
+<dt>mutations_tested</dt>
+<dd><p>Number of candidate mutations tested.</p></dd>
+
+<dt>total_coverage, total_count</dt>
+<dd><p>Total count and coverage across all mutations (only reference and alternative allele(s).</p></dd>
+
+<dt>mutations_tested</dt>
+<dd><p>Number of candidate mutations tested.</p></dd>
+
+<dt>EM_converged</dt>
+<dd><p>If the EM algorithm converged.</p></dd>
+
+<dt>EM_steps, fpeval, objfeval</dt>
+<dd><p>Number of steps and function evaluations by the EM algorithm.</p></dd>
+
+<dt>ll_0, ll_A</dt>
+<dd><p>The value of the log-likelihood function under the null (tf=0) and alternative (tf&gt;0) hypothesis.</p></dd>
+
+<dt>Q_val, df, p_val</dt>
+<dd><p>The chisq test statistic, degrees of freedom and p-value of the statistical test.</p></dd>
+
+<dt>cancer_detected</dt>
+<dd><p>Whether cancer was detected at the supplied alpha level.</p></dd>
+
+
+</dl></li>
+<li><p><strong>mutation_info</strong> A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with information about the individual mutations:</p><dl><dt>chr, genomic_pos</dt>
+<dd><p>The genomic position of the mutation.</p></dd>
+
+<dt>ref, alt</dt>
+<dd><p>The reference and alternative allele.</p></dd>
+
+<dt>P_mut_is_present</dt>
+<dd><p>The estimated probability the mutation is present in the sample.</p></dd>
+
+<dt>exp_count</dt>
+<dd><p>The expected count of the alternative allele under the error (null) model.</p></dd>
+
+<dt>count</dt>
+<dd><p>The count of the alternative allele.</p></dd>
+
+<dt>coverage</dt>
+<dd><p>The coverage used by the model (only referenceredas with and alternative allele).</p></dd>
+
+<dt>obs_freq</dt>
+<dd><p>The observed frequency of the alternative allele.</p></dd>
+
+
+</dl></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="call_mutations.html">call_mutations()</a></code>, <code><a href="train_model.html">train_model()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="call_mutations.html">call_mutations()</a></code>, <code><a href="train_dreams_model.html">train_dreams_model()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
