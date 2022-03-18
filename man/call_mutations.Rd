@@ -11,7 +11,7 @@ call_mutations(
   beta,
   alpha = 0.05,
   use_turboem = TRUE,
-  calculate_confidence_interval = FALSE
+  calculate_confidence_intervals = FALSE
 )
 }
 \arguments{
@@ -21,20 +21,35 @@ call_mutations(
 
 \item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
 
-\item{beta}{Down sampling parameter from (TODO: Link)}
+\item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
 
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
 \item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
 
-\item{calculate_confidence_interval}{Logical. Should confidence intervals be calculated? Default is FALSE.}
+\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
 }
 \value{
-
+A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:
+\describe{
+\item{chr, genomic_pos}{The genomic position of the mutation.}
+\item{ref, alt}{The reference and alternative allele.}
+\item{EM_converged}{If the EM algorithm converged.}
+\item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+\item{tf_est}{The estiamted tumor fraction (allele fraction).}
+\item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+\item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+\item{count}{The count of the alternative allele.}
+\item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+\item{full_coverage}{The total coverage of the position (for reference).}
+\item{obs_freq}{The observed frequency of the alternative allele.}
+\item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+\item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+\item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
+}
 }
 \description{
 This function evaluate the presence (calls) of individual mutations from a predefined list.
-TODO: Add describeIn instead
 }
 \seealso{
 \code{\link[=call_cancer]{call_cancer()}}, \code{\link[=train_dreams_model]{train_dreams_model()}}

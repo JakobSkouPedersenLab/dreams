@@ -21,20 +21,45 @@ call_cancer(
 
 \item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
 
-\item{beta}{Down sampling parameter from (TODO: Link)}
+\item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
 
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
-\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.
-
-TODO: Make sub list of items in data.frames}
+\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
 
 \item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
 }
 \value{
 A \code{list()} with:
-\item{cancer_info}{A \code{\link[=data.frame]{data.frame()}} with results for cancer calling across all mutations}
-\item{mutation_info}{A \code{\link[=data.frame]{data.frame()}} with information about the individual mutations}
+\itemize{
+\item \strong{cancer_info} A \code{\link[=data.frame]{data.frame()}} with results for cancer calling across all mutations:
+\describe{
+\item{tf_est}{The estiamted tumor fraction (allele fraction).}
+\item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+\item{r_est, est_mutations_present}{The estiamted fraction/number of candidate mutations present in the sample.}
+\item{r_min, r_max}{The confidence interval of \code{r_est}.}
+\item{mutations_tested}{Number of candidate mutations tested.}
+\item{total_coverage, total_count}{Total count and coverage across all mutations (only reference and alternative allele(s).}
+\item{mutations_tested}{Number of candidate mutations tested.}
+\item{EM_converged}{If the EM algorithm converged.}
+\item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+\item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+\item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+\item{cancer_detected}{Whether cancer was detected at the supplied alpha level.}
+}
+
+\item \strong{mutation_info} A \code{\link[=data.frame]{data.frame()}} with information about the individual mutations:
+\describe{
+\item{chr, genomic_pos}{The genomic position of the mutation.}
+\item{ref, alt}{The reference and alternative allele.}
+\item{P_mut_is_present}{The estimated probability the mutation is present in the sample.}
+\item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+\item{count}{The count of the alternative allele.}
+\item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+\item{obs_freq}{The observed frequency of the alternative allele.}
+}
+
+}
 }
 \description{
 This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.

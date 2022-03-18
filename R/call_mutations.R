@@ -1,20 +1,30 @@
 #' Call mutations from read positions
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' TODO: Add describeIn instead
 #' @inheritParams call_cancer
-#' @param calculate_confidence_interval Logical. Should confidence intervals be calculated? Default is FALSE.
 #'
-#' @return
-#'
-#'
-#'
-#'
+#' @return A [data.frame()] with information about the individual mutation calls, including:
+#' \describe{
+#'   \item{chr, genomic_pos}{The genomic position of the mutation.}
+#'   \item{ref, alt}{The reference and alternative allele.}
+#'   \item{EM_converged}{If the EM algorithm converged.}
+#'   \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+#'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
+#'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+#'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'   \item{count}{The count of the alternative allele.}
+#'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+#'   \item{full_coverage}{The total coverage of the position (for reference).}
+#'   \item{obs_freq}{The observed frequency of the alternative allele.}
+#'   \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+#'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+#'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
+#' }
 #'
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export
-call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_interval = FALSE) {
+call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(data.frame())

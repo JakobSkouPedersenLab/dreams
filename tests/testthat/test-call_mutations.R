@@ -202,13 +202,13 @@ test_that("Bigger example", {
 
   res <- call_mutations(
     mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
-    calculate_confidence_interval = TRUE
+    calculate_confidence_intervals = TRUE
   )
 
   slow_res <- call_mutations(
     mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
     use_turboem = FALSE,
-    calculate_confidence_interval = TRUE
+    calculate_confidence_intervals = TRUE
   )
 
   expect_equal(slow_res %>% select(tf_est, tf_min, tf_min, p_val), res %>% select(tf_est, tf_min, tf_min, p_val))
