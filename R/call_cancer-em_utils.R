@@ -221,6 +221,12 @@ run_full_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, er
 }
 
 run_turbo_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+  if (!requireNamespace("turboEM", quietly = TRUE)) {
+    stop(
+      "Package \"turboEM\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
   turboem_res <- turboEM::turboem(
     par = start_values,
     fixptfn = em_update,
