@@ -58,7 +58,7 @@ model = train_model(
   
 # Call variants using DREAM-vc
 
-variant_calls = dream_vc(
+variant_calls = dreams_vc(
   bam_path = "/path/test_bam_file",
   positions = "positions_file",
   model = model,
@@ -67,7 +67,7 @@ variant_calls = dream_vc(
 
 # Call cancer using DREAM-cc
 
-cancer_calls = dream_cc(
+cancer_calls = dreams_cc(
   bam_path = "/path/test_bam_file",
   positions = "positions_file",
   model = model,

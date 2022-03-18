@@ -22,38 +22,45 @@ You can install the development version of dreams from
 devtools::install_github("JakobSkouPedersenLab/dreams")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
+## Basic functions
 
 ``` r
 library(dreams)
-## basic example code
+
+# For training data DREAMS requires one or more bam-files
+# and a reference genome
+
+training_data = get_training_data(
+  bam_paths = "/path/bam_file",
+  reference_path = "/path/hg38.fa",
+  ...)
+
+# The model can be trained using a neural network
+# - and requires basic settings for keras
+
+model = train_model(
+  training_data,
+  layers = c(16,8),
+  model_features = c("trinucleotide_ctx", "strand", "read_index"),
+  lr = 0.01,
+  batch_size = 10000,
+  epochs = 100,
+  ...)
+  
+# Call variants using DREAM-vc
+
+variant_calls = dreams_vc(
+  bam_path = "/path/test_bam_file",
+  positions = "positions_file",
+  model = model,
+  ...
+)
+
+# Call cancer using DREAM-cc
+
+cancer_calls = dreams_cc(
+  bam_path = "/path/test_bam_file",
+  positions = "positions_file",
+  model = model,
+  ...)
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
