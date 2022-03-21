@@ -101,16 +101,37 @@ get_starting_values <- function(obs_is_mut_list, error_mut_to_ref_list, error_re
 
   # Find good starting values
   # (Heuristic) Limits for parameters
-  tf_max <- min(max(observed_signal) * 2, 2)
+  tf_max <- min(max(observed_signal) * 2, 1.999)
 
-  r_max <- max(1 / length(obs_is_mut_list), mean(observed_signal > 0))
+  expected_count <- error_ref_to_mut_list %>%
+    sapply(sum) %>%
+    sum()
+  count <- obs_is_mut_list %>%
+    sapply(sum) %>%
+    sum()
+  coverage <- error_ref_to_mut_list %>%
+    sapply(length) %>%
+    sum()
+  tf_guess <- 2 * (count - expected_count) / coverage
+
+  # Make sure tf_guess is valid
+  tf_guess <- min(max(1e-5, tf_guess), tf_max)
+
+  r_max <- min(max(1 / length(obs_is_mut_list), mean(observed_signal > 0)), 0.999)
 
   # Grid size
-  tf_n_start_guess <- 7
+  tf_n_start_guess_low <- 4
+  tf_n_start_guess_high <- 4
   r_n_start_guess <- 7
 
   # Make grid
-  tf_seq <- tf_max * 10^seq(-3, 0, length.out = tf_n_start_guess)
+  tf_low_seq <- seq(tf_guess / 100, tf_guess, length.out = tf_n_start_guess_low)
+  tf_high_seq <- seq(tf_guess, tf_max, length.out = tf_n_start_guess_high)
+
+  tf_seq <- c(tf_low_seq, tf_high_seq) %>%
+    sort() %>%
+    unique()
+
   r_seq <- seq(1e-8, r_max, length.out = r_n_start_guess)
   tf_r_grid <- expand.grid(tf = tf_seq, r = r_seq)
 
