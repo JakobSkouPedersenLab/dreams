@@ -99,7 +99,7 @@
 <span class="co"># The model can be trained using a neural network</span>
 <span class="co"># - and requires basic settings for keras</span>
 
-<span class="va">model</span> <span class="op">=</span> <span class="fu">train_model</span><span class="op">(</span>
+<span class="va">model</span> <span class="op">=</span> <span class="fu"><a href="reference/train_dreams_model.html">train_dreams_model</a></span><span class="op">(</span>
   <span class="va">training_data</span>,
   layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span>,<span class="fl">8</span><span class="op">)</span>,
   model_features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"trinucleotide_ctx"</span>, <span class="st">"strand"</span>, <span class="st">"read_index"</span><span class="op">)</span>,
@@ -108,18 +108,18 @@
   epochs <span class="op">=</span> <span class="fl">100</span>,
   <span class="va">...</span><span class="op">)</span>
   
-<span class="co"># Call variants using DREAM-vc</span>
+<span class="co"># Call variants using DREAMS-vc</span>
 
-<span class="va">variant_calls</span> <span class="op">=</span> <span class="fu">dreams_vc</span><span class="op">(</span>
+<span class="va">variant_calls</span> <span class="op">=</span> <span class="fu"><a href="reference/dreams_vc.html">dreams_vc</a></span><span class="op">(</span>
   bam_path <span class="op">=</span> <span class="st">"/path/test_bam_file"</span>,
   positions <span class="op">=</span> <span class="st">"positions_file"</span>,
   model <span class="op">=</span> <span class="va">model</span>,
   <span class="va">...</span>
 <span class="op">)</span>
 
-<span class="co"># Call cancer using DREAM-cc</span>
+<span class="co"># Call cancer using DREAMS-cc</span>
 
-<span class="va">cancer_calls</span> <span class="op">=</span> <span class="fu">dreams_cc</span><span class="op">(</span>
+<span class="va">cancer_calls</span> <span class="op">=</span> <span class="fu"><a href="reference/dreams_cc.html">dreams_cc</a></span><span class="op">(</span>
   bam_path <span class="op">=</span> <span class="st">"/path/test_bam_file"</span>,
   positions <span class="op">=</span> <span class="st">"positions_file"</span>,
   model <span class="op">=</span> <span class="va">model</span>,
