@@ -3,6 +3,8 @@
 export("%>%")
 export(call_cancer)
 export(call_mutations)
+export(dreams_cc)
+export(dreams_vc)
 export(get_read_positions_from_BAM)
 export(get_training_data)
 export(train_dreams_model)

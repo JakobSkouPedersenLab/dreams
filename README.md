@@ -38,7 +38,7 @@ training_data = get_training_data(
 # The model can be trained using a neural network
 # - and requires basic settings for keras
 
-model = train_model(
+model = train_dreams_model(
   training_data,
   layers = c(16,8),
   model_features = c("trinucleotide_ctx", "strand", "read_index"),
@@ -47,7 +47,7 @@ model = train_model(
   epochs = 100,
   ...)
   
-# Call variants using DREAM-vc
+# Call variants using DREAMS-vc
 
 variant_calls = dreams_vc(
   bam_path = "/path/test_bam_file",
@@ -56,7 +56,7 @@ variant_calls = dreams_vc(
   ...
 )
 
-# Call cancer using DREAM-cc
+# Call cancer using DREAMS-cc
 
 cancer_calls = dreams_cc(
   bam_path = "/path/test_bam_file",

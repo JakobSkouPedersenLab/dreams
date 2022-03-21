@@ -1,3 +1,23 @@
+test_that("Simple example dreams_vc", {
+  read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
+  reference_path <- system.file("extdata", "ref.fasta", package = "dreams")
+
+  model_path <- system.file("extdata", "model_test.h5", package = "dreams")
+  model <- keras::load_model_hdf5(model_path)
+
+  mutations_df <-
+    data.frame(
+      CHROM = "chr1",
+      POS = 10,
+      REF = "T",
+      alt = "A"
+    )
+
+
+  test <- dreams_vc(mutations_df = mutations_df, bam_file_path = read_example_bam_file, reference_path = reference_path, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE)
+})
+
+
 test_that("Invalid mutations_df", {
   mutations_no_alt_df <-
     data.frame(
@@ -217,4 +237,3 @@ test_that("Bigger example", {
   # expect_snapshot(res)
   # expect_snapshot(slow_res)
 })
-
