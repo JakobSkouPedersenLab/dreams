@@ -12,8 +12,6 @@ coverage](https://codecov.io/gh/JakobSkouPedersenLab/dreams/branch/main/graph/ba
 v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
 
-The goal of DREAMS is to develop accurate error models for Next-generation sequencing data. The error model can be used for variant calling using the DREAMS-vc method and for calling cancer using the DREAMS-cc method. 
-
 ## Installation
 
 You can install the development version of dreams from
@@ -40,7 +38,7 @@ training_data = get_training_data(
 # The model can be trained using a neural network
 # - and requires basic settings for keras
 
-model = train_model(
+model = train_dreams_model(
   training_data,
   layers = c(16,8),
   model_features = c("trinucleotide_ctx", "strand", "read_index"),
@@ -49,21 +47,20 @@ model = train_model(
   epochs = 100,
   ...)
   
-# Call variants using DREAM-vc
+# Call variants using DREAMS-vc
 
-variant_calls = dream_vc(
+variant_calls = dreams_vc(
   bam_path = "/path/test_bam_file",
   positions = "positions_file",
   model = model,
   ...
 )
 
-# Call cancer using DREAM-cc
+# Call cancer using DREAMS-cc
 
-cancer_calls = dream_cc(
+cancer_calls = dreams_cc(
   bam_path = "/path/test_bam_file",
   positions = "positions_file",
   model = model,
-  ...
-)
+  ...)
 ```

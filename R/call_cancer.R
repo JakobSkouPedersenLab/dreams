@@ -1,3 +1,91 @@
+#' Call cancer from read positions in bam-file
+#'
+#' @description This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.
+#'
+#' @inheritParams call_cancer
+#' @param bam_file_path Path to .BAM-file
+#' @param reference_path Path to reference genome e.g. FASTA-file.
+#'
+#' @return
+#' A \code{list()} with:
+#' \itemize{
+#'   \item \strong{cancer_info} A [data.frame()] with results for cancer calling across all mutations:
+#'     \describe{
+#'       \item{tf_est}{The estiamted tumor fraction (allele fraction).}
+#'       \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+#'       \item{r_est, est_mutations_present}{The estiamted fraction/number of candidate mutations present in the sample.}
+#'       \item{r_min, r_max}{The confidence interval of \code{r_est}.}
+#'       \item{mutations_tested}{Number of candidate mutations tested.}
+#'       \item{total_coverage, total_count}{Total count and coverage across all mutations (only reference and alternative allele(s).}
+#'       \item{mutations_tested}{Number of candidate mutations tested.}
+#'       \item{EM_converged}{If the EM algorithm converged.}
+#'       \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+#'       \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+#'       \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+#'       \item{cancer_detected}{Whether cancer was detected at the supplied alpha level.}
+#'     }
+#'
+#'   \item \strong{mutation_info} A [data.frame()] with information about the individual mutations:
+#'       \describe{
+#'         \item{chr, genomic_pos}{The genomic position of the mutation.}
+#'         \item{ref, alt}{The reference and alternative allele.}
+#'         \item{P_mut_is_present}{The estimated probability the mutation is present in the sample.}
+#'         \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'         \item{count}{The count of the alternative allele.}
+#'         \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+#'         \item{obs_freq}{The observed frequency of the alternative allele.}
+#'      }
+#'
+#' }
+#' @seealso [call_mutations()], [train_dreams_model()]
+#'
+#' @export
+dreams_cc <- function(mutations_df, bam_file_path, reference_path, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
+  # If no mutations return empty result
+  if (nrow(mutations_df) == 0) {
+    return(
+      list(
+        cancer_info = data.frame(),
+        mutation_info = data.frame()
+      )
+    )
+  }
+
+  # Clean up mutations
+  mutations_df <- mutations_df %>%
+    select(
+      "chr" = matches("chr|CHR|CHROM"),
+      "genomic_pos" = matches("pos|POS"),
+      "ref" = matches("ref|REF"),
+      "alt" = matches("alt|ALT|obs|OBS")
+    )
+
+
+  # Get read positions
+  read_positions_df <- get_read_positions_from_BAM(
+    bam_file_path = bam_file_path,
+    chr = mutations_df$chr,
+    genomic_pos = mutations_df$genomic_pos,
+    reference_path
+  )
+
+  # Call cancer
+  cancer_call <- call_cancer(
+      mutations_df = mutations_df,
+      read_positions_df = read_positions_df,
+      model = model,
+      beta = beta,
+      alpha = alpha,
+      use_turboem = use_turboem,
+      calculate_confidence_intervals = calculate_confidence_intervals
+    )
+
+  return(cancer_call)
+
+
+}
+
+
 #' Call cancer from read positions
 #'
 #' @description This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.

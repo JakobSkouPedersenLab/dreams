@@ -1,3 +1,73 @@
+
+#' Call mutations in a bam-file
+#'
+#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
+#' @inheritParams call_cancer
+#' @param bam_file_path Path to .BAM-file
+#' @param reference_path Path to reference genome e.g. FASTA-file.
+
+#' @return A [data.frame()] with information about the individual mutation calls, including:
+#' \describe{
+#'   \item{chr, genomic_pos}{The genomic position of the mutation.}
+#'   \item{ref, alt}{The reference and alternative allele.}
+#'   \item{EM_converged}{If the EM algorithm converged.}
+#'   \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+#'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
+#'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+#'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'   \item{count}{The count of the alternative allele.}
+#'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+#'   \item{full_coverage}{The total coverage of the position (for reference).}
+#'   \item{obs_freq}{The observed frequency of the alternative allele.}
+#'   \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+#'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+#'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
+#' }
+#'
+#' @seealso [call_mutations()], [call_cancer()], [train_dreams_model()]
+#'
+#' @export
+
+dreams_vc <- function(mutations_df, bam_file_path, reference_path, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE) {
+
+  # Clean up mutations
+  mutations_df <- mutations_df %>%
+    select(
+      "chr" = matches("chr|CHR|CHROM"),
+      "genomic_pos" = matches("pos|POS"),
+      "ref" = matches("ref|REF"),
+      "alt" = matches("alt|ALT|obs|OBS")
+    )
+
+  # Stop if mutations do not have the expected columns
+  mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
+  if (!all(mutations_expected_columns %in% colnames(mutations_df))) {
+    stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
+  }
+
+
+  # Get read positions
+  read_positions_df <- get_read_positions_from_BAM(
+    bam_file_path = bam_file_path,
+    chr = mutations_df$chr,
+    genomic_pos = mutations_df$genomic_pos,
+    reference_path
+  )
+
+  # Call mutations
+  mutation_calls <- call_mutations(
+    mutations_df = mutations_df,
+    read_positions_df = read_positions_df,
+    model = model,
+    beta = beta,
+    alpha = alpha,
+    use_turboem = use_turboem,
+    calculate_confidence_intervals = calculate_confidence_intervals
+  )
+
+  return(mutation_calls)
+}
+
 #' Call mutations from read positions
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
