@@ -1,5 +1,5 @@
-limit_0_1 <- function(x) {
-  return(pmax(pmin(x, 1), 0))
+limit <- function(x, min = 0, max = 1) {
+  return(pmax(pmin(x, max), min))
 }
 
 #' @import dplyr
@@ -29,10 +29,10 @@ correct_errors_predictions <- function(error_df, beta) {
         1 - .data$error_prob_corrected,
         .data$error_prob_corrected * .data$T / (.data$error_prob_sample)
       ),
-      A_corrected = ifelse(is.nan(.data$A_corrected), 0, .data$A_corrected) %>% limit_0_1(),
-      C_corrected = ifelse(is.nan(.data$C_corrected), 0, .data$C_corrected) %>% limit_0_1(),
-      G_corrected = ifelse(is.nan(.data$G_corrected), 0, .data$G_corrected) %>% limit_0_1(),
-      T_corrected = ifelse(is.nan(.data$T_corrected), 0, .data$T_corrected) %>% limit_0_1()
+      A_corrected = ifelse(is.nan(.data$A_corrected), 0, .data$A_corrected) %>% limit(),
+      C_corrected = ifelse(is.nan(.data$C_corrected), 0, .data$C_corrected) %>% limit(),
+      G_corrected = ifelse(is.nan(.data$G_corrected), 0, .data$G_corrected) %>% limit(),
+      T_corrected = ifelse(is.nan(.data$T_corrected), 0, .data$T_corrected) %>% limit()
     )
 }
 

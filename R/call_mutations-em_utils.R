@@ -1,20 +1,3 @@
-get_starting_value_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
-  expected_signal <- sum(error_ref_to_mut) / length(obs_is_mut)
-  excess_signal <- mean(obs_is_mut) - expected_signal
-
-  tf_guess <- max(1e-8, excess_signal * 2)
-
-  # Improve guess if value close to 0 is better
-  ll_guess <- log_likelihood(tf = tf_guess, obs_is_mut_list = obs_is_mut, error_ref_to_mut_list = error_ref_to_mut, error_mut_to_ref_list = error_mut_to_ref)
-  ll_eps <- log_likelihood(tf = 1e-8, obs_is_mut_list = obs_is_mut, error_ref_to_mut_list = error_ref_to_mut, error_mut_to_ref_list = error_mut_to_ref)
-  ll_0 <- log_likelihood(tf = 0, obs_is_mut_list = obs_is_mut, error_ref_to_mut_list = error_ref_to_mut, error_mut_to_ref_list = error_mut_to_ref)
-
-  # Choose best starting value
-  tf_start <- c(tf_guess, 1e-8, 0)[which.max(c(ll_guess, ll_eps, ll_0))]
-
-  return(tf_start)
-}
-
 em_update_vc <- function(par, obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
   fixed_r <- 1
   new_par <- em_update(
@@ -65,7 +48,11 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
   }
 
   # Get starting guess for tf
-  tf_start <- get_starting_value_vc(obs_is_mut, error_ref_to_mut, error_mut_to_ref)
+  tf_start <- get_starting_values(
+    obs_is_mut_list = list(obs_is_mut),
+    error_mut_to_ref_list = list(error_ref_to_mut),
+    error_ref_to_mut_list = list(error_mut_to_ref)
+  )["tf_start"]
 
   if (use_turboem) {
     if (!requireNamespace("turboEM", quietly = TRUE)) {
