@@ -23,10 +23,10 @@
 #' @family Train model
 #' @seealso [get_training_data()] Function for getting training data
 train_dreams_model <- function(training_data, layers,
-                               model_features, lr, batch_size, epochs,
-                               model_file_path = NULL, log_file_path = NULL,
-                               decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
-                               validation_split = 0, ctx3_embed_dim = 3) {
+                        model_features, lr, batch_size, epochs,
+                        model_file_path = NULL, log_file_path = NULL,
+                        decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
+                        validation_split = 0, ctx3_embed_dim = 3) {
   training_data <- prepare_training_data(
     training_data = training_data,
     model_features = model_features
@@ -365,13 +365,14 @@ fit_model <- function(features, labels, input_structure,
 
   if (!is.null(log_file_path)) {
 
+
     # Log metrics and time
     logger_callback <- LogMetrics$new(log_path = log_file_path)
 
     # Collect callback in list
     callback_list <- list(
       callback_list,
-      logger_callback
+      checkpoint_callback
     )
   }
 
