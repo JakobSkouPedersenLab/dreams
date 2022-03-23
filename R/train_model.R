@@ -372,7 +372,7 @@ fit_model <- function(features, labels, input_structure,
     # Collect callback in list
     callback_list <- list(
       callback_list,
-      checkpoint_callback
+      logger_callback
     )
   }
 
