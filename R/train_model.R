@@ -58,7 +58,7 @@ train_dreams_model <- function(training_data, layers,
     log_file_path = log_file_path
   )
 
-  if (is.null(model_file_path)) {
+  if (!is.null(model_file_path)) {
     # Save final model
     keras::save_model_hdf5(
       object = model,
@@ -363,7 +363,7 @@ fit_model <- function(features, labels, input_structure,
     checkpoint_callback
   )
 
-  if (is.null(log_file_path)) {
+  if (!is.null(log_file_path)) {
 
 
     # Log metrics and time
