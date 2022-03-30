@@ -4,7 +4,14 @@
 \alias{get_read_positions_from_BAM}
 \title{Get read positions from BAM-file}
 \usage{
-get_read_positions_from_BAM(bam_file_path, chr, genomic_pos, reference_path)
+get_read_positions_from_BAM(
+  bam_file_path,
+  chr,
+  genomic_pos,
+  reference_path,
+  chr_wise = F,
+  pos_wise = F
+)
 }
 \arguments{
 \item{bam_file_path}{Path to BAM-file.}
@@ -12,6 +19,10 @@ get_read_positions_from_BAM(bam_file_path, chr, genomic_pos, reference_path)
 \item{chr, genomic_pos}{Vectors. Should specify the positions of interest (\code{chr} = Chromosome, \code{genomic_pos} = Position in chromosome)}
 
 \item{reference_path}{Path to reference genome e.g. FASTA-file.}
+
+\item{chr_wise}{handle bam files chromosome wise}
+
+\item{pos_wise}{Handle bam files position wise}
 }
 \value{
 \code{\link[=data.frame]{data.frame()}}. Each line describes a position in a read.
