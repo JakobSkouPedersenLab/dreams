@@ -151,7 +151,7 @@ log_likelihood <- function(obs_is_mut_list, error_mut_to_ref_list, error_ref_to_
   }
 
   # Check model parameters
-  if (is.nan(tf) || is.na(tf) || tf < 0 || 1 < (tf / 2)) {
+  if (is.nan(tf) || is.na(tf) || tf < 0 || 2 < tf) {
     stop(paste("Illegal value of tf:", tf))
   }
 

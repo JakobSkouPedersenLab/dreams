@@ -11,12 +11,13 @@ em_update_vc <- function(par, obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
 
 em_objective_vc <- function(par, obs_is_mut, error_ref_to_mut, error_mut_to_ref) {
   fixed_r <- 1
-  em_objective(
+  res <- em_objective(
     par = c(par, fixed_r),
     obs_is_mut_list = list(obs_is_mut),
     error_ref_to_mut_list = list(error_ref_to_mut),
     error_mut_to_ref_list = list(error_mut_to_ref)
   )
+  return(res)
 }
 
 get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, use_turboem, max_it = 5000) {
@@ -83,8 +84,7 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
       error_mut_to_ref = error_mut_to_ref,
       control.run =
         list(
-          convtype = "objfn",
-          tol = 1e-8
+          convtype = "objfn"
         )
     )
 
