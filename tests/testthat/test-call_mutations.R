@@ -237,3 +237,73 @@ test_that("Bigger example", {
   # expect_snapshot(res)
   # expect_snapshot(slow_res)
 })
+
+
+test_that("Bigger example with chr/pos wise", {
+  three_mutations_df <-
+    data.frame(
+      CHROM = c("chr1", "chr2", "chr2", "chr3"),
+      POS = c(10, 13, 14, 17),
+      REF = "A",
+      ALT = "T"
+    )
+
+  # Reads on Mut 1,2 - No reads on Mut 3 - And random read
+  cov_1 <- 17
+  count_1 <- 1
+  cov_2 <- 43
+  count_2 <- 3
+  cov_3 <- 30
+  count_3 <- 2
+
+  some_read_positions_df <-
+    data.frame(
+      chr =
+        c(
+          rep("chr1", cov_1),
+          rep("chr2", cov_2),
+          rep("chr2", cov_3)
+        ),
+      genomic_pos =
+        c(
+          rep(10, cov_1),
+          rep(13, cov_2),
+          rep(14, cov_3)
+        ),
+      ref = "A",
+      obs =
+        c(
+          rep("A", cov_1 - count_1), rep("T", count_1),
+          rep("A", cov_2 - count_2), rep("T", count_2),
+          rep("A", cov_3 - count_3), rep("T", count_3)
+        )
+    )
+
+  model_path <- system.file("extdata", "model_test.h5", package = "dreams")
+  model <- keras::load_model_hdf5(model_path)
+
+  res <- call_mutations(
+    mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
+    calculate_confidence_intervals = TRUE
+  )
+
+  res_1 <- call_mutations(
+    mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
+    calculate_confidence_intervals = TRUE,
+    pos_wise = T
+  )
+
+  res_2 <- call_mutations(
+    mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
+    calculate_confidence_intervals = TRUE,
+    chr_wise = T
+  )
+
+  expect_equal(res %>% select(tf_est, tf_min, tf_min, p_val), res_1 %>% select(tf_est, tf_min, tf_min, p_val))
+  expect_equal(res %>% select(tf_est, tf_min, tf_min, p_val), res_2 %>% select(tf_est, tf_min, tf_min, p_val))
+
+
+  # Snap shots
+  # expect_snapshot(res)
+  # expect_snapshot(slow_res)
+})

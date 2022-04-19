@@ -62,11 +62,10 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
   mutation_calls <- NULL
 
   for (q in queue) {
+    print(q)
 
-    print (q)
-
-    print (q$chr)
-    print (q$pos)
+    print(q$chr)
+    print(q$pos)
 
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
@@ -124,7 +123,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export
-call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE) {
+call_mutations <- function(mutations_df, read_positions_df, model, beta,
+                           alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                           chr_wise = F, pos_wise = F) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -151,95 +152,123 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta, alpha =
     stop("read_positions_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
   }
 
-  # Prepare EM input
-  em_input <- prepare_em_input(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta)
+  chr_vec <- mutations_df$chr
+  pos_vec <- mutations_df$genomic_pos
 
-  obs_is_mut_list <- em_input$obs_is_mut_list
-  error_ref_to_mut_list <- em_input$error_ref_to_mut_list
-  error_mut_to_ref_list <- em_input$error_mut_to_ref_list
+  if (chr_wise) {
+    queue <- lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
+  } else if (pos_wise) {
+    queue <- lapply(1:length(chr_vec), function(i) list(chr = chr_vec[i], pos = pos_vec[i]))
+  } else {
+    queue <- list(list(chr = chr_vec, pos = pos_vec))
+  }
 
-  # Add full coverage to mutations
-  full_coverage_df <- read_positions_df %>%
-    count(.data$chr, .data$genomic_pos, name = "full_coverage")
+  mutation_calls <- NULL
 
-  mutations_df <- mutations_df %>%
-    left_join(full_coverage_df, by = c("chr", "genomic_pos"))
-
-  # Call mutations from reads
-  res_df <- NULL
-  for (i in 1:nrow(mutations_df)) {
-    # Mutation information
-    mutation_line <- mutations_df[i, ]
-
-    # Read information
-    obs_is_mut <- obs_is_mut_list[[i]]
-    error_ref_to_mut <- error_ref_to_mut_list[[i]]
-    error_mut_to_ref <- error_mut_to_ref_list[[i]]
-
-    # Run EM algorithm
-    em_res <- get_tf_estimate_vc(
-      obs_is_mut = obs_is_mut,
-      error_ref_to_mut = error_ref_to_mut,
-      error_mut_to_ref = error_mut_to_ref,
-      use_turboem = use_turboem
+  for (q in queue) {
+    current_read_positions_df <- read_positions_df %>% filter(
+      chr %in% q$chr,
+      genomic_pos %in% q$pos
     )
 
-    # Confidence intervals
-    if (calculate_confidence_intervals) {
-      tf_CI <- get_tf_CI(
-        obs_is_mut_list = obs_is_mut_list,
-        error_mut_to_ref_list = error_mut_to_ref_list,
-        error_ref_to_mut_list = error_ref_to_mut_list,
-        r_est = 1,
-        tf_est = em_res$tf_est,
-        alpha = alpha
+    current_mutations <- mutations_df %>% filter(
+      chr %in% q$chr,
+      genomic_pos %in% q$pos
+    )
+
+
+    # Prepare EM input
+    em_input <- prepare_em_input(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta)
+
+    obs_is_mut_list <- em_input$obs_is_mut_list
+    error_ref_to_mut_list <- em_input$error_ref_to_mut_list
+    error_mut_to_ref_list <- em_input$error_mut_to_ref_list
+
+    # Add full coverage to mutations
+    full_coverage_df <- current_read_positions_df %>%
+      count(.data$chr, .data$genomic_pos, name = "full_coverage")
+
+    current_mutations_df <- current_mutations %>%
+      left_join(full_coverage_df, by = c("chr", "genomic_pos"))
+
+    # Call mutations from reads
+    res_df <- NULL
+    for (i in 1:nrow(current_mutations_df)) {
+      # Mutation information
+      mutation_line <- current_mutations_df[i, ]
+
+      # Read information
+      obs_is_mut <- obs_is_mut_list[[i]]
+      error_ref_to_mut <- error_ref_to_mut_list[[i]]
+      error_mut_to_ref <- error_mut_to_ref_list[[i]]
+
+      # Run EM algorithm
+      em_res <- get_tf_estimate_vc(
+        obs_is_mut = obs_is_mut,
+        error_ref_to_mut = error_ref_to_mut,
+        error_mut_to_ref = error_mut_to_ref,
+        use_turboem = use_turboem
       )
-    } else {
-      tf_CI <- list(tf_min = NA, tf_max = NA)
+
+      # Confidence intervals
+      if (calculate_confidence_intervals) {
+        tf_CI <- get_tf_CI(
+          obs_is_mut_list = obs_is_mut,
+          error_mut_to_ref_list = error_mut_to_ref,
+          error_ref_to_mut_list = error_ref_to_mut,
+          r_est = 1,
+          tf_est = em_res$tf_est,
+          alpha = alpha
+        )
+      } else {
+        tf_CI <- list(tf_min = NA, tf_max = NA)
+      }
+
+      # Test mutation
+      ll_0 <- log_likelihood(
+        tf = 0,
+        r = 1,
+        obs_is_mut_list = obs_is_mut,
+        error_ref_to_mut_list = error_ref_to_mut,
+        error_mut_to_ref_list = error_mut_to_ref
+      )
+      ll_A <- log_likelihood(
+        tf = em_res$tf_est,
+        r = 1,
+        obs_is_mut_list = obs_is_mut,
+        error_ref_to_mut_list = error_ref_to_mut,
+        error_mut_to_ref_list = error_mut_to_ref
+      )
+      Q_val <- -2 * (ll_0 - ll_A)
+      df <- 1
+      p_val <- stats::pchisq(Q_val, df, lower.tail = FALSE)
+
+      # Add result to output
+      new_row <- data.frame(
+        # Mutation annotations
+        mutation_line,
+        # EM results
+        em_res,
+        # Confidence interval
+        tf_min = tf_CI$tf_min, tf_max = tf_CI$tf_max,
+        # Misc.
+        exp_count = sum(error_ref_to_mut),
+        count = sum(obs_is_mut),
+        coverage = length(obs_is_mut),
+        obs_freq = mean(obs_is_mut),
+        # Test results
+        ll_0,
+        ll_A,
+        Q_val,
+        df,
+        p_val,
+        mutation_detected = p_val <= alpha
+      )
+
+      res_df <- rbind(res_df, new_row)
     }
 
-    # Test mutation
-    ll_0 <- log_likelihood(
-      tf = 0,
-      r = 1,
-      obs_is_mut_list = obs_is_mut,
-      error_ref_to_mut_list = error_ref_to_mut,
-      error_mut_to_ref_list = error_mut_to_ref
-    )
-    ll_A <- log_likelihood(
-      tf = em_res$tf_est,
-      r = 1,
-      obs_is_mut_list = obs_is_mut,
-      error_ref_to_mut_list = error_ref_to_mut,
-      error_mut_to_ref_list = error_mut_to_ref
-    )
-    Q_val <- -2 * (ll_0 - ll_A)
-    df <- 1
-    p_val <- stats::pchisq(Q_val, df, lower.tail = FALSE)
-
-    # Add result to output
-    new_row <- data.frame(
-      # Mutation annotations
-      mutation_line,
-      # EM results
-      em_res,
-      # Confidence interval
-      tf_min = tf_CI$tf_min, tf_max = tf_CI$tf_max,
-      # Misc.
-      exp_count = sum(error_ref_to_mut),
-      count = sum(obs_is_mut),
-      coverage = length(obs_is_mut),
-      obs_freq = mean(obs_is_mut),
-      # Test results
-      ll_0,
-      ll_A,
-      Q_val,
-      df,
-      p_val,
-      mutation_detected = p_val <= alpha
-    )
-
-    res_df <- rbind(res_df, new_row)
+    mutation_calls <- rbind(mutation_calls, res_df)
   }
-  return(res_df)
+  return(mutation_calls)
 }
