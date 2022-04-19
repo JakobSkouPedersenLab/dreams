@@ -63,6 +63,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   for (q in queue) {
 
+    print (q$chr)
+    print (q$genomic_pos)
+
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
       bam_file_path = bam_file_path,
