@@ -68,7 +68,9 @@
   <span class="va">beta</span>,
   alpha <span class="op">=</span> <span class="fl">0.05</span>,
   use_turboem <span class="op">=</span> <span class="cn">TRUE</span>,
-  calculate_confidence_intervals <span class="op">=</span> <span class="cn">FALSE</span>
+  calculate_confidence_intervals <span class="op">=</span> <span class="cn">FALSE</span>,
+  chr_wise <span class="op">=</span> <span class="cn">F</span>,
+  pos_wise <span class="op">=</span> <span class="cn">F</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -90,6 +92,10 @@
 <dd><p>Logical. Should <code><a href="https://rdrr.io/pkg/turboEM/man/turboem.html" class="external-link">turboEM::turboem()</a></code> be used for EM algorithm? Default is TRUE.</p></dd>
 <dt>calculate_confidence_intervals</dt>
 <dd><p>Logical. Should confidence intervals be calculated? Default is FALSE.</p></dd>
+<dt>chr_wise</dt>
+<dd><p>handle bam files chromosome wise</p></dd>
+<dt>pos_wise</dt>
+<dd><p>Handle bam files position wise</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
