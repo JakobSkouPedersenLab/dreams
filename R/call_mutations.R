@@ -28,7 +28,9 @@
 #'
 #' @export
 
-dreams_vc <- function(mutations_df, bam_file_path, reference_path, model, beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE) {
+dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
+                      beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                      chr_wise = F, pos_wise = F) {
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
@@ -46,24 +48,47 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model, beta, 
   }
 
 
-  # Get read positions
-  read_positions_df <- get_read_positions_from_BAM(
-    bam_file_path = bam_file_path,
-    chr = mutations_df$chr,
-    genomic_pos = mutations_df$genomic_pos,
-    reference_path
-  )
+  chr_vec <- mutations_df$chr
+  pos_vec <- mutations_df$genomic_pos
 
-  # Call mutations
-  mutation_calls <- call_mutations(
-    mutations_df = mutations_df,
-    read_positions_df = read_positions_df,
-    model = model,
-    beta = beta,
-    alpha = alpha,
-    use_turboem = use_turboem,
-    calculate_confidence_intervals = calculate_confidence_intervals
-  )
+  if (chr_wise) {
+    queue <- lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
+  } else if (pos_wise) {
+    queue <- lapply(1:length(chr_vec), function(i) list(chr = chr_vec[i], pos = pos_vec[i]))
+  } else {
+    queue <- list(list(chr = chr_vec, pos = pos_vec))
+  }
+
+  mutation_calls <- NULL
+
+  for (q in queue) {
+
+    # Get read positions
+    read_positions_df <- get_read_positions_from_BAM(
+      bam_file_path = bam_file_path,
+      chr = q$chr,
+      genomic_pos = q$genomic_pos,
+      reference_path
+    )
+
+    current_mutations <- mutations_df %>% filter(
+      chr %in% q$chr,
+      genomic_pos %in% q$genomic_pos
+    )
+
+    # Call mutations
+    calls <- call_mutations(
+      mutations_df = current_mutations,
+      read_positions_df = read_positions_df,
+      model = model,
+      beta = beta,
+      alpha = alpha,
+      use_turboem = use_turboem,
+      calculate_confidence_intervals = calculate_confidence_intervals
+    )
+
+    mutation_calls <- rbind(mutation_calls, calls)
+  }
 
   return(mutation_calls)
 }
