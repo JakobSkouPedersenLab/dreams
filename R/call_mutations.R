@@ -5,6 +5,9 @@
 #' @inheritParams call_cancer
 #' @param bam_file_path Path to .BAM-file
 #' @param reference_path Path to reference genome e.g. FASTA-file.
+#' @param pos_wise Handle bam files position wise
+#' @param chr_wise handle bam files chromosome wise
+
 
 #' @return A [data.frame()] with information about the individual mutation calls, including:
 #' \describe{
@@ -76,8 +79,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     )
 
     current_mutations <- mutations_df %>% filter(
-      chr %in% q$chr,
-      genomic_pos %in% q$pos
+      .data$chr %in% q$chr,
+      .data$genomic_pos %in% q$pos
     )
 
     # Call mutations
@@ -101,6 +104,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
 #' @inheritParams call_cancer
+#' @param pos_wise Handle bam files position wise
+#' @param chr_wise handle bam files chromosome wise
+
 #'
 #' @return A [data.frame()] with information about the individual mutation calls, including:
 #' \describe{
@@ -167,13 +173,13 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
 
   for (q in queue) {
     current_read_positions_df <- read_positions_df %>% filter(
-      chr %in% q$chr,
-      genomic_pos %in% q$pos
+      .data$chr %in% q$chr,
+      .data$genomic_pos %in% q$pos
     )
 
     current_mutations <- mutations_df %>% filter(
-      chr %in% q$chr,
-      genomic_pos %in% q$pos
+      .data$chr %in% q$chr,
+      .data$genomic_pos %in% q$pos
     )
 
 
