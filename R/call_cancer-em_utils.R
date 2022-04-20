@@ -255,7 +255,8 @@ run_full_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, er
   return(res)
 }
 
-run_turbo_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list) {
+run_turbo_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list,
+                         turboem_method = "squarem") {
   if (!requireNamespace("turboEM", quietly = TRUE)) {
     stop(
       "Package \"turboEM\" must be installed to use this function.",
@@ -276,7 +277,7 @@ run_turbo_em <- function(start_values, obs_is_mut_list, error_mut_to_ref_list, e
       par_project <- pmax(1e-8, pmin(par, c(2, 1)))
       return(par_project)
     },
-    method = "squarem",
+    method = turboem_method,
     obs_is_mut_list = obs_is_mut_list,
     error_ref_to_mut_list = error_ref_to_mut_list,
     error_mut_to_ref_list = error_mut_to_ref_list,
@@ -340,7 +341,23 @@ get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, e
 
   # Run EM algorithm
   if (use_turboem) {
-    em_res <- run_turbo_em(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
+    em_res <-
+      run_turbo_em(
+        start_values = start_values, obs_is_mut_list = obs_is_mut_list,
+        error_mut_to_ref_list = error_mut_to_ref_list,
+        error_ref_to_mut_list = error_ref_to_mut_list,
+        turboem_method = "squarem"
+      )
+    # If "squarem" fails, rerun with regular EM
+    squarem_failed = is.na(em_res$tf_est)
+    if (squarem_failed) {
+      em_res <- run_turbo_em(
+        start_values = start_values, obs_is_mut_list = obs_is_mut_list,
+        error_mut_to_ref_list = error_mut_to_ref_list,
+        error_ref_to_mut_list = error_ref_to_mut_list,
+        turboem_method = "em"
+      )
+    }
   } else {
     em_res <- run_full_em(start_values, obs_is_mut_list, error_mut_to_ref_list, error_ref_to_mut_list)
   }
