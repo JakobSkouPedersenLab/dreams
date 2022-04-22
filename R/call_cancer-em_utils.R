@@ -349,7 +349,7 @@ get_em_parameter_estimates <- function(obs_is_mut_list, error_ref_to_mut_list, e
         turboem_method = "squarem"
       )
     # If "squarem" fails, rerun with regular EM
-    squarem_failed = is.na(em_res$tf_est)
+    squarem_failed <- is.na(em_res$tf_est)
     if (squarem_failed) {
       em_res <- run_turbo_em(
         start_values = start_values, obs_is_mut_list = obs_is_mut_list,
