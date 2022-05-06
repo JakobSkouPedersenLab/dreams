@@ -12,8 +12,12 @@
 #' @export
 get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, reference_path, chr_wise = F, pos_wise = F) {
 
-  chr_vec = chr
-  pos_vec = genomic_pos
+  # Only extract reads from distinct positions
+  positions = data.frame(chr = chr,
+             genomic_pos = genomic_pos) %>% distinct()
+
+  chr_vec = positions$chr
+  pos_vec = positions$genomic_pos
 
   if (chr_wise) {
     queue = lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
