@@ -141,7 +141,8 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "strand",
       "first_in_pair",
       "ctx_minus1",
-      "ctx_plus1"
+      "ctx_plus1",
+      "chr"
     )
   all_embedded_variables_ctx3 <-
     c(
