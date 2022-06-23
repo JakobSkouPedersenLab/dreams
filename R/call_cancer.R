@@ -97,6 +97,7 @@ dreams_cc <- function(mutations_df, bam_file_path, reference_path, model, beta, 
 #' @param alpha Alpha-level used for testing and confidence intervals. Default is 0.05.
 #' @param use_turboem Logical. Should [turboEM::turboem()] be used for EM algorithm? Default is TRUE.
 #' @param calculate_confidence_intervals Logical. Should confidence intervals be calculated? Default is FALSE.
+#' @param batch_size Batch size fore predicting error rates
 #'
 #' @return
 #' A \code{list()} with:
@@ -132,7 +133,7 @@ dreams_cc <- function(mutations_df, bam_file_path, reference_path, model, beta, 
 #' @seealso [call_mutations()], [train_dreams_model()]
 #'
 #' @export
-call_cancer <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
+call_cancer <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE, batch_size = 32000) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(
@@ -165,7 +166,7 @@ call_cancer <- function(mutations_df, read_positions_df, model, beta, alpha = 0.
   }
 
   # Prepare inputs for algorithm
-  em_input <- prepare_em_input(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta)
+  em_input <- prepare_em_input(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta, batch_size = batch_size)
   obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list

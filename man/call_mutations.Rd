@@ -13,7 +13,8 @@ call_mutations(
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
   chr_wise = F,
-  pos_wise = F
+  pos_wise = F,
+  batch_size = 32000
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ call_mutations(
 \item{chr_wise}{handle bam files chromosome wise}
 
 \item{pos_wise}{Handle bam files position wise}
+
+\item{batch_size}{Batch size fore predicting error rates}
 }
 \value{
 A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:

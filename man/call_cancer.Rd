@@ -11,7 +11,8 @@ call_cancer(
   beta,
   alpha = 0.05,
   calculate_confidence_intervals = FALSE,
-  use_turboem = TRUE
+  use_turboem = TRUE,
+  batch_size = 32000
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ call_cancer(
 \item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
 
 \item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
+
+\item{batch_size}{Batch size fore predicting error rates}
 }
 \value{
 A \code{list()} with:

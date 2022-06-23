@@ -1,4 +1,4 @@
-prepare_em_input <- function(mutations_df, read_positions_df, model, beta) {
+prepare_em_input <- function(mutations_df, read_positions_df, model, beta, batch_size) {
   obs_is_mut_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
@@ -24,8 +24,8 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta) {
       obs_is_mut_list <- append(obs_is_mut_list, list(X))
 
       # Error rates
-      error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
-      error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+      error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta, batch_size)
+      error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta, batch_size)
 
       # Pick relevant error rates for ref and alt
       error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
