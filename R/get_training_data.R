@@ -141,7 +141,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   output_list <- list(
     data = output_data,
     info = info,
-    read_position_mm_rate = read_position_mm_rate
+    read_position_mm_rate = position_error_rate
   )
 
   return(output_list)
