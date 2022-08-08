@@ -29,8 +29,9 @@ get_training_data <- function(bam_paths,
 
   training_data <- NULL
   info <- NULL
+  read_position_mm_rates <- NULL
 
-  n_bam_files = length(bam_paths)
+  n_bam_files <- length(bam_paths)
 
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
@@ -59,6 +60,7 @@ get_training_data <- function(bam_paths,
 
     training_data <- rbind(training_data, current_training_data$data)
     info <- rbind(info, current_training_data$info)
+    read_position_mm_rates = rbind(read_position_mm_rates, current_training_data$read_position_mm_rate)
   }
 
   # Collect output info for beta calculation
@@ -70,7 +72,8 @@ get_training_data <- function(bam_paths,
 
   return(list(
     data = training_data,
-    info = output_info
+    info = output_info,
+    read_position_mm_rate = read_position_mm_rates
   ))
 }
 
@@ -111,6 +114,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   positive_samples <- mismatches$data
   info <- mismatches$info
+  position_error_rate <- mismatches$read_position_mm_rate
 
   n_samples <- nrow(positive_samples) * factor
 
@@ -136,7 +140,8 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   output_list <- list(
     data = output_data,
-    info = info
+    info = info,
+    read_position_mm_rate = read_position_mm_rate
   )
 
   return(output_list)
@@ -228,7 +233,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   return(list(
     data = read_positions_filtered,
-    info = beta_info
+    info = beta_info,
+    read_position_mm_rate = read_position_mm_rate
   ))
 }
 
