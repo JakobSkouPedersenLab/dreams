@@ -188,9 +188,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   # Filter heterozygote positions
 
   read_positions_summarized <- read_positions %>%
-    filter(obs != ref, obs != "N") %>%
     group_by(.data$chr, .data$genomic_pos) %>%
-    summarize(n_mismatches = n()) %>%
+    summarize(n_mismatches = sum(obs != ref)) %>%
     ungroup()
 
   # Join with coverage dataframe - all positions if included_regions is NULL
