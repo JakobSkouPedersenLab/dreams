@@ -60,7 +60,7 @@ get_training_data <- function(bam_paths,
 
     training_data <- rbind(training_data, current_training_data$data)
     info <- rbind(info, current_training_data$info)
-    read_position_mm_rates = rbind(read_position_mm_rates, current_training_data$read_position_mm_rate)
+    read_position_mm_rates <- rbind(read_position_mm_rates, current_training_data$read_position_mm_rate)
   }
 
   # Collect output info for beta calculation
@@ -198,7 +198,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   # Remove positions with high mismatch rate in mismatch  and coverage data
 
   read_position_mm_rate <- read_positions_summarized %>%
-    inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
+    full_join(coverage_data, by = c("chr", "genomic_pos")) %>%
     mutate(mm_rate = .data$n_mismatches / .data$coverage)
 
   read_position_filter <- read_position_mm_rate %>%
