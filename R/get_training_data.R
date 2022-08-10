@@ -208,8 +208,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     mutate(
       mm_rate = .data$n_mismatches / .data$coverage,
       across(where(is.numeric), coalesce, 0)
-    ) %>%
-    filter(mm_rate < mm_rate_max)
+    )
 
   read_position_filter <- read_position_mm_rate %>%
     filter(.data$mm_rate < mm_rate_max)
