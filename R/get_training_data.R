@@ -215,7 +215,9 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     semi_join(read_position_filter, by = c("chr", "genomic_pos"))
 
   coverage_data_filtered <- coverage_data %>%
-    semi_join(read_position_filter, by = c("chr", "genomic_pos"))
+    semi_join(position_mm_rate %>% filter(.data$mm_rate < mm_rate_max), by = c("chr", "genomic_pos"))
+
+  print (dim(coverage_data_filtered))
 
   # Remove unwanted positions based on exclude files
 
