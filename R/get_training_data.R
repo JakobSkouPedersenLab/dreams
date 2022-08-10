@@ -185,7 +185,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
 
-  print ("COVERAGE DATA")
+  print("COVERAGE DATA")
   print(dim(coverage_data))
 
   # Filter heterozygote positions
@@ -205,8 +205,10 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   position_mm_rate <- coverage_data %>%
     left_join(read_positions_summarized, by = c("chr", "genomic_pos")) %>%
-    mutate(mm_rate = .data$n_mismatches / .data$coverage,
-           across(where(is.numeric), coalesce, 0)) %>%
+    mutate(
+      mm_rate = .data$n_mismatches / .data$coverage,
+      across(where(is.numeric), coalesce, 0)
+    ) %>%
     filter(mm_rate < mm_rate_max)
 
   read_position_filter <- read_position_mm_rate %>%
@@ -217,8 +219,9 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   coverage_data_filtered <- coverage_data %>%
     semi_join(position_mm_rate %>%
-                filter(.data$mm_rate < mm_rate_max),
-              by = c("chr", "genomic_pos"))
+      filter(.data$mm_rate < mm_rate_max),
+    by = c("chr", "genomic_pos")
+    )
 
   # Remove unwanted positions based on exclude files
 
