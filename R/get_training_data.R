@@ -234,7 +234,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   return(list(
     data = read_positions_filtered,
     info = beta_info,
-    read_position_mm_rate = read_positions_filtered %>% left_join(read_position_mm_rate)
+    read_position_mm_rate = read_position_filter
   ))
 }
 
