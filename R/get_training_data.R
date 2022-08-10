@@ -204,7 +204,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     mutate(mm_rate = .data$n_mismatches / .data$coverage)
 
   position_mm_rate <- coverage_data %>%
-    inner_join(read_positions_summarized, by = c("chr", "genomic_pos")) %>%
+    left_join(read_positions_summarized, by = c("chr", "genomic_pos")) %>%
     mutate(mm_rate = .data$n_mismatches / .data$coverage)
 
 
