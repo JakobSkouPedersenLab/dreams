@@ -177,7 +177,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   pp <- Rsamtools::PileupParam(
     max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
-    distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
+    distinguish_strands = FALSE, distinguish_nucleotides = T,
     ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
@@ -218,7 +218,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   coverage_data_filtered <- coverage_data %>%
     semi_join(position_mm_rate,
-    by = c("chr", "genomic_pos")
+      by = c("chr", "genomic_pos")
     )
 
   # Remove unwanted positions based on exclude files
@@ -246,7 +246,12 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   return(list(
     data = read_positions_filtered,
     info = beta_info,
-    read_position_mm_rate = position_mm_rate
+    read_position_mm_rate = position_mm_rate %>%
+      group_by(chr, genomic_pos) %>%
+      mutate(count = n_mismatches,
+             total_coverage = sum(coverage),
+             mm_rate = n_mismatches/total_coverage) %>%
+      pivot_wider(id_cols = c(chr,genomic_pos,total_coverage), names_from = "nucleotide", values_from = mm_rate, values_fill = 0)
   ))
 }
 
