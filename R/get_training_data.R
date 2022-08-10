@@ -205,8 +205,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   position_mm_rate <- coverage_data %>%
     left_join(read_positions_summarized, by = c("chr", "genomic_pos")) %>%
-    mutate(mm_rate = .data$n_mismatches / .data$coverage)
-
+    mutate(mm_rate = .data$n_mismatches / .data$coverage,
+           across(where(is.numeric), coalesce, 0))
 
   read_position_filter <- read_position_mm_rate %>%
     filter(.data$mm_rate < mm_rate_max)
