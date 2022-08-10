@@ -185,6 +185,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
 
+  print ("COVERAGE DATA")
   print(dim(coverage_data))
 
   # Filter heterozygote positions
