@@ -14,9 +14,12 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta, posit
 
         print ("POSITION BETA")
 
+        print (dim(position_beta))
+
         current_position_beta = position_beta %>% filter(genomic_pos == genomic_pos,
                                         chr == chr)
 
+        print (dim(current_position_beta))
         print (current_position_beta)
 
         beta = current_position_beta$mm_rate
