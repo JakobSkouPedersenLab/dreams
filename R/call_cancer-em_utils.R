@@ -11,21 +11,21 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta, posit
       alt <- mutations_df[i, "alt"]
 
       if (!is.null(position_beta)) {
+        print("POSITION BETA")
 
-        print ("POSITION BETA")
+        print(dim(position_beta))
 
-        print (dim(position_beta))
+        current_position_beta <- position_beta %>% filter(
+          genomic_pos == !!genomic_pos,
+          chr == !!chr
+        )
 
-        current_position_beta = position_beta %>% filter(genomic_pos == genomic_pos,
-                                        chr == chr)
+        print(dim(current_position_beta))
+        print(current_position_beta)
 
-        print (dim(current_position_beta))
-        print (current_position_beta)
+        beta <- current_position_beta$mm_rate
 
-        beta = current_position_beta$mm_rate
-
-        print (beta)
-
+        print(beta)
       }
 
       mut_reads_ref_alt <-
