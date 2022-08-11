@@ -16,6 +16,8 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta, posit
                                         chr == chr) %>%
           .$mm_rate
 
+        print (beta)
+
       }
 
       mut_reads_ref_alt <-
