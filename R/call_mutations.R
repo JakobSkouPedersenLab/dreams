@@ -32,7 +32,7 @@
 #' @export
 
 dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
-                      beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                      beta, position_beta = NULL, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                       chr_wise = F, pos_wise = F) {
 
   # Clean up mutations
@@ -88,6 +88,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       mutations_df = current_mutations,
       read_positions_df = read_positions_df,
       model = model,
+      position_beta = position_beta,
       beta = beta,
       alpha = alpha,
       use_turboem = use_turboem,
@@ -129,7 +130,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export
-call_mutations <- function(mutations_df, read_positions_df, model, beta,
+call_mutations <- function(mutations_df, read_positions_df, model, beta, position_beta = NULL,
                            alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                            chr_wise = F, pos_wise = F, batch_size = 32000) {
   # If no mutations return empty result
@@ -184,7 +185,14 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
 
 
     # Prepare EM input
-    em_input <- prepare_em_input(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta, batch_size = batch_size)
+    em_input <- prepare_em_input(
+      mutations_df = current_mutations,
+      read_positions_df = current_read_positions_df,
+      model = model,
+      beta = beta,
+      position_beta = position_beta,
+      batch_size = batch_size
+    )
 
     obs_is_mut_list <- em_input$obs_is_mut_list
     error_ref_to_mut_list <- em_input$error_ref_to_mut_list

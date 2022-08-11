@@ -1,4 +1,4 @@
-prepare_em_input <- function(mutations_df, read_positions_df, model, beta, batch_size) {
+prepare_em_input <- function(mutations_df, read_positions_df, model, beta, position_beta = NULL, batch_size) {
   obs_is_mut_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
@@ -9,6 +9,14 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta, batch
       genomic_pos <- mutations_df[i, "genomic_pos"]
       ref <- mutations_df[i, "ref"]
       alt <- mutations_df[i, "alt"]
+
+      if (!is.null(position_beta)) {
+
+        beta = position_beta %>% filter(ref == !!ref,
+                                        alt == !!alt) %>%
+          .$mm_rate
+
+      }
 
       mut_reads_ref_alt <-
         read_positions_df %>%
