@@ -13,7 +13,7 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta, posit
       if (!is.null(position_beta)) {
 
         beta = position_beta %>% filter(genomic_pos == genomic_pos,
-                                        chr = chr) %>%
+                                        chr == chr) %>%
           .$mm_rate
 
       }
