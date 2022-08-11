@@ -12,8 +12,6 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta, posit
 
       if (!is.null(position_beta)) {
 
-        print (position_beta)
-
         current_position_beta = position_beta %>% filter(genomic_pos == genomic_pos,
                                         chr == chr)
 
