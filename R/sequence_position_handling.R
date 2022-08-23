@@ -9,13 +9,13 @@
 correct_pos_idx_w_cigar <- function(df) {
   df %>% mutate(
     # Raw processing of CIGAR
-    cigar_pos = str_extract_all(string = .data$cigar, pattern = "\\d+(?=[MID]+)") %>% lapply(as.numeric),
+    cigar_pos = str_extract_all(string = .data$cigar, pattern = "\\d+(?=[HMID]+)") %>% lapply(as.numeric),
     insert_idx = str_remove_all(string = .data$cigar, pattern = "[\\d]") %>%
       str_locate_all(pattern = "I") %>%
       map(function(x) x[, "start"]),
     del_idx = .data$cigar %>%
       str_remove_all(pattern = "[\\d]") %>%
-      str_locate_all(pattern = "D") %>%
+      str_locate_all(pattern = "[HD]") %>%
       map(function(x) x[, "start"]),
     ind_sz = map2(.data$cigar_pos, .data$insert_idx, function(x, y) x[y]),
     del_sz = map2(.data$cigar_pos, .data$del_idx, function(x, y) x[y]),
@@ -122,13 +122,13 @@ get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
 
   event_lengths <-
     cigar_inserts_removed %>%
-    str_extract_all(pattern = "\\d+(?=[MD]+)") %>%
+    str_extract_all(pattern = "\\d+(?=[HMD]+)") %>%
     lapply(as.numeric)
 
   genomic_offset <- map(event_lengths, function(x) 1:sum(x))
 
   del_idx <-
-    str_extract_all(cigar_inserts_removed, "[MD]") %>%
+    str_extract_all(cigar_inserts_removed, "[HMD]") %>%
     lapply(str_which, pattern = "D")
 
   del_start <-
