@@ -194,3 +194,61 @@ test_that("simple examples 2", {
   expect_equal(res3$is_in_deletion, c(F, T, F, F, F))
 })
 
+
+
+
+test_that("simple examples 3 with hardclips", {
+  # Example 1
+  # POS+:123
+  # REF: TTT
+  # SEQ: T-T
+  ex1 <- data.frame(
+    pos_idx = 1:3,
+    cigar = "3H1M1D1M"
+  )
+
+  res1 <- ex1 %>% correct_pos_idx_w_cigar()
+  expect_equal(res1$is_in_deletion, c(F, T, F))
+
+  # Example 2
+  # POS+:1234567
+  # REF: TTTTTTT
+  # SEQ: T---TTT
+  ex2 <- data.frame(
+    pos_idx = 1:7,
+    cigar = "1M3D3M3H"
+  )
+
+  res2 <- ex2 %>% correct_pos_idx_w_cigar()
+  expect_equal(res2$is_in_deletion, c(F, T, T, T, F, F, F))
+
+
+
+  # Example 3
+  # POS+:1--2345
+  # REF: T--TTTT
+  # SEQ: TAA-TTT
+  ex3 <- data.frame(
+    pos_idx = 1:5,
+    cigar = "3H1M2I1D3M3H"
+  )
+
+  res3 <- ex3 %>% correct_pos_idx_w_cigar()
+  expect_equal(res3$is_in_deletion, c(F, T, F, F, F))
+
+
+  # Example 4
+  # POS+:1--2345
+  # REF: T--TTTT
+  # SEQ: TAA-TTT
+  ex3 <- data.frame(
+    pos_idx = 1:5,
+    cigar = "3H1M2I1H3M3H"
+  )
+
+  res3 <- ex3 %>% correct_pos_idx_w_cigar()
+  expect_equal(res3$is_in_deletion, c(F, T, F, F, F))
+
+})
+
+
