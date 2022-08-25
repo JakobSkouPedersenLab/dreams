@@ -9,13 +9,15 @@
 correct_pos_idx_w_cigar <- function(df) {
   df %>% mutate(
     # Raw processing of CIGAR
-    cigar_pos = str_extract_all(string = .data$cigar, pattern = "\\d+(?=[MID]+)") %>% lapply(as.numeric),
+    cigar = str_remove_all(.data$cigar, pattern = "^[0-9]+[HD]"),
+    cigar = str_remove_all(.data$cigar, pattern = "[0-9]+[HD]$"),
+    cigar_pos = str_extract_all(string = .data$cigar, pattern = "\\d+(?=[HMID]+)") %>% lapply(as.numeric),
     insert_idx = str_remove_all(string = .data$cigar, pattern = "[\\d]") %>%
       str_locate_all(pattern = "I") %>%
       map(function(x) x[, "start"]),
     del_idx = .data$cigar %>%
       str_remove_all(pattern = "[\\d]") %>%
-      str_locate_all(pattern = "[D]") %>%
+      str_locate_all(pattern = "[HD]") %>%
       map(function(x) x[, "start"]),
     ind_sz = map2(.data$cigar_pos, .data$insert_idx, function(x, y) x[y]),
     del_sz = map2(.data$cigar_pos, .data$del_idx, function(x, y) x[y]),
