@@ -95,7 +95,12 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
       first_in_pair = as.integer(as.logical(bitwAnd(.data$flag, 64))),
       n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
       n_insertions_in_read = str_count(.data$cigar, "I"),
-      n_deletions_in_read = str_count(.data$cigar, "D")
+      n_deletions_in_read = str_count(.data$cigar, "D"),
+      md_tag = .data$MD,
+      cigar = .data$cigar,
+      seq = .data$seq,
+      pos = .data$pos,
+      pos_idx =.data$pos_idx
     ) %>%
     # TODO: Move to filter function! Or do before calling this function!
     filter(.data$fragment_size != 0)
@@ -107,7 +112,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
       "strand", "first_in_pair", "read_index", "fragment_size",
       "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
       "local_complexity_1", "local_complexity_2", "local_GC",
-      "n_other_errors", "n_insertions_in_read", "n_deletions_in_read"
+      "n_other_errors", "n_insertions_in_read", "n_deletions_in_read", "md_tag", "cigar", "seq", "pos", "pos_idx"
     )
 
   # Add UMI features if asked
@@ -152,5 +157,3 @@ get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
 
   return(as.character(Fa, use.names = FALSE))
 }
-
-

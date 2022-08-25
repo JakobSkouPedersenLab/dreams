@@ -118,30 +118,57 @@ get_mismatch_genomic_pos_list <- function(pos, MDtag) {
 #' @keywords internal
 get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
   # Remove insert from cigar
-  cigar_inserts_removed <- cigar %>% str_remove_all(pattern = "[\\d]+I")
+  cigar_inserts_removed <- cigar %>%
+    str_remove_all(pattern = "[\\d]+I") %>%
+    str_remove_all(pattern = "^[0-9]+[HD]") %>%
+    str_remove_all(pattern = "[0-9]+[HD]$")
+
+  print(cigar)
+  print(cigar_inserts_removed)
 
   event_lengths <-
     cigar_inserts_removed %>%
     str_extract_all(pattern = "\\d+(?=[HMD]+)") %>%
     lapply(as.numeric)
 
+  print("EVENT LENGTHS")
+  print(event_lengths)
+-
   genomic_offset <- map(event_lengths, function(x) 1:sum(x))
+
+  print("OFFSET")
+  print(genomic_offset)
 
   del_idx <-
     str_extract_all(cigar_inserts_removed, "[HMD]") %>%
-    lapply(str_which, pattern = "D")
+    lapply(str_which, pattern = "[HD]")
 
   del_start <-
     map(event_lengths, cumsum) %>%
     map2(event_lengths, function(x, y) x - y + 1) %>%
     map2(del_idx, function(x, y) x[y])
 
+
+
   del_end <-
     map(event_lengths, cumsum) %>%
     map2(del_idx, function(x, y) x[y])
 
+  print("dels")
+  print(del_idx)
+  print(del_start)
+  print(del_end)
+
   del_positions <- map2(del_start, del_end, function(x, y) mapply(":", x, y) %>% unlist())
+
+  print("del_positions")
+  print(del_positions)
+
   mismatch_genomic_pos <- get_mismatch_genomic_pos_list(pos = pos, MDtag = MDtag)
+
+  print("mismatches")
+  print(mismatch_genomic_pos)
+
 
   match_positions <-
     genomic_offset %>%
@@ -151,6 +178,7 @@ get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
     map2(pos, function(x, y) x + y - 1) %>%
     # Filter mismatch positions
     map2(mismatch_genomic_pos, function(x, y) setdiff(x, y))
+
 
   return(match_positions)
 }
