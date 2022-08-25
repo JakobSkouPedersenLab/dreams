@@ -125,9 +125,6 @@ get_match_genomic_pos_list <- function(pos, cigar, MDtag) {
     str_remove_all(pattern = "^[0-9]+[H]") %>%
     str_remove_all(pattern = "[0-9]+[H]$")
 
-  print (cigar_inserts_removed)
-
-
   event_lengths <-
     cigar_inserts_removed %>%
     str_extract_all(pattern = "\\d+(?=[MD]+)") %>%
