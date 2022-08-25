@@ -134,8 +134,8 @@ test_that("simple examples 2", {
     isize = 5
   )
 
-   expect_true(sample_negative_read_positions(bam_df = ex2, n_samples = 1)$genomic_pos %in% c(1, 4))
-   expect_equal(extract_mismatch_positions(bam_df = ex2)$genomic_pos, c(2, 5))
+  expect_true(sample_negative_read_positions(bam_df = ex2, n_samples = 1)$genomic_pos %in% c(1, 4))
+  expect_equal(extract_mismatch_positions(bam_df = ex2)$genomic_pos, c(2, 5))
 
   # Example 3
   # POS+:123456789
@@ -149,8 +149,8 @@ test_that("simple examples 2", {
     isize = 9
   )
 
-   expect_true(sample_negative_read_positions(bam_df = ex3, n_samples = 1)$genomic_pos %in% 1:9)
-   expect_equal(extract_mismatch_positions(bam_df = ex3) %>% nrow(), 0)
+  expect_true(sample_negative_read_positions(bam_df = ex3, n_samples = 1)$genomic_pos %in% 1:9)
+  expect_equal(extract_mismatch_positions(bam_df = ex3) %>% nrow(), 0)
 })
 
 
@@ -241,14 +241,11 @@ test_that("simple examples 3 with hardclips", {
   # POS+:1--2345
   # REF: T--TTTT
   # SEQ: TAA-TTT
-  ex3 <- data.frame(
+  ex4 <- data.frame(
     pos_idx = 1:5,
     cigar = "3H1M2I1H3M3H"
   )
 
-  res3 <- ex3 %>% correct_pos_idx_w_cigar()
-  expect_equal(res3$is_in_deletion, c(F, T, F, F, F))
-
+  res4 <- ex4 %>% correct_pos_idx_w_cigar()
+  expect_equal(res4$is_in_deletion, c(F, T, F, F, F))
 })
-
-
