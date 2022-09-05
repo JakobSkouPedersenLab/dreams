@@ -50,7 +50,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
   }
 
-  queue_indices = mutations_df %>% select(chr, genomic_pos) %>% distinct()
+  queue_indices = mutations_df %>% select(.data$chr, .data$genomic_pos) %>% distinct()
 
 
   chr_vec <- queue_indices$chr
