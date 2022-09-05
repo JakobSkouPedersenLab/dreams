@@ -50,9 +50,11 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
   }
 
+  queue_indices = mutations_df %>% select(chr, genomic_pos) %>% distinct()
 
-  chr_vec <- mutations_df$chr
-  pos_vec <- mutations_df$genomic_pos
+
+  chr_vec <- queue_indices$chr
+  pos_vec <- queue_indices$genomic_pos
 
   if (chr_wise) {
     queue <- lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
@@ -63,6 +65,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
   }
 
   mutation_calls <- NULL
+
+  print (queue)
 
   for (q in queue) {
     print(q)
