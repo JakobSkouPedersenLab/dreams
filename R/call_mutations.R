@@ -66,12 +66,15 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   mutation_calls <- NULL
 
+  print ("QUEUE")
   print (queue)
 
   for (q in queue) {
-    print(q)
 
+    print ("CHR")
     print(q$chr)
+
+    print ("POS")
     print(q$pos)
 
     # Get read positions
