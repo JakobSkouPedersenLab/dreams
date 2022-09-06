@@ -85,7 +85,6 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
   }
 
 
-  foreach(q = queue, .combine = rbind) %dopar% {
 
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
