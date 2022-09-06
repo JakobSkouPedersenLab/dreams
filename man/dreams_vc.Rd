@@ -14,7 +14,8 @@ dreams_vc(
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
   chr_wise = F,
-  pos_wise = F
+  pos_wise = F,
+  ncores = 1
 )
 }
 \arguments{

@@ -30,10 +30,16 @@
 #' @seealso [call_mutations()], [call_cancer()], [train_dreams_model()]
 #'
 #' @export
+#' @import doParallel
+#'
 
 dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
                       beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                      chr_wise = F, pos_wise = F) {
+                      chr_wise = F, pos_wise = F, ncores = 1) {
+  print("PARALLEL")
+  print(detectCores())
+  doParallel::registerDoParallel(ncores)
+
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
@@ -50,7 +56,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
   }
 
-  queue_indices = mutations_df %>% select(.data$chr, .data$genomic_pos) %>% distinct()
+  queue_indices <- mutations_df %>%
+    select(.data$chr, .data$genomic_pos) %>%
+    distinct()
 
 
   chr_vec <- queue_indices$chr
@@ -66,8 +74,18 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   mutation_calls <- NULL
 
+  print ("QUEUE")
+  print (queue)
 
-  for (q in queue) {
+  for (i in queue) {
+
+    print (i$chr)
+    print (i$genomic_pos)
+
+  }
+
+
+  foreach(q = queue, .combine = rbind) %dopar% {
 
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
@@ -95,6 +113,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
     mutation_calls <- rbind(mutation_calls, calls)
   }
+
 
   return(mutation_calls)
 }
