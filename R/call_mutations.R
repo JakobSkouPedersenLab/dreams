@@ -72,33 +72,35 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     queue <- list(list(chr = chr_vec, pos = pos_vec))
   }
 
-  mutation_calls <- NULL
-
-  print ("QUEUE")
-  print (queue)
+  print("QUEUE")
+  print(queue)
 
   for (i in queue) {
-
-    print (i$chr)
-    print (i$genomic_pos)
-
+    print(i$chr)
+    print(i$pos)
   }
 
 
-
-    # Get read positions
-    read_positions_df <- get_read_positions_from_BAM(
-      bam_file_path = bam_file_path,
-      chr = q$chr,
-      genomic_pos = q$pos,
-      reference_path
-    )
+  mutation_calls <- foreach(q = queue, .combine = rbind) %dopar% {
+    print(q)
 
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
       .data$genomic_pos %in% q$pos
     )
 
+    print(current_mutations)
+    print(current_mutations$chr)
+    print(current_mutations$genomic_pos)
+
+    # Get read positions
+    read_positions_df <- get_read_positions_from_BAM(
+      bam_file_path = bam_file_path,
+      chr = current_mutations$chr,
+      genomic_pos = current_mutations$genomic_pos,
+      reference_path = reference_path
+    )
+#
     # Call mutations
     calls <- call_mutations(
       mutations_df = current_mutations,
@@ -109,8 +111,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       use_turboem = use_turboem,
       calculate_confidence_intervals = calculate_confidence_intervals
     )
-
-    mutation_calls <- rbind(mutation_calls, calls)
+#
+#     calls
   }
 
 
