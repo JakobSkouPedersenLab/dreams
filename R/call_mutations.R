@@ -100,7 +100,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       genomic_pos = current_mutations$genomic_pos,
       reference_path = reference_path
     )
-#
+    #
     # Call mutations
     calls <- call_mutations(
       mutations_df = current_mutations,
@@ -111,8 +111,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       use_turboem = use_turboem,
       calculate_confidence_intervals = calculate_confidence_intervals
     )
-#
-#     calls
+
+
+    calls
   }
 
 
