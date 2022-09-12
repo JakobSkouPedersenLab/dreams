@@ -50,7 +50,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
   }
 
-  queue_indices = mutations_df %>% select(.data$chr, .data$genomic_pos) %>% distinct()
+  queue_indices <- mutations_df %>%
+    select(.data$chr, .data$genomic_pos) %>%
+    distinct()
 
 
   chr_vec <- queue_indices$chr
@@ -66,8 +68,16 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   mutation_calls <- NULL
 
+  length_queue <- length(queue)
+
+  print(paste0("Calling mutations in ", length_queue, " batches:"))
+
+  count <- 0
 
   for (q in queue) {
+    count <- count + 1
+
+    print(paste0("Calling batch ", count, "/", length_queue))
 
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
