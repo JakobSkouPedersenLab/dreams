@@ -54,12 +54,12 @@ run_full_em_vc <- function(tf_start, obs_is_mut, error_mut_to_ref, error_ref_to_
 
 run_turbo_em_vc <- function(tf_start, obs_is_mut, error_mut_to_ref, error_ref_to_mut,
                             turboem_method = "squarem") {
-  if (!requireNamespace("turboEM", quietly = TRUE)) {
-    stop(
-      "Package \"turboEM\" must be installed to use this function.",
-      call. = FALSE
-    )
-  }
+  # if (!requireNamespace("turboEM", quietly = TRUE)) {
+  #   stop(
+  #     "Package \"turboEM\" must be installed to use this function.",
+  #     call. = FALSE
+  #   )
+  # }
 
   # Start speed up version of EM algorithm
   turboem_res <- turboEM::turboem(
