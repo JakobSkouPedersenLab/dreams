@@ -62,8 +62,11 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       reference_path = reference_path,
       model = model,
       beta = beta,
-      use_turboem = F,
-      pos_wise = T
+      use_turboem = use_turboem,
+      pos_wise = pos_wise,
+      chr_wise = chr_wise,
+      calculate_confidence_intervals = calculate_confidence_intervals,
+      alpha = alpha
     )
 
     return(current_calls)
