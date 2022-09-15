@@ -42,6 +42,8 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   cl <- makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
+  init_model = model
+
   serial_model <- keras::serialize_model(init_model)
 
   mutations_df <- mutation_list %>% mutate(idx = sort(sample(ncores, nrow(mutation_list), replace = T), decreasing = F))
