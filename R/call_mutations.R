@@ -42,27 +42,26 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   cl <- makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
-  init_model = model
 
-  serial_model <- keras::serialize_model(init_model)
+  serial_model <- keras::serialize_model(model)
 
-  mutations_df <- mutation_list %>% mutate(idx = sort(sample(ncores, nrow(mutation_list), replace = T), decreasing = F))
+  mutations_df <- mutations_df %>% mutate(idx = sort(sample(ncores, nrow(mutations_df), replace = T), decreasing = F))
 
-  mutation_calls <- foreach(
+  mutation_calls <- foreach::foreach(
     i = 1:ncores,
     .combine = rbind,
     .packages = c("tidyverse", "dreams", "keras", "tensorflow", "parallel", "doParallel"),
     .errorhandling = "pass"
   ) %dopar% {
-    model <- keras::unserialize_model(serial_model)
+    unserial_model <- keras::unserialize_model(serial_model)
 
-    mutations <- mutations %>% filter(idx == i)
+    mutations <- mutations %>% filter(.data$idx == !!i)
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
-      bam_file_path = bam_file,
+      bam_file_path = bam_file_path,
       reference_path = reference_path,
-      model = model,
+      model = unserial_model,
       beta = beta,
       use_turboem = use_turboem,
       pos_wise = pos_wise,
