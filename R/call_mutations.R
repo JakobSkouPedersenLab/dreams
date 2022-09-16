@@ -39,67 +39,73 @@
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
                                beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                                chr_wise = F, pos_wise = F, ncores = 1) {
-  if (nrow(mutations_df < ncores)) {
-    ncores <- nrow(mutations_df)
+  if (nrow(mutations_df) == 0) {
+    return(data.frame())
   }
+
+  if (nrow(mutations_df) < ncores) {
+    ncores <- max(nrow(mutations_df), 1)
+  }
+
+
+
+
+  serial_model <- keras::serialize_model(model)
+
+  mutations_df <- mutations_df %>%
+    select(
+      "chr" = matches("chr|CHR|CHROM"),
+      "genomic_pos" = matches("pos|POS"),
+      "ref" = matches("ref|REF"),
+      "alt" = matches("alt|ALT|obs|OBS")
+    ) %>%
+    mutate(idx = sort(row_number() %% ncores, decreasing = F))
+
+  index_list <- unique(mutations_df$idx)
 
 
   cl <- makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
 
-  serial_model <- keras::serialize_model(model)
-
-  mutations_df <- mutations_df %>% mutate(idx = sort(sample(ncores, nrow(mutations_df), replace = T), decreasing = F))
-
-
-  index_list <- unique(mutations_df$idx)
-
-
-  print(head(mutations_df))
-  print(mutations_df %>% select(-idx))
-
-  print(pos_wise)
-  print(chr_wise)
-
   mutation_calls <- foreach::foreach(
     i = index_list,
     .combine = rbind,
-    .packages = c("tidyverse", "dreams", "keras", "tensorflow", "parallel", "doParallel"),
-    .errorhandling = "pass"
+    .packages = c("tidyverse", "keras", "tensorflow", "parallel", "doParallel"),
+    .errorhandling = "pass",
+    .export = "dreams_vc"
   ) %dopar% {
     unserial_model <- keras::unserialize_model(serial_model)
 
     mutations <- mutations_df %>%
       filter(.data$idx == i) %>%
-      select(-idx)
+      select(-.data$idx)
 
-    if (nrow(mutations > 0)) {
-      current_calls <- dreams_vc(
-        mutations_df = mutations,
-        bam_file_path = bam_file_path,
-        reference_path = reference_path,
-        model = unserial_model,
-        beta = beta,
-        use_turboem = use_turboem,
-        pos_wise = pos_wise,
-        chr_wise = chr_wise,
-        calculate_confidence_intervals = calculate_confidence_intervals,
-        alpha = alpha
-      )
+    current_calls <- dreams_vc(
+      mutations_df = mutations,
+      bam_file_path = bam_file_path,
+      reference_path = reference_path,
+      model = unserial_model,
+      beta = beta,
+      use_turboem = use_turboem,
+      pos_wise = pos_wise,
+      chr_wise = chr_wise,
+      calculate_confidence_intervals = calculate_confidence_intervals,
+      alpha = alpha
+    )
 
-      return(current_calls)
-    } else {
-      return(NULL)
-    }
-
-
+    print(current_calls)
+    current_calls
+    return(current_calls)
   }
+
+
+  print("MUTATION CALLS")
+  print(mutation_calls)
+
   stopCluster(cl)
   return(mutation_calls)
 }
-
-
 
 #' Call mutations in a bam-file
 #'
