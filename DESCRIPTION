@@ -42,7 +42,10 @@ Imports:
     reticulate,
     progress,
     rsconnect,
-    keras
+    keras,
+    parallel,
+    doParallel,
+    foreach
 Suggests: 
     knitr,
     covr,

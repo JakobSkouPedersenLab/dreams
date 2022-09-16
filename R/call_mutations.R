@@ -1,4 +1,106 @@
 
+
+#' Call mutations in a bam-file
+#'
+#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
+#' @inheritParams call_cancer
+#' @param bam_file_path Path to .BAM-file
+#' @param reference_path Path to reference genome e.g. FASTA-file.
+#' @param pos_wise Handle bam files position wise
+#' @param chr_wise handle bam files chromosome wise
+#' @param ncores Number of processing cores
+
+
+#' @return A [data.frame()] with information about the individual mutation calls, including:
+#' \describe{
+#'   \item{chr, genomic_pos}{The genomic position of the mutation.}
+#'   \item{ref, alt}{The reference and alternative allele.}
+#'   \item{EM_converged}{If the EM algorithm converged.}
+#'   \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
+#'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
+#'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
+#'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'   \item{count}{The count of the alternative allele.}
+#'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
+#'   \item{full_coverage}{The total coverage of the position (for reference).}
+#'   \item{obs_freq}{The observed frequency of the alternative allele.}
+#'   \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
+#'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
+#'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
+#' }
+#'
+#' @seealso [call_mutations()], [call_cancer()], [train_dreams_model()]
+#'
+#' @import parallel
+#' @import doParallel
+#'
+#' @export
+
+dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
+                               beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                               chr_wise = F, pos_wise = F, ncores = 1) {
+  if (nrow(mutations_df < ncores)) {
+    ncores <- nrow(mutations_df)
+  }
+
+
+  cl <- makeCluster(ncores)
+  doParallel::registerDoParallel(cl)
+
+
+  serial_model <- keras::serialize_model(model)
+
+  mutations_df <- mutations_df %>% mutate(idx = sort(sample(ncores, nrow(mutations_df), replace = T), decreasing = F))
+
+
+  index_list <- unique(mutations_df$idx)
+
+
+  print(head(mutations_df))
+  print(mutations_df %>% select(-idx))
+
+  print(pos_wise)
+  print(chr_wise)
+
+  mutation_calls <- foreach::foreach(
+    i = index_list,
+    .combine = rbind,
+    .packages = c("tidyverse", "dreams", "keras", "tensorflow", "parallel", "doParallel"),
+    .errorhandling = "pass"
+  ) %dopar% {
+    unserial_model <- keras::unserialize_model(serial_model)
+
+    mutations <- mutations_df %>%
+      filter(.data$idx == i) %>%
+      select(-idx)
+
+    if (nrow(mutations > 0)) {
+      current_calls <- dreams_vc(
+        mutations_df = mutations,
+        bam_file_path = bam_file_path,
+        reference_path = reference_path,
+        model = unserial_model,
+        beta = beta,
+        use_turboem = use_turboem,
+        pos_wise = pos_wise,
+        chr_wise = chr_wise,
+        calculate_confidence_intervals = calculate_confidence_intervals,
+        alpha = alpha
+      )
+
+      return(current_calls)
+    } else {
+      return(NULL)
+    }
+
+
+  }
+  stopCluster(cl)
+  return(mutation_calls)
+}
+
+
+
 #' Call mutations in a bam-file
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
