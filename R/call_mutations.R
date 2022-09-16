@@ -55,7 +55,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   ) %dopar% {
     unserial_model <- keras::unserialize_model(serial_model)
 
-    mutations <- mutations %>% filter(.data$idx == !!i)
+    mutations <- mutations_df %>% filter(.data$idx == !!i)
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
