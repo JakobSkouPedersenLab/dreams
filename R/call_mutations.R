@@ -39,11 +39,8 @@
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
                                beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                                chr_wise = F, pos_wise = F, ncores = 1) {
-
   if (nrow(mutations_df < ncores)) {
-
-    ncores = nrow(mutations_df)
-
+    ncores <- nrow(mutations_df)
   }
 
 
@@ -56,7 +53,14 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   mutations_df <- mutations_df %>% mutate(idx = sort(sample(ncores, nrow(mutations_df), replace = T), decreasing = F))
 
 
-  index_list = unique(mutations_df$idx)
+  index_list <- unique(mutations_df$idx)
+
+
+  print(head(mutations_df))
+  print(mutations_df %>% select(-idx))
+
+  print(pos_wise)
+  print(chr_wise)
 
   mutation_calls <- foreach::foreach(
     i = index_list,
@@ -66,25 +70,32 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   ) %dopar% {
     unserial_model <- keras::unserialize_model(serial_model)
 
-    mutations <- mutations_df %>% filter(.data$idx == i)
+    mutations <- mutations_df %>%
+      filter(.data$idx == i) %>%
+      select(-idx)
 
-    current_calls <- dreams_vc(
-      mutations_df = mutations,
-      bam_file_path = bam_file_path,
-      reference_path = reference_path,
-      model = unserial_model,
-      beta = beta,
-      use_turboem = use_turboem,
-      #pos_wise = pos_wise,
-      #chr_wise = chr_wise,
-      calculate_confidence_intervals = calculate_confidence_intervals,
-      alpha = alpha
-    )
+    if (nrow(mutations > 0)) {
+      current_calls <- dreams_vc(
+        mutations_df = mutations,
+        bam_file_path = bam_file_path,
+        reference_path = reference_path,
+        model = unserial_model,
+        beta = beta,
+        use_turboem = use_turboem,
+        pos_wise = pos_wise,
+        chr_wise = chr_wise,
+        calculate_confidence_intervals = calculate_confidence_intervals,
+        alpha = alpha
+      )
 
-    return(current_calls)
+      return(current_calls)
+    } else {
+      return(NULL)
+    }
+
+
   }
   stopCluster(cl)
-
   return(mutation_calls)
 }
 
