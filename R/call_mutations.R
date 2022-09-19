@@ -48,8 +48,6 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   }
 
 
-
-
   serial_model <- keras::serialize_model(model)
 
   mutations_df <- mutations_df %>%
@@ -94,14 +92,10 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       alpha = alpha
     )
 
-    print(current_calls)
     current_calls
     return(current_calls)
   }
 
-
-  print("MUTATION CALLS")
-  print(mutation_calls)
 
   stopCluster(cl)
   return(mutation_calls)
