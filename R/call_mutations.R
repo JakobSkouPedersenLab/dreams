@@ -69,7 +69,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   mutation_calls <- foreach::foreach(
     i = index_list,
     .combine = rbind,
-    .packages = c("tidyverse", "keras", "tensorflow", "parallel", "doParallel"),
+    .packages = c("keras", "tensorflow", "parallel", "doParallel"),
     .errorhandling = "pass",
     .export = "dreams_vc"
   ) %dopar% {
