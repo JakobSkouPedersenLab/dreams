@@ -14,7 +14,12 @@ test_that("Simple example dreams_vc", {
     )
 
 
-  test <- dreams_vc(mutations_df = mutations_df, bam_file_path = read_example_bam_file, reference_path = reference_path, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE)
+  test <- dreams_vc(
+    mutations_df = mutations_df, bam_file_path = read_example_bam_file,
+    reference_path = reference_path,
+    model = model, beta = 0.01, alpha = 0.05,
+    calculate_confidence_intervals = FALSE
+  )
 })
 
 test_that("Simple example dreams_vc parallel", {
@@ -29,18 +34,23 @@ test_that("Simple example dreams_vc parallel", {
       CHROM = "chr1",
       POS = 10,
       REF = "T",
-      alt = "A"
+      ALT = "A"
     )
 
-
-  test <- dreams_vc_parallel(mutations_df = mutations_df,
-                    bam_file_path = read_example_bam_file, reference_path = reference_path,
-                    model = model, beta = 0.01,
-                    alpha = 0.05,
-                    calculate_confidence_intervals = FALSE, ncores = 2)
+  test <- dreams_vc_parallel(
+    mutations_df = mutations_df,
+    bam_file_path = read_example_bam_file,
+    reference_path = reference_path,
+    model = model,
+    beta = 0.01,
+    alpha = 0.05,
+    chr_wise = F,
+    pos_wise = T,
+    calculate_confidence_intervals = FALSE,
+    ncores = 1
+  )
 
   test
-
 })
 
 
@@ -54,14 +64,50 @@ test_that("Simple example dreams_vc - 3 pos", {
   mutations_df <-
     data.frame(
       CHROM = c("chr1", "chr1", "chr1"),
-      POS = c(10,10,10),
+      POS = c(10, 10, 10),
       REF = c("T", "T", "T"),
       alt = c("A", "G", "C")
     )
 
-
-  test <- dreams_vc(mutations_df = mutations_df, bam_file_path = read_example_bam_file, reference_path = reference_path, model = model, beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE)
+  test <- dreams_vc(
+    mutations_df = mutations_df,
+    bam_file_path = read_example_bam_file,
+    reference_path = reference_path, model = model, pos_wise = F,
+    beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE
+  )
 })
+
+
+
+
+
+# test_that("Simple example dreams_vc - 3 pos - parallel", {
+#   read_example_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
+#   reference_path <- system.file("extdata", "ref.fasta", package = "dreams")
+#
+#   model_path <- system.file("extdata", "model_test.h5", package = "dreams")
+#   model <- keras::load_model_hdf5(model_path)
+#
+#   mutations_df <-
+#     data.frame(
+#       CHROM = c("chr1", "chr1", "chr1"),
+#       POS = c(10, 10, 10),
+#       REF = c("T", "T", "T"),
+#       alt = c("A", "G", "C")
+#     )
+#
+#
+#   test <- dreams_vc_parallel(
+#     mutations_df = mutations_df,
+#     bam_file_path = read_example_bam_file,
+#     reference_path = reference_path, model = model,
+#     beta = 0.01, alpha = 0.05, chr_wise = T,
+#     calculate_confidence_intervals = FALSE, ncores = 8
+#   )
+#
+#   test
+#
+# })
 
 
 test_that("Invalid mutations_df", {
