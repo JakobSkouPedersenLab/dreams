@@ -65,7 +65,6 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   cl <- makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
-
   mutation_calls <- foreach::foreach(
     i = index_list,
     .combine = rbind,
@@ -76,7 +75,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
     unserial_model <- keras::unserialize_model(serial_model)
 
     mutations <- mutations_df %>%
-      filter(idx == i) %>%
+      dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
 
     current_calls <- dreams_vc(
@@ -94,7 +93,6 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
     current_calls
     return(current_calls)
   }
-
 
   stopCluster(cl)
   return(mutation_calls)
