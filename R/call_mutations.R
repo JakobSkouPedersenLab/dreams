@@ -83,7 +83,6 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
 
-    print(mutations)
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
@@ -165,13 +164,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     batch_size <- nrow(positions) + 1
   }
 
-  print("BATCH_SIZE")
-  print(batch_size)
-
   position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
 
-  print("POSITION BATCHES")
-  print(tail(position_batches))
 
   mutation_calls <- NULL
 
