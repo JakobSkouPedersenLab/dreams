@@ -13,8 +13,7 @@ dreams_vc(
   alpha = 0.05,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
-  chr_wise = F,
-  pos_wise = F
+  batch_size = NULL
 )
 }
 \arguments{
@@ -34,9 +33,11 @@ dreams_vc(
 
 \item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
 
-\item{chr_wise}{handle bam files chromosome wise}
+\item{batch_size}{Batch size fore predicting error rates}
 
 \item{pos_wise}{Handle bam files position wise}
+
+\item{chr_wise}{handle bam files chromosome wise}
 }
 \value{
 A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:

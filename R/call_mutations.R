@@ -76,8 +76,8 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
     unserial_model <- keras::unserialize_model(serial_model)
 
     mutations <- mutations_df %>%
-      filter(.data$idx == i) %>%
-      dplyr::select(-.data$idx)
+      filter(idx == i) %>%
+      dplyr::select(-idx)
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
