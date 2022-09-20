@@ -51,7 +51,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   serial_model <- keras::serialize_model(model)
 
   mutations_df <- mutations_df %>%
-    select(
+    dplyr::select(
       "chr" = matches("chr|CHR|CHROM"),
       "genomic_pos" = matches("pos|POS"),
       "ref" = matches("ref|REF"),
@@ -77,7 +77,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 
     mutations <- mutations_df %>%
       filter(.data$idx == i) %>%
-      select(-.data$idx)
+      dplyr::select(-.data$idx)
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
