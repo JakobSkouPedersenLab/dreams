@@ -92,7 +92,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       model = unserial_model,
       beta = beta,
       use_turboem = use_turboem,
-      batch_size = NULL,
+      batch_size = batch_size,
       calculate_confidence_intervals = calculate_confidence_intervals,
       alpha = alpha
     )
@@ -165,13 +165,13 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     batch_size <- nrow(positions) + 1
   }
 
-  print ("BATCH_SIZE")
-  print (batch_size)
+  print("BATCH_SIZE")
+  print(batch_size)
 
   position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
 
-  print ("POSITION BATCHES")
-  print (tail(position_batches))
+  print("POSITION BATCHES")
+  print(tail(position_batches))
 
   mutation_calls <- NULL
 
