@@ -86,8 +86,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       model = unserial_model,
       beta = beta,
       use_turboem = use_turboem,
-      pos_wise = pos_wise,
-      chr_wise = chr_wise,
+      batch_size = NULL,
       calculate_confidence_intervals = calculate_confidence_intervals,
       alpha = alpha
     )
@@ -135,7 +134,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 
 dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
                       beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                      chr_wise = F, pos_wise = F) {
+                      batch_size = NULL) {
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
@@ -152,46 +151,42 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
   }
 
-  queue_indices <- mutations_df %>%
+  positions <- mutations_df %>%
     select(.data$chr, .data$genomic_pos) %>%
     distinct()
 
-
-  chr_vec <- queue_indices$chr
-  pos_vec <- queue_indices$genomic_pos
-
-  if (chr_wise) {
-    queue <- lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
-  } else if (pos_wise) {
-    queue <- lapply(1:length(chr_vec), function(i) list(chr = chr_vec[i], pos = pos_vec[i]))
-  } else {
-    queue <- list(list(chr = chr_vec, pos = pos_vec))
+  if (is.null(batch_size)) {
+    batch_size <- nrow(positions) + 1
   }
+
+
+  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
 
   mutation_calls <- NULL
 
-  length_queue <- length(queue)
+  n_batches <- length(unique(position_batches$batch_idx)) - 1
 
-  print(paste0("Calling mutations in ", length_queue, " batches:"))
+  print(paste0("Calling mutations in ", n_batches, " batches:"))
 
   count <- 0
 
-  for (q in queue) {
+  for (batch in sort(unique(position_batches$batch_idx))) {
+    print(paste0("Calling batch ", count, "/", n_batches))
     count <- count + 1
 
-    print(paste0("Calling batch ", count, "/", length_queue))
+    q <- position_batches %>% filter(batch_idx == batch)
 
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
       bam_file_path = bam_file_path,
       chr = q$chr,
-      genomic_pos = q$pos,
+      genomic_pos = q$genomic_pos,
       reference_path
     )
 
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
-      .data$genomic_pos %in% q$pos
+      .data$genomic_pos %in% q$genomic_pos
     )
 
     # Call mutations
