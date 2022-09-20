@@ -38,7 +38,7 @@
 
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
                                beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                               chr_wise = F, pos_wise = F, ncores = 1) {
+                               batch_size = NULL, ncores = 1) {
   if (nrow(mutations_df) == 0) {
     return(data.frame())
   }
