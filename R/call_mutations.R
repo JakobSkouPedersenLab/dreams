@@ -38,7 +38,7 @@
 
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
                                beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                               batch_size = NULL, ncores = 1) {
+                               batch_size = NULL, ncores = 1, log_file = NULL) {
   if (nrow(mutations_df) == 0) {
     return(data.frame())
   }
@@ -74,9 +74,16 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   ) %dopar% {
     unserial_model <- keras::unserialize_model(serial_model)
 
+    if (!is.null(log_file)) {
+      sink(paste0(log_file, "_", i))
+    }
+
+
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
+
+    print(mutations)
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
@@ -94,6 +101,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
     return(current_calls)
   }
 
+  sink()
   stopCluster(cl)
   return(mutation_calls)
 }
