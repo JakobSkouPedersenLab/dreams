@@ -69,9 +69,9 @@
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  use_turboem <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  calculate_confidence_intervals <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  chr_wise <span class="op">=</span> <span class="cn">F</span>,</span>
-<span>  pos_wise <span class="op">=</span> <span class="cn">F</span>,</span>
-<span>  ncores <span class="op">=</span> <span class="fl">1</span></span>
+<span>  batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  log_file <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,16 +109,16 @@
 <dd><p>Logical. Should confidence intervals be calculated? Default is FALSE.</p></dd>
 
 
-<dt>chr_wise</dt>
-<dd><p>handle bam files chromosome wise</p></dd>
-
-
-<dt>pos_wise</dt>
-<dd><p>Handle bam files position wise</p></dd>
+<dt>batch_size</dt>
+<dd><p>Number of positions to process at a time</p></dd>
 
 
 <dt>ncores</dt>
 <dd><p>Number of processing cores</p></dd>
+
+
+<dt>log_file</dt>
+<dd><p>write log-file to this path</p></dd>
 
 </dl></div>
     <div class="section level2">
