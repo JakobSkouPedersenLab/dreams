@@ -18,6 +18,8 @@
 #'
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
+
+
   # Get reference to BamFile
   bamFile <- BamFile(BamPath)
 

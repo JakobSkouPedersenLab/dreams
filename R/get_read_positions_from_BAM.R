@@ -5,34 +5,38 @@
 #' @param bam_file_path Path to BAM-file.
 #' @param chr,genomic_pos Vectors. Should specify the positions of interest (\code{chr} = Chromosome, \code{genomic_pos} = Position in chromosome)
 #' @param reference_path Path to reference genome e.g. FASTA-file.
-#' @param pos_wise Handle bam files position wise
-#' @param chr_wise handle bam files chromosome wise
+#' @param batch_size Number of positions to process at a time
+
 #'
 #' @return [data.frame()]. Each line describes a position in a read.
 #' @export
-get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, reference_path, chr_wise = F, pos_wise = F) {
+get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, reference_path, batch_size = NULL) {
 
   # Only extract reads from distinct positions
-  positions = data.frame(chr = chr,
-             genomic_pos = genomic_pos) %>% distinct()
+  positions <- data.frame(
+    chr = chr,
+    genomic_pos = genomic_pos
+  ) %>% distinct()
 
-  chr_vec = positions$chr
-  pos_vec = positions$genomic_pos
-
-  if (chr_wise) {
-    queue = lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
-  } else if (pos_wise) {
-    queue = lapply(1:length(chr_vec), function(i) list(chr = chr_vec[i], pos = pos_vec[i]))
-  } else {
-    queue = list(list(chr = chr_vec, pos = pos_vec))
+  if (is.null(batch_size)) {
+    batch_size <- nrow(positions) + 1
   }
 
-  read_positions_df = NULL
+  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
 
-  for (q in queue) {
+  n_batches <- length(unique(position_batches$batch_idx))
+
+
+  read_positions_df <- NULL
+
+  for (batch in sort(unique(position_batches$batch_idx))) {
+    q <- position_batches %>% filter(batch_idx == batch)
+
 
     # Load reads from BAM into data.frame
-    bam_df <- load_BAM(bam_file_path, q$chr, q$pos)
+
+    bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos)
+
 
     # If no coverage -> return empty data.frame
     if (nrow(bam_df) == 0) {
@@ -46,8 +50,7 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
         reference_path = reference_path
       )
 
-    read_positions_df = rbind(read_positions_df, read_positions_df_current)
-
+    read_positions_df <- rbind(read_positions_df, read_positions_df_current)
   }
 
   return(read_positions_df)

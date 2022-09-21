@@ -100,7 +100,7 @@ test_that("Simple example dreams_vc - 3 pos", {
 #     mutations_df = mutations_df,
 #     bam_file_path = read_example_bam_file,
 #     reference_path = reference_path, model = model,
-#     beta = 0.01, alpha = 0.05, chr_wise = T,
+#     beta = 0.01, alpha = 0.05,
 #     calculate_confidence_intervals = FALSE, ncores = 8
 #   )
 #
@@ -380,14 +380,12 @@ test_that("Bigger example with chr/pos wise", {
 
   res_1 <- call_mutations(
     mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
-    calculate_confidence_intervals = TRUE,
-    pos_wise = T
+    calculate_confidence_intervals = TRUE
   )
 
   res_2 <- call_mutations(
     mutations_df = three_mutations_df, read_positions_df = some_read_positions_df, model = model, beta = 0.01, alpha = 0.05,
-    calculate_confidence_intervals = TRUE,
-    chr_wise = T
+    calculate_confidence_intervals = TRUE
   )
 
   expect_equal(res %>% select(tf_est, tf_min, tf_min, p_val), res_1 %>% select(tf_est, tf_min, tf_min, p_val))

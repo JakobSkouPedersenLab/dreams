@@ -14,7 +14,8 @@ dreams_vc_parallel(
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
   batch_size = NULL,
-  ncores = 1
+  ncores = 1,
+  log_file = NULL
 )
 }
 \arguments{
@@ -34,13 +35,11 @@ dreams_vc_parallel(
 
 \item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
 
-\item{batch_size}{Batch size fore predicting error rates}
+\item{batch_size}{Number of positions to process at a time}
 
 \item{ncores}{Number of processing cores}
 
-\item{pos_wise}{Handle bam files position wise}
-
-\item{chr_wise}{handle bam files chromosome wise}
+\item{log_file}{write log-file to this path}
 }
 \value{
 A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:

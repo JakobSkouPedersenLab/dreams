@@ -37,7 +37,7 @@ correct_errors_predictions <- function(error_df, beta) {
 }
 
 #' @importFrom stats predict
-predict_error_rates <- function(read_positions_df, model, beta, batch_size) {
+predict_error_rates <- function(read_positions_df, model, beta) {
 
   # Predict error rates for read positions from trained DREAM model
   if (nrow(read_positions_df) == 0) {
@@ -50,7 +50,7 @@ predict_error_rates <- function(read_positions_df, model, beta, batch_size) {
       )
   } else {
     predictions_df <- model %>%
-      predict(read_positions_df, batch_size = batch_size) %>%
+      predict(read_positions_df) %>%
       data.frame() %>%
       rename(
         A = .data$X1,

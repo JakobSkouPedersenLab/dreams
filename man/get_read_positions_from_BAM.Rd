@@ -9,8 +9,7 @@ get_read_positions_from_BAM(
   chr,
   genomic_pos,
   reference_path,
-  chr_wise = F,
-  pos_wise = F
+  batch_size = NULL
 )
 }
 \arguments{
@@ -20,9 +19,7 @@ get_read_positions_from_BAM(
 
 \item{reference_path}{Path to reference genome e.g. FASTA-file.}
 
-\item{chr_wise}{handle bam files chromosome wise}
-
-\item{pos_wise}{Handle bam files position wise}
+\item{batch_size}{Number of positions to process at a time}
 }
 \value{
 \code{\link[=data.frame]{data.frame()}}. Each line describes a position in a read.

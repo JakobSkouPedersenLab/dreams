@@ -6,9 +6,10 @@
 #' @inheritParams call_cancer
 #' @param bam_file_path Path to .BAM-file
 #' @param reference_path Path to reference genome e.g. FASTA-file.
-#' @param pos_wise Handle bam files position wise
-#' @param chr_wise handle bam files chromosome wise
 #' @param ncores Number of processing cores
+#' @param batch_size Number of positions to process at a time
+#' @param log_file write log-file to this path
+
 
 
 #' @return A [data.frame()] with information about the individual mutation calls, including:
@@ -111,8 +112,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #' @inheritParams call_cancer
 #' @param bam_file_path Path to .BAM-file
 #' @param reference_path Path to reference genome e.g. FASTA-file.
-#' @param pos_wise Handle bam files position wise
-#' @param chr_wise handle bam files chromosome wise
+#' @param batch_size Number of positions to process at a time
 
 
 #' @return A [data.frame()] with information about the individual mutation calls, including:
@@ -169,11 +169,11 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   mutation_calls <- NULL
 
-  n_batches <- length(unique(position_batches$batch_idx)) - 1
+  n_batches <- length(unique(position_batches$batch_idx))
 
   print(paste0("Calling mutations in ", n_batches, " batches:"))
 
-  count <- 0
+  count <- 1
 
   for (batch in sort(unique(position_batches$batch_idx))) {
     print(paste0("Calling batch ", count, "/", n_batches))
@@ -215,8 +215,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
 #' @inheritParams call_cancer
-#' @param pos_wise Handle bam files position wise
-#' @param chr_wise handle bam files chromosome wise
+#' @param batch_size Number of positions to process at a time
 
 #'
 #' @return A [data.frame()] with information about the individual mutation calls, including:
@@ -241,8 +240,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #'
 #' @export
 call_mutations <- function(mutations_df, read_positions_df, model, beta,
-                           alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                           chr_wise = F, pos_wise = F, batch_size = 32000) {
+                           alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE, batch_size = NULL) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -269,33 +267,40 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
     stop("read_positions_df should have the columns ['chr', genomic_pos', 'ref, 'obs']")
   }
 
-  chr_vec <- mutations_df$chr
-  pos_vec <- mutations_df$genomic_pos
+  positions <- mutations_df %>%
+    select(.data$chr, .data$genomic_pos) %>%
+    distinct()
 
-  if (chr_wise) {
-    queue <- lapply(unique(chr_vec), function(c) list(chr = chr_vec[chr_vec == c], pos = pos_vec[chr_vec == c]))
-  } else if (pos_wise) {
-    queue <- lapply(1:length(chr_vec), function(i) list(chr = chr_vec[i], pos = pos_vec[i]))
-  } else {
-    queue <- list(list(chr = chr_vec, pos = pos_vec))
+  if (is.null(batch_size)) {
+    batch_size <- nrow(positions) + 1
   }
+
+  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
+
+  n_batches <- length(unique(position_batches$batch_idx))
+
+  print(paste0("Calling mutations in ", n_batches, " batches:"))
 
   mutation_calls <- NULL
 
-  for (q in queue) {
+
+  for (batch in sort(unique(position_batches$batch_idx))) {
+    q <- position_batches %>% filter(batch_idx == batch)
+
+
     current_read_positions_df <- read_positions_df %>% filter(
       .data$chr %in% q$chr,
-      .data$genomic_pos %in% q$pos
+      .data$genomic_pos %in% q$genomic_pos
     )
 
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
-      .data$genomic_pos %in% q$pos
+      .data$genomic_pos %in% q$genomic_pos
     )
 
 
     # Prepare EM input
-    em_input <- prepare_em_input(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta, batch_size = batch_size)
+    em_input <- prepare_em_input(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta)
 
     obs_is_mut_list <- em_input$obs_is_mut_list
     error_ref_to_mut_list <- em_input$error_ref_to_mut_list
