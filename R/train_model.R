@@ -23,10 +23,10 @@
 #' @family Train model
 #' @seealso [get_training_data()] Function for getting training data
 train_dreams_model <- function(training_data, layers,
-                        model_features, lr, batch_size, epochs,
-                        model_file_path = NULL, log_file_path = NULL,
-                        decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
-                        validation_split = 0, ctx3_embed_dim = 3) {
+                               model_features, lr, batch_size, epochs,
+                               model_file_path = NULL, log_file_path = NULL,
+                               decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
+                               validation_split = 0, ctx3_embed_dim = 3) {
   training_data <- prepare_training_data(
     training_data = training_data,
     model_features = model_features
@@ -133,8 +133,7 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "umi_errors",
       "local_complexity_1",
       "local_complexity_2",
-      "n_other_errors",
-      "genomic_pos"
+      "n_other_errors"
     )
   all_categorical_variables <-
     c(
@@ -143,7 +142,8 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "first_in_pair",
       "ctx_minus1",
       "ctx_plus1",
-      "chr"
+      "chr",
+      "genomic_pos"
     )
   all_embedded_variables_ctx3 <-
     c(
