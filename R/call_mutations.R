@@ -84,6 +84,8 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
 
+    print(mutations)
+
 
     current_calls <- dreams_vc(
       mutations_df = mutations,
@@ -97,8 +99,14 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       alpha = alpha
     )
 
-    current_calls
-    return(current_calls)
+
+    if (nrow(current_calls) > 0) {
+      print(head(current_calls))
+      return(current_calls)
+    } else {
+      print (current_calls)
+      return(NULL)
+    }
   }
 
   sink()
