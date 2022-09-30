@@ -189,6 +189,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
     q <- position_batches %>% filter(batch_idx == batch)
 
+    print ("DIM Q")
+    print (dim(q))
+
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
       bam_file_path = bam_file_path,
@@ -197,10 +200,17 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       reference_path
     )
 
+    print ("DIM RP_DF")
+    print (dim(read_positions_df))
+
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
       .data$genomic_pos %in% q$genomic_pos
     )
+
+    print ("current_mutations")
+    print (dim(current_mutations))
+
 
     # Call mutations
     calls <- call_mutations(
@@ -212,6 +222,10 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       use_turboem = use_turboem,
       calculate_confidence_intervals = calculate_confidence_intervals
     )
+
+    print ("calls")
+    print (dim(calls))
+
 
     mutation_calls <- rbind(mutation_calls, calls)
   }
