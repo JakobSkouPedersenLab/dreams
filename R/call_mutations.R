@@ -246,10 +246,6 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
     return(data.frame())
   }
 
-  if (nrow(read_positions_df) == 0) {
-    return(data.frame())
-  }
-
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
@@ -296,6 +292,12 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
       .data$chr %in% q$chr,
       .data$genomic_pos %in% q$genomic_pos
     )
+
+
+    if (nrow(current_read_positions_df) == 0) {
+      return(data.frame())
+    }
+
 
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
