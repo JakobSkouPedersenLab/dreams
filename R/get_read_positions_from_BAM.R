@@ -12,6 +12,8 @@
 #' @export
 get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, reference_path, batch_size = NULL) {
 
+  print ("INSIDE GET POSITION READS")
+
   # Only extract reads from distinct positions
   positions <- data.frame(
     chr = chr,
