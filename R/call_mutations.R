@@ -357,6 +357,11 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
       error_ref_to_mut <- error_ref_to_mut_list[[i]]
       error_mut_to_ref <- error_mut_to_ref_list[[i]]
 
+      print ("READ_INFORMATION")
+      print (obs_is_mut)
+      print (error_ref_to_mut)
+      print (error_mut_to_ref)
+
       # Run EM algorithm
       em_res <- get_tf_estimate_vc(
         obs_is_mut = obs_is_mut,
