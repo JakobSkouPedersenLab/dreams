@@ -30,17 +30,22 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
 
   n_batches <- length(unique(position_batches$batch_idx))
 
+  print ("N batches")
+  print (n_batches)
 
   read_positions_df <- NULL
 
   for (batch in sort(unique(position_batches$batch_idx))) {
     q <- position_batches %>% filter(batch_idx == batch)
-
+    print ("Q")
+    print (q)
 
     # Load reads from BAM into data.frame
 
-    bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos)
 
+    bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos)
+    print ("BAM DF")
+    print (head(bam_df))
 
     # If no coverage -> return empty data.frame
     if (nrow(bam_df) == 0) {
