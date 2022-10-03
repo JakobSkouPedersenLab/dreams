@@ -349,6 +349,9 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
       # Mutation information
       mutation_line <- current_mutations_df[i, ]
 
+      print ("LINE")
+      print (mutation_line)
+
       # Read information
       obs_is_mut <- obs_is_mut_list[[i]]
       error_ref_to_mut <- error_ref_to_mut_list[[i]]
@@ -361,6 +364,9 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
         error_mut_to_ref = error_mut_to_ref,
         use_turboem = use_turboem
       )
+
+      print ("EM")
+      print (em_res)
 
       # Confidence intervals
       if (calculate_confidence_intervals) {
