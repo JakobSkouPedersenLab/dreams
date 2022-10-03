@@ -59,8 +59,15 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
         reference_path = reference_path
       )
 
+    print ("read_positions")
+    print (head(read_positions_df_current))
+
     read_positions_df <- rbind(read_positions_df, read_positions_df_current)
   }
+
+  print ("out of loop")
+  print ("READ POSITIONS DF")
+  print (head(read_positions_df))
 
   return(read_positions_df)
 }
