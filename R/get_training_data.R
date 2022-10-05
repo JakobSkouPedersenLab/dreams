@@ -215,7 +215,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   print (coverage_data)
   print (coverage_data_filtered)
 
-  prior_position_error_rate = coverage_data_filtered %>% mutate(ifelse(is.na(n_mismatches), 0, n_mismatches),
+  prior_position_error_rate = coverage_data_filtered %>% mutate(n_mismatches = ifelse(is.na(n_mismatches), 0, n_mismatches),
                                                                 mm_rate = n_mismatches/coverage)
 
   # Remove unwanted positions based on exclude files
