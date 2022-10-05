@@ -29,6 +29,7 @@ get_training_data <- function(bam_paths,
 
   training_data <- NULL
   info <- NULL
+  prior_position_error_rate <- NULL
 
   n_bam_files = length(bam_paths)
 
@@ -59,6 +60,8 @@ get_training_data <- function(bam_paths,
 
     training_data <- rbind(training_data, current_training_data$data)
     info <- rbind(info, current_training_data$info)
+    prior_position_error_rate <- rbind(prior_position_error_rate, current_training_data$prior_position_error_rate)
+
   }
 
   # Collect output info for beta calculation
@@ -70,7 +73,8 @@ get_training_data <- function(bam_paths,
 
   return(list(
     data = training_data,
-    info = output_info
+    info = output_info,
+    prior_position_error_rate = prior_position_error_rate
   ))
 }
 
