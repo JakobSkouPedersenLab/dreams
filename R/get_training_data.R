@@ -111,6 +111,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   positive_samples <- mismatches$data
   info <- mismatches$info
+  prior_position_error_rate = mismatches$prior_position_error_rate
 
   n_samples <- nrow(positive_samples) * factor
 
@@ -136,7 +137,8 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   output_list <- list(
     data = output_data,
-    info = info
+    info = info,
+    prior_position_error_rate = prior_position_error_rate
   )
 
   return(output_list)
@@ -204,6 +206,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   coverage_data_filtered <- coverage_data %>%
     anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
 
+  prior_position_error_rate = read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max) %>% group_by("chr", "genomic_pos") %>% summarize(prior_error_rate = mean(.data$mm_rate))
+
   # Remove unwanted positions based on exclude files
 
   if (!is.null(positions_to_exclude_paths)) {
@@ -228,7 +232,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   return(list(
     data = read_positions_filtered,
-    info = beta_info
+    info = beta_info,
+    prior_position_error_rate = prior_position_error_rate
   ))
 }
 
