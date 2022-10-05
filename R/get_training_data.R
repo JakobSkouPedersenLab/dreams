@@ -210,7 +210,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   coverage_data_filtered <- coverage_data %>%
     anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
 
-  prior_position_error_rate = read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max) %>% group_by("chr", "genomic_pos") %>% summarize(prior_error_rate = mean(.data$mm_rate))
+  prior_position_error_rate = read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max) %>% group_by(chr, genomic_pos) %>% summarize(prior_error_rate = mean(.data$mm_rate))
 
   # Remove unwanted positions based on exclude files
 
