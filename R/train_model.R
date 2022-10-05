@@ -133,8 +133,7 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "umi_errors",
       "local_complexity_1",
       "local_complexity_2",
-      "n_other_errors",
-      "genomic_pos"
+      "n_other_errors"
     )
   all_categorical_variables <-
     c(
@@ -143,7 +142,8 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "first_in_pair",
       "ctx_minus1",
       "ctx_plus1",
-      "chr"
+      "chr",
+      "genomic_pos"
     )
   all_embedded_variables_ctx3 <-
     c(
