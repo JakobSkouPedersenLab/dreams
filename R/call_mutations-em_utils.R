@@ -103,6 +103,11 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
   observed_mut <- sum(obs_is_mut)
   total_observed_positions <- length(obs_is_mut)
   total_mut_ratio <- observed_mut / total_observed_positions
+
+  print (observed_mut)
+  print (total_observed_positions)
+  print (total_mut_ratio)
+
   if (observed_mut == 0) {
     res <- list(
       tf_est = 0,
@@ -125,12 +130,16 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     return(res)
   }
 
+
   # Get starting guess for tf
   tf_start <- get_starting_values(
     obs_is_mut_list = list(obs_is_mut),
     error_mut_to_ref_list = list(error_ref_to_mut),
     error_ref_to_mut_list = list(error_mut_to_ref)
   )["tf_start"]
+
+  print ("TF START")
+  print (tf_start)
 
   # Run EM algorithm
   if (use_turboem) {
@@ -160,6 +169,12 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     )
   }
 
+  print ("AFTER CHECK")
+  print (em_res)
+  print (max(obs_is_mut))
+  print (max(error_mut_to_ref))
+  print (max(error_ref_to_mut))
+
   # Check if 0 is better fit
   ll_0 <- log_likelihood(
     tf = 0,
@@ -168,6 +183,9 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     error_ref_to_mut_list = error_ref_to_mut
   )
 
+  print ("LL0")
+  print (ll_0)
+
   ll_em <- log_likelihood(
     tf = em_res$tf_est,
     obs_is_mut_list = obs_is_mut,
@@ -175,9 +193,15 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     error_ref_to_mut_list = error_ref_to_mut,
   )
 
+  print ("LL-EM")
+  print (ll_em)
+
+
   if (ll_0 >= ll_em) {
     em_res$tf_est <- 0
   }
+
+  print ("AFTER IF")
 
   return(em_res)
 }

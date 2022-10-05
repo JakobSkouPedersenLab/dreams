@@ -3,6 +3,8 @@ prepare_em_input <- function(mutations_df, read_positions_df, model, beta) {
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
 
+  print (mutations_df)
+
   if (nrow(mutations_df) >= 1) {
     for (i in 1:nrow(mutations_df)) {
       chr <- mutations_df[i, "chr"]
