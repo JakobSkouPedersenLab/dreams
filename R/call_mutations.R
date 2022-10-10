@@ -154,12 +154,12 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
   # Clean up mutations
 
   if (!is.null(prior_error_rates)) {
-  prior_error_rates <- prior_error_rates %>%
-    select(
-      "chr" = matches("chr|CHR|CHROM"),
-      "genomic_pos" = matches("pos|POS"),
-      "prior_error" = matches("mm_rate|error_rate|prior_error|prior_error_Rate")
-    )
+    prior_error_rates <- prior_error_rates %>%
+      select(
+        "chr" = matches("chr|CHR|CHROM"),
+        "genomic_pos" = matches("pos|POS"),
+        "prior_error" = matches("mm_rate|error_rate|prior_error|prior_error_Rate")
+      )
   }
 
   # Stop if mutations do not have the expected columns
@@ -202,8 +202,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     )
 
     if (!is.null(prior_error_rates)) {
-
-      read_positions_df = read_positions_df %>% left_join(prior_error_rates)
+      read_positions_df <- read_positions_df %>% left_join(prior_error_rates)
     }
 
     current_mutations <- mutations_df %>% filter(
