@@ -2,7 +2,7 @@
 #'
 #' @export
 
-predict_error_rates <- function(bam_file_path, factor, bed_file = NULL, mm_rate_max = NULL) {
+calculate_beta_factor <- function(bam_file_path, factor, bed_file = NULL, mm_rate_max = NULL) {
   pp <- Rsamtools::PileupParam(
     max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
