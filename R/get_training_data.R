@@ -23,14 +23,15 @@ get_training_data <- function(bam_paths,
 
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
-    (length(bam_paths) != length(positions_to_exclude_paths)))) {
+       (length(bam_paths) != length(positions_to_exclude_paths)))) {
     stop("Wrong number of exclude paths")
   }
 
   training_data <- NULL
   info <- NULL
+  read_position_mm_rates <- NULL
 
-  n_bam_files = length(bam_paths)
+  n_bam_files <- length(bam_paths)
 
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
@@ -59,6 +60,7 @@ get_training_data <- function(bam_paths,
 
     training_data <- rbind(training_data, current_training_data$data)
     info <- rbind(info, current_training_data$info)
+    read_position_mm_rates <- rbind(read_position_mm_rates, current_training_data$read_position_mm_rate)
   }
 
   # Collect output info for beta calculation
@@ -70,7 +72,8 @@ get_training_data <- function(bam_paths,
 
   return(list(
     data = training_data,
-    info = output_info
+    info = output_info,
+    read_position_mm_rate = read_position_mm_rates
   ))
 }
 
@@ -111,6 +114,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   positive_samples <- mismatches$data
   info <- mismatches$info
+  position_error_rate <- mismatches$read_position_mm_rate
 
   n_samples <- nrow(positive_samples) * factor
 
@@ -136,7 +140,8 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   output_list <- list(
     data = output_data,
-    info = info
+    info = info,
+    read_position_mm_rate = position_error_rate
   )
 
   return(output_list)
@@ -172,7 +177,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   pp <- Rsamtools::PileupParam(
     max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
-    distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
+    distinguish_strands = FALSE, distinguish_nucleotides = F,
     ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
@@ -180,11 +185,14 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
 
+  print("COVERAGE DATA")
+  print(dim(coverage_data))
+
   # Filter heterozygote positions
 
-  read_positions_summarized <- read_positions %>%
+  read_positions_summarized <- read_positions_filtered %>%
     group_by(.data$chr, .data$genomic_pos) %>%
-    summarize(n_mismatches = n()) %>%
+    summarize(n_mismatches = sum(obs != ref)) %>%
     ungroup()
 
   # Join with coverage dataframe - all positions if included_regions is NULL
@@ -195,6 +203,13 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
     mutate(mm_rate = .data$n_mismatches / .data$coverage)
 
+  position_mm_rate <- coverage_data %>%
+    left_join(read_positions_summarized, by = c("chr", "genomic_pos")) %>%
+    mutate(
+      mm_rate = .data$n_mismatches / .data$coverage,
+      across(where(is.numeric), coalesce, 0)
+    )
+
   read_position_filter <- read_position_mm_rate %>%
     filter(.data$mm_rate < mm_rate_max)
 
@@ -202,7 +217,9 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     semi_join(read_position_filter, by = c("chr", "genomic_pos"))
 
   coverage_data_filtered <- coverage_data %>%
-    anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
+    semi_join(position_mm_rate,
+              by = c("chr", "genomic_pos")
+    )
 
   # Remove unwanted positions based on exclude files
 
@@ -228,8 +245,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   return(list(
     data = read_positions_filtered,
-    info = beta_info
-  ))
+    info = beta_info,
+    read_position_mm_rate = position_mm_rate))
 }
 
 #' Title
