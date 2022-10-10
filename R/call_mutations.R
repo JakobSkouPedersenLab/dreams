@@ -38,7 +38,7 @@
 #' @export
 
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
-                               beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                               beta, alpha = 0.05, prior_error_rates = NULL, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                                batch_size = NULL, ncores = 1, log_file = NULL) {
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -92,6 +92,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       model = unserial_model,
       beta = beta,
       use_turboem = use_turboem,
+      prior_error_rates = NULL,
       batch_size = batch_size,
       calculate_confidence_intervals = calculate_confidence_intervals,
       alpha = alpha
@@ -138,7 +139,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #' @export
 
 dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
-                      beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                      beta, alpha = 0.05, prior_error_rates = NULL, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                       batch_size = NULL) {
 
   # Clean up mutations
@@ -149,6 +150,17 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       "ref" = matches("ref|REF"),
       "alt" = matches("alt|ALT|obs|OBS")
     )
+
+  # Clean up mutations
+
+  if (!is.null(prior_error_rates)) {
+  prior_error_rates <- prior_error_rates %>%
+    select(
+      "chr" = matches("chr|CHR|CHROM"),
+      "genomic_pos" = matches("pos|POS"),
+      "prior_error" = matches("mm_rate|error_rate|prior_error|prior_error_Rate")
+    )
+  }
 
   # Stop if mutations do not have the expected columns
   mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
@@ -188,6 +200,11 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       genomic_pos = q$genomic_pos,
       reference_path
     )
+
+    if (!is.null(prior_error_rates)) {
+
+      read_positions_df = read_positions_df %>% left_join(prior_error_rates)
+    }
 
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
