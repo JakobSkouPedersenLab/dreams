@@ -37,6 +37,8 @@ correct_errors_predictions <- function(error_df, beta) {
 }
 
 #' @importFrom stats predict
+#' @export
+
 predict_error_rates <- function(read_positions_df, model, beta) {
 
   # Predict error rates for read positions from trained DREAM model
