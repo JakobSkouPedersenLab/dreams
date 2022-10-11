@@ -8,7 +8,7 @@
 #' @param batch_size Number of positions to process at a time
 
 #'
-#' @return [data.frame()]. Each line describes a position in a read.
+#' @return [numeric]. Value for the sample specific beta
 #' @export
 get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, reference_path, batch_size = NULL) {
 

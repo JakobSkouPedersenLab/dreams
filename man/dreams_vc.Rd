@@ -9,11 +9,14 @@ dreams_vc(
   bam_file_path,
   reference_path,
   model,
-  beta,
+  beta = NULL,
+  factor = NULL,
+  bed_file = NULL,
   alpha = 0.05,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
-  batch_size = NULL
+  batch_size = NULL,
+  mm_rate_max = 0.05
 )
 }
 \arguments{
@@ -27,6 +30,10 @@ dreams_vc(
 
 \item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
 
+\item{factor}{mismatch to match ratio in training data}
+
+\item{bed_file}{path to bed file with relevant regions}
+
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
 \item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
@@ -34,6 +41,8 @@ dreams_vc(
 \item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
 
 \item{batch_size}{Number of positions to process at a time}
+
+\item{mm_rate_max}{maximum error rate for beta calculation}
 }
 \value{
 A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:

@@ -30,7 +30,7 @@ get_training_data <- function(bam_paths,
   training_data <- NULL
   info <- NULL
 
-  n_bam_files = length(bam_paths)
+  n_bam_files <- length(bam_paths)
 
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]

@@ -9,8 +9,9 @@
 #' @param ncores Number of processing cores
 #' @param batch_size Number of positions to process at a time
 #' @param log_file write log-file to this path
-
-
+#' @param factor mismatch to match ratio in training data
+#' @param bed_file path to bed file with relevant regions
+#' @param mm_rate_max maximum error rate for beta calculation
 
 #' @return A [data.frame()] with information about the individual mutation calls, including:
 #' \describe{
@@ -38,8 +39,22 @@
 #' @export
 
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
-                               beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                               batch_size = NULL, ncores = 1, log_file = NULL) {
+                               beta = NULL, factor = NULL, bed_file = NULL, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                               batch_size = NULL, ncores = 1, log_file = NULL, mm_rate_max = 0.05) {
+
+  # If no beta value
+
+  if (is.null(beta) && is.null(factor)) {
+    stop("Please provide beta factor of scaling factor")
+  } else if (is.null(beta)) {
+    beta <- calculate_beta_factor(
+      bam_file_path = bam_file,
+      factor = factor,
+      mm_rate_max = mm_rate_max,
+      bed_file = bed_file
+    )
+  }
+
   if (nrow(mutations_df) == 0) {
     return(data.frame())
   }
@@ -113,6 +128,10 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #' @param bam_file_path Path to .BAM-file
 #' @param reference_path Path to reference genome e.g. FASTA-file.
 #' @param batch_size Number of positions to process at a time
+#' @param factor mismatch to match ratio in training data
+#' @param bed_file path to bed file with relevant regions
+#' @param mm_rate_max maximum error rate for beta calculation
+
 
 
 #' @return A [data.frame()] with information about the individual mutation calls, including:
@@ -138,8 +157,23 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #' @export
 
 dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
-                      beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                      batch_size = NULL) {
+                      beta = NULL, factor = NULL, bed_file = NULL, alpha = 0.05,
+                      use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                      batch_size = NULL, mm_rate_max = 0.05) {
+
+  # If no beta value
+
+  if (is.null(beta) && is.null(factor)) {
+    stop("Please provide beta factor of scaling factor")
+  } else if (is.null(beta)) {
+    beta <- calculate_beta_factor(
+      bam_file_path = bam_file,
+      factor = factor,
+      mm_rate_max = mm_rate_max,
+      bed_file = bed_file,
+      reference_path = reference_path
+    )
+  }
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
@@ -164,7 +198,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     batch_size <- nrow(positions) + 1
   }
 
-  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
+  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% !!batch_size))
 
 
   mutation_calls <- NULL
@@ -241,6 +275,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #' @export
 call_mutations <- function(mutations_df, read_positions_df, model, beta,
                            alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE, batch_size = NULL) {
+
+
+
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(data.frame())

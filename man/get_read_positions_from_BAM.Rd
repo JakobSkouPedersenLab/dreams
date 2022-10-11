@@ -22,7 +22,7 @@ get_read_positions_from_BAM(
 \item{batch_size}{Number of positions to process at a time}
 }
 \value{
-\code{\link[=data.frame]{data.frame()}}. Each line describes a position in a read.
+\link{numeric}. Value for the sample specific beta
 }
 \description{
 This functions extracts information about read position that cover positions of interest in a BAM-file.
