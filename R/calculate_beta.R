@@ -29,7 +29,8 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
     coverage_data <- Rsamtools::pileup(bam_file_path, pileupParam = pp)
   }
 
-  print (coverage_data)
+  print ("COVERAGE DATA 1")
+  print (head(coverage_data))
 
   coverage_data <- coverage_data %>%
     dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count) %>%
@@ -38,13 +39,15 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
     mutate(total_coverage = sum(.data$coverage)) %>%
     ungroup()
 
-  print (coverage_data)
+  print ("COVERAGE DATA 2")
+  print (head(coverage_data))
 
   errors <- coverage_data %>% filter(
     .data$reference_base != .data$nucleotide,
     .data$coverage < mm_rate_max * .data$total_coverage
   )
 
+  print ("ERRORS")
   print (errors)
 
   beta <- sum(errors$coverage) / (sum(coverage_data$coverage) - sum(errors$coverage))
