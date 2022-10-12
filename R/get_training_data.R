@@ -12,6 +12,95 @@
 #' @export
 #' @return \code{data.frame} with training data for a bam file
 #' @seealso [train_dreams_model()] Function for training model
+get_training_data_parallel <- function(bam_paths,
+                                       reference_path,
+                                       bed_include_path = NULL,
+                                       factor = 1,
+                                       common_positions_to_exclude_paths = NULL,
+                                       positions_to_exclude_paths = NULL,
+                                       mm_rate_max = 1,
+                                       verbose = F,
+                                       ncores = 1) {
+
+  # Check if there is a position exclude path for each bam file
+  if ((!is.null(positions_to_exclude_paths) &
+    (length(bam_paths) != length(positions_to_exclude_paths)))) {
+    stop("Wrong number of exclude paths")
+  }
+
+
+  cl <- makeCluster(ncores)
+  doParallel::registerDoParallel(cl)
+
+
+  training_data <- NULL
+  info <- NULL
+
+  n_bam_files <- length(bam_paths)
+
+  foreach::foreach(
+    i = 1:n_bam_files, .combine = combine, .multicombine = TRUE,
+    .errorhandling = "pass"
+  ) %dopar% {
+    bam_path <- bam_paths[[bam_idx]]
+
+    if (!is.null(log_file)) {
+      sink(paste0(log_file, "_", i))
+    }
+
+    if (verbose) {
+      cat("file ", bam_idx, "/", n_bam_files, "\n")
+    }
+
+    # Combine sample specific position exclusion with common exclusion
+    if (!is.null(positions_to_exclude_paths)) {
+      current_positions_to_exclude_paths <- c(common_positions_to_exclude_paths, positions_to_exclude_paths[[bam_idx]])
+    } else {
+      current_positions_to_exclude_paths <- common_positions_to_exclude_paths
+    }
+
+    # Get training data for single bam file
+    current_training_data <- get_training_data_from_bam(
+      bam_path = bam_path,
+      reference_path = reference_path,
+      bed_include_path = bed_include_path,
+      positions_to_exclude_paths = current_positions_to_exclude_paths,
+      factor = factor,
+      mm_rate_max = mm_rate_max
+    )
+
+    training_data <- rbind(training_data, current_training_data$data)
+    info <- rbind(info, current_training_data$info)
+  }
+
+  # Collect output info for beta calculation
+  output_info <- data.frame(
+    total_mismatches = sum(info$n_mismatches),
+    total_matches = sum(info$n_matches),
+    total_coverage = sum(info$total_coverage)
+  ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
+
+  return(list(
+    data = training_data,
+    info = output_info
+  ))
+}
+
+
+#' Extract training data from BAM files
+#'
+#' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract training data from.
+#' @param reference_path String. Path to reference genome fasta file.
+#' @param bed_include_path String. Path to bed-file with regions to include. Default is \code{NULL}.
+#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.
+#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
+#' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
+#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
+#' @param verbose TODO: Write this
+#'
+#' @export
+#' @return \code{data.frame} with training data for a bam file
+#' @seealso [train_dreams_model()] Function for training model
 get_training_data <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,
@@ -248,4 +337,8 @@ bed_to_granges <- function(bed_path) {
   grange_from_bed <- makeGRangesFromDataFrame(df, start.field = "start", end.field = c("end", "stop"))
 
   return(grange_from_bed)
+}
+
+combine <- function(x, ...) {
+  mapply(rbind, x, ..., SIMPLIFY = FALSE)
 }
