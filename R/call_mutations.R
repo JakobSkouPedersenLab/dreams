@@ -199,7 +199,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
   }
 
   positions <- mutations_df %>%
-    select(.data$chr, .data$genomic_pos) %>%
+    select(chr, genomic_pos) %>%
     distinct()
 
   if (is.null(batch_size)) {
