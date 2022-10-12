@@ -35,6 +35,7 @@
 #'
 #' @import parallel
 #' @import doParallel
+#' @import dplyr
 #'
 #' @export
 
