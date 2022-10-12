@@ -33,7 +33,7 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
   print (head(coverage_data))
 
   coverage_data <- coverage_data %>%
-    dplyr::rename(chr = .data$seqnames,
+    rename(chr = .data$seqnames,
                   genomic_pos = .data$pos,
                   coverage = .data$count)
 
