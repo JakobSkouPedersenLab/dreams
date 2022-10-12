@@ -48,7 +48,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
     stop("Please provide beta factor of scaling factor")
   } else if (is.null(beta)) {
     beta <- calculate_beta_factor(
-      bam_file_path = bam_file,
+      bam_file_path = bam_file_path,
       factor = factor,
       mm_rate_max = mm_rate_max,
       bed_file = bed_file,
@@ -168,7 +168,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     stop("Please provide beta factor of scaling factor")
   } else if (is.null(beta)) {
     beta <- calculate_beta_factor(
-      bam_file_path = bam_file,
+      bam_file_path = bam_file_path,
       factor = factor,
       mm_rate_max = mm_rate_max,
       bed_file = bed_file,
