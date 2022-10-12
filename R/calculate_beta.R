@@ -33,10 +33,17 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
   print (head(coverage_data))
 
   coverage_data <- coverage_data %>%
-    dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count) %>%
-    mutate(reference_base = get_reference_seq(.data$chr, .data$genomic_pos, 0, reference_path))
+    dplyr::rename(chr = .data$seqnames,
+                  genomic_pos = .data$pos,
+                  coverage = .data$count)
 
   print ("COVERAGE DATA 2")
+  print (head(coverage_data))
+
+  coverage_data = coverage_data %>%
+    mutate(reference_base = get_reference_seq(.data$chr, .data$genomic_pos, 0, reference_path))
+
+  print ("COVERAGE DATA 3")
   print (head(coverage_data))
 
   coverage_data = coverage_data %>%
@@ -44,7 +51,7 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
     mutate(total_coverage = sum(.data$coverage)) %>%
     ungroup()
 
-  print ("COVERAGE DATA 3")
+  print ("COVERAGE DATA 4")
   print (head(coverage_data))
 
   errors <- coverage_data %>% filter(
