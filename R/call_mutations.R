@@ -99,7 +99,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
-      dplyr::select(-idx)
+      select(-idx)
 
 
     current_calls <- dreams_vc(
