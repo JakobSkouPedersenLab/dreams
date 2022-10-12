@@ -51,7 +51,8 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       bam_file_path = bam_file,
       factor = factor,
       mm_rate_max = mm_rate_max,
-      bed_file = bed_file
+      bed_file = bed_file,
+      reference_path = reference_path
     )
   }
 
