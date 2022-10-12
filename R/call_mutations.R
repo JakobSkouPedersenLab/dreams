@@ -179,7 +179,6 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   print(beta)
 
-  print ("MUTATIONS mutations")
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
@@ -190,7 +189,6 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
-  print ("AFTER MUTATIONS")
 
   # Stop if mutations do not have the expected columns
   mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")

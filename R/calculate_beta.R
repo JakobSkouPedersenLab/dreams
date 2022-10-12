@@ -20,7 +20,6 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
   )
 
 
-  print(pp)
 
   if (!is.null(bed_file)) {
     included_regions_granges <- bed_to_granges(bed_file)
@@ -29,9 +28,6 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
     coverage_data <- Rsamtools::pileup(bam_file_path, pileupParam = pp)
   }
 
-  print("COVERAGE DATA 1")
-  print(head(coverage_data))
-
   coverage_data <- coverage_data %>%
     rename(
       chr = seqnames,
@@ -39,35 +35,22 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
       coverage = count
     )
 
-  print("COVERAGE DATA 2")
-  print(head(coverage_data))
-
   coverage_data <- coverage_data %>%
     mutate(reference_base = get_reference_seq(.data$chr, .data$genomic_pos, 0, reference_path))
-
-  print("COVERAGE DATA 3")
-  print(head(coverage_data))
 
   coverage_data <- coverage_data %>%
     group_by(.data$chr, .data$genomic_pos) %>%
     mutate(total_coverage = sum(.data$coverage)) %>%
     ungroup()
 
-  print("COVERAGE DATA 4")
-  print(head(coverage_data))
-
   errors <- coverage_data %>% filter(
     .data$reference_base != .data$nucleotide,
     .data$coverage < mm_rate_max * .data$total_coverage
   )
 
-  print("ERRORS")
-  print(errors)
 
   beta <- sum(errors$coverage) / (sum(coverage_data$coverage) - sum(errors$coverage))
 
-
-  print(beta)
 
   return(beta)
 }

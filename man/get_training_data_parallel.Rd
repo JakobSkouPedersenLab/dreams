@@ -32,6 +32,8 @@ get_training_data_parallel(
 \item{mm_rate_max}{Number between 0 and 1. Maximum mismatch rate in position. Default is 1.}
 
 \item{verbose}{TODO: Write this}
+
+\item{ncores}{Number of cores}
 }
 \value{
 \code{data.frame} with training data for a bam file

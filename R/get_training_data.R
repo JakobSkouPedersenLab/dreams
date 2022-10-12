@@ -7,6 +7,7 @@
 #' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
 #' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
 #' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
+#' @param ncores Number of cores
 #' @param verbose TODO: Write this
 #'
 #' @export
