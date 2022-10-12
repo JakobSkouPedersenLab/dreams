@@ -69,7 +69,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
   serial_model <- keras::serialize_model(model)
 
   mutations_df <- mutations_df %>%
-    dplyr::select(
+    select(
       "chr" = matches("chr|CHR|CHROM"),
       "genomic_pos" = matches("pos|POS"),
       "ref" = matches("ref|REF"),
@@ -177,7 +177,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     )
   }
 
-  print (beta)
+  print(beta)
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
