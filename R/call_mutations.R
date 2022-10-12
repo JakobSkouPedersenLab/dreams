@@ -176,6 +176,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     )
   }
 
+  print (beta)
+
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
