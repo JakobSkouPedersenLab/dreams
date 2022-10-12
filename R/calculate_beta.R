@@ -20,12 +20,16 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
   )
 
 
+  print (pp)
+
   if (!is.null(bed_file)) {
     included_regions_granges <- bed_to_granges(bed_file)
     coverage_data <- Rsamtools::pileup(bam_file_path, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges))
   } else {
     coverage_data <- Rsamtools::pileup(bam_file_path, pileupParam = pp)
   }
+
+  print (coverage_data)
 
   coverage_data <- coverage_data %>%
     dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count) %>%
@@ -34,13 +38,19 @@ calculate_beta_factor <- function(bam_file_path, factor, reference_path, bed_fil
     mutate(total_coverage = sum(.data$coverage)) %>%
     ungroup()
 
+  print (coverage_data)
+
   errors <- coverage_data %>% filter(
     .data$reference_base != .data$nucleotide,
     .data$coverage < mm_rate_max * .data$total_coverage
   )
 
+  print (errors)
+
   beta <- sum(errors$coverage) / (sum(coverage_data$coverage) - sum(errors$coverage))
 
+
+  print (beta)
 
   return(beta)
 }
