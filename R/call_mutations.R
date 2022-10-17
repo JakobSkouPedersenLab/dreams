@@ -70,7 +70,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
     i = index_list,
     .combine = rbind,
     .packages = c("keras", "tensorflow", "parallel", "doParallel"),
-    .errorhandling = "pass",
+    #.errorhandling = "pass",
     .export = "dreams_vc"
   ) %dopar% {
     unserial_model <- keras::unserialize_model(serial_model)
@@ -193,6 +193,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       .data$chr %in% q$chr,
       .data$genomic_pos %in% q$genomic_pos
     )
+
+    print (current_mutations)
 
     # Call mutations
     calls <- call_mutations(
