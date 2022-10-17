@@ -134,7 +134,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
 #'   \item{count}{The count of the alternative allele.}
 #'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
-#'   \item{full_coverage}{The total coverage of the position (for reference).}
+#'   \item{full_coverage}{The total coverage of the position (for reference).}G
 #'   \item{obs_freq}{The observed frequency of the alternative allele.}
 #'   \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
 #'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
@@ -323,10 +323,17 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
       .data$genomic_pos %in% q$genomic_pos
     )
 
+    print ("current_read_positions_df")
+    print (head(current_read_positions_df))
+
+
     current_mutations <- mutations_df %>% filter(
       .data$chr %in% q$chr,
       .data$genomic_pos %in% q$genomic_pos
     )
+
+    print ("current_mutations")
+    print (current_mutations)
 
 
     # Prepare EM input
@@ -343,6 +350,8 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
     current_mutations_df <- current_mutations %>%
       left_join(full_coverage_df, by = c("chr", "genomic_pos"))
 
+
+    print ("JUST BEFORE CALLING")
     # Call mutations from reads
     res_df <- NULL
     for (i in 1:nrow(current_mutations_df)) {
