@@ -248,6 +248,10 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
     return(data.frame())
   }
 
+  if (nrow(read_positions_df) == 0) {
+    return(data.frame())
+  }
+
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
