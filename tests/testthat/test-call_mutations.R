@@ -108,20 +108,20 @@ test_that("Simple example dreams_vc - 3 pos", {
 #
 # })
 
-
-test_that("Invalid mutations_df", {
-  mutations_no_alt_df <-
-    data.frame(
-      CHROM = "chr1",
-      POS = 10,
-      REF = "T"
-    )
-
-  expect_error(
-    call_mutations(mutations_df = mutations_no_alt_df, read_positions_df = data.frame(), model = NULL, beta = NULL),
-    "mutations_df should have the columns .*"
-  )
-})
+#
+# test_that("Invalid mutations_df", {
+#   mutations_no_alt_df <-
+#     data.frame(
+#       CHROM = "chr1",
+#       POS = 10,
+#       REF = "T"
+#     )
+#
+#   expect_error(
+#     call_mutations(mutations_df = mutations_no_alt_df, read_positions_df = data.frame(), model = NULL, beta = NULL),
+#     "mutations_df should have the columns .*"
+#   )
+# })
 
 test_that("Invalid read_positions_df", {
   mutations_df <-

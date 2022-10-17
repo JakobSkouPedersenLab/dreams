@@ -1,4 +1,4 @@
-limit <- function(x, min = 0, max = 1) {
+limit <- function(x, min = 10^-13, max = 0.999999999999) {
   return(pmax(pmin(x, max), min))
 }
 
@@ -14,19 +14,19 @@ correct_errors_predictions <- function(error_df, beta) {
       ),
       error_prob_corrected = beta * .data$error_prob_sample / (beta * .data$error_prob_sample - .data$error_prob_sample + 1),
       A_corrected = ifelse(.data$ref == "A",
-        1 - .data$error_prob_corrected,
+        1.00 - .data$error_prob_corrected,
         .data$error_prob_corrected * .data$A / (.data$error_prob_sample)
       ),
       C_corrected = ifelse(.data$ref == "C",
-        1 - .data$error_prob_corrected,
+        1.00 - .data$error_prob_corrected,
         .data$error_prob_corrected * .data$C / (.data$error_prob_sample)
       ),
       G_corrected = ifelse(.data$ref == "G",
-        1 - .data$error_prob_corrected,
+        1.00 - .data$error_prob_corrected,
         .data$error_prob_corrected * .data$G / (.data$error_prob_sample)
       ),
       T_corrected = ifelse(.data$ref == "T",
-        1 - .data$error_prob_corrected,
+        1.00 - .data$error_prob_corrected,
         .data$error_prob_corrected * .data$T / (.data$error_prob_sample)
       ),
       A_corrected = ifelse(is.nan(.data$A_corrected), 0, .data$A_corrected) %>% limit(),
