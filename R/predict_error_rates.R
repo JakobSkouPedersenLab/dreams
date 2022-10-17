@@ -35,7 +35,12 @@ correct_errors_predictions <- function(error_df, beta) {
       T_corrected = ifelse(is.nan(.data$T_corrected), 0, .data$T_corrected) %>% limit()
     )
 }
-
+#' Predict error rates for read positions
+#'
+#' @param read_positions_df Dataframe with read positions
+#' @param model model file
+#' @param beta beta value
+#'
 #' @importFrom stats predict
 #' @export
 
