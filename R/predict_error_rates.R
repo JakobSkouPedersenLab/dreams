@@ -137,7 +137,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 
   print(mutations_df)
 
-  print ("BEFORE FOREACH")
+  print("BEFORE FOREACH")
 
   error_rates <- foreach::foreach(
     i = index_list,
@@ -162,7 +162,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 
 
     print("MUTATIONS")
-    print (head(mutations))
+    print(head(mutations))
 
 
     current_error_rates <- predict_error_rates_batches(
@@ -172,7 +172,6 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       batch_size = batch_size,
       model = unserial_model,
       beta = beta
-
     ) %>% dplyr::mutate(
       beta = beta
     )
@@ -203,11 +202,11 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 #' @export
 
 predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_path, model,
-                                        beta = NULL, factor = NULL, bed_file = NULL,  mm_rate_max = 0.05, batch_size = NULL) {
+                                        beta = NULL, factor = NULL, bed_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
 
   # If no beta value
 
-  print ("INSIDE BATCHES")
+  print("INSIDE BATCHES")
 
   if (is.null(beta) && is.null(factor)) {
     stop("Please provide beta factor of scaling factor")
@@ -233,7 +232,7 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
-  print (mutations_df)
+  print(mutations_df)
 
   positions <- mutations_df %>%
     select(chr, genomic_pos) %>%
@@ -260,6 +259,8 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
 
     q <- position_batches %>% filter(batch_idx == batch)
 
+    print(head(q))
+
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
       bam_file_path = bam_file_path,
@@ -267,6 +268,8 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       genomic_pos = q$genomic_pos,
       reference_path
     )
+
+    print(head(read_positions_df))
 
     current_error_rates <- predict_error_rates(
       read_positions_df = read_positions_df,
@@ -276,10 +279,11 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       beta = beta
     )
 
+    print(head(current_error_rates))
+
 
     error_rates <- rbind(error_rates, current_error_rates)
   }
 
   return(error_rates)
 }
-
