@@ -103,7 +103,7 @@ predict_error_rates <- function(read_positions_df, model, beta) {
 #' @export
 
 predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_path, model,
-                                         beta = NULL, factor = NULL, bed_file = NULL, ncores = 1, log_file = NULL, mm_rate_max = 0.05) {
+                                         beta = NULL, factor = NULL, bed_file = NULL, ncores = 1, log_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
 
   # If no beta value
 
@@ -168,19 +168,12 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       dplyr::select(-idx)
 
 
-    # Get read positions
-    read_positions_df <- get_read_positions_from_BAM(
+
+    current_error_rates <- predict_error_rates_batches(
+      mutations_df = mutations,
       bam_file_path = bam_file_path,
-      chr = mutations$chr,
-      genomic_pos = mutations$genomic_pos,
-      reference_path
-    )
-
-    print(head(read_positions_df))
-
-
-    current_error_rates <- predict_error_rates(
-      read_positions_df = read_positions_df,
+      reference_path = reference_path,
+      batch_size = batch_size,
       model = model,
       beta = beta
     ) %>% dplyr::mutate(
@@ -213,7 +206,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 #' @export
 
 predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_path, model,
-                                        beta = NULL, factor = NULL, bed_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
+                                        beta = NULL, factor = NULL, bed_file = NULL,  mm_rate_max = 0.05, batch_size = NULL) {
 
   # If no beta value
 
