@@ -154,11 +154,15 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
     .errorhandling = "pass",
     .export = "dreams_vc"
   ) %dopar% {
+
     unserial_model <- keras::unserialize_model(serial_model)
+
 
     if (!is.null(log_file)) {
       sink(paste0(log_file, "_", i))
     }
+
+    print ("INSIDE")
 
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
