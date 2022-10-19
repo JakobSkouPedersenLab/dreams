@@ -80,16 +80,6 @@ predict_error_rates <- function(read_positions_df, model, beta) {
 
 
 
-
-
-
-
-
-
-
-
-
-
 #' Parallel predict error rates
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
@@ -167,6 +157,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
 
+    print (head(mutations))
 
 
     current_error_rates <- predict_error_rates_batches(
@@ -209,6 +200,8 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
                                         beta = NULL, factor = NULL, bed_file = NULL,  mm_rate_max = 0.05, batch_size = NULL) {
 
   # If no beta value
+
+  print ("INSIDE BATCHES")
 
   if (is.null(beta) && is.null(factor)) {
     stop("Please provide beta factor of scaling factor")
