@@ -241,6 +241,8 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
+  print (mutations_df)
+
 
   # Stop if mutations do not have the expected columns
   mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
