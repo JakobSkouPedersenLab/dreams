@@ -158,10 +158,11 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       sink(paste0(log_file, "_", i))
     }
 
-
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
       select(-idx)
+
+    print (mutations)
 
 
     # Get read positions
@@ -172,6 +173,9 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       reference_path
     )
 
+    print (read_positions_df)
+
+
     current_error_rates <- predict_error_rates(
       read_positions_df = read_positions_df,
       model = model,
@@ -179,6 +183,8 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
     ) %>% mutate(
       beta = beta
     )
+
+    print (current_error_rates)
 
 
     return(current_error_rates)
