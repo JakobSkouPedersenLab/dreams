@@ -22,7 +22,7 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
     batch_size <- nrow(positions) + 1
   }
 
-  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% batch_size))
+  position_batches <- positions %>% dplyr::mutate(batch_idx = (row_number() %/% batch_size))
 
   n_batches <- length(unique(position_batches$batch_idx))
 
