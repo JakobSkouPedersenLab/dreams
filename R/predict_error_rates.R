@@ -244,7 +244,7 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
     batch_size <- nrow(positions) + 1
   }
 
-  position_batches <- positions %>% mutate(batch_idx = (row_number() %/% !!batch_size))
+  position_batches <- positions %>% dplyr::mutate(batch_idx = (row_number() %/% !!batch_size))
 
 
   error_rates <- NULL
