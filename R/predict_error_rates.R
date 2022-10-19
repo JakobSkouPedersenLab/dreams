@@ -152,11 +152,14 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
     }
 
     print("INSIDE")
+    print("INSIDE2")
 
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
 
+
+    print("MUTATIONS")
     print (head(mutations))
 
 
