@@ -145,6 +145,8 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
   cl <- makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
+  print (mutations_df)
+
   error_rates <- foreach::foreach(
     i = index_list,
     .combine = rbind,
