@@ -137,12 +137,14 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 
   print(mutations_df)
 
+  print ("BEFORE FOREACH")
+
   error_rates <- foreach::foreach(
     i = index_list,
     .combine = rbind,
     .packages = c("keras", "tensorflow", "parallel", "doParallel", "dplyr"),
     .errorhandling = "pass",
-    .export = "dreams_vc"
+    .export = "predict_error_rates_batches"
   ) %dopar% {
     unserial_model <- keras::unserialize_model(serial_model)
 
