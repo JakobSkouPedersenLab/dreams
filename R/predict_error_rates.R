@@ -243,13 +243,6 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
 
   print (mutations_df)
 
-
-  # Stop if mutations do not have the expected columns
-  mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
-  if (!all(mutations_expected_columns %in% colnames(mutations_df))) {
-    stop("mutations_df should have the columns ['chr', genomic_pos', 'ref, 'alt']")
-  }
-
   positions <- mutations_df %>%
     select(chr, genomic_pos) %>%
     distinct()
