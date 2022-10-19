@@ -150,7 +150,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
   error_rates <- foreach::foreach(
     i = index_list,
     .combine = rbind,
-    .packages = c("keras", "tensorflow", "parallel", "doParallel"),
+    .packages = c("keras", "tensorflow", "parallel", "doParallel", "dplyr"),
     .errorhandling = "pass",
     .export = "dreams_vc"
   ) %dopar% {
@@ -184,7 +184,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       read_positions_df = read_positions_df,
       model = model,
       beta = beta
-    ) %>% mutate(
+    ) %>% dplyr::mutate(
       beta = beta
     )
 
