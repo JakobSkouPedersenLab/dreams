@@ -168,8 +168,6 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
 
-    print (mutations)
-
 
     # Get read positions
     read_positions_df <- get_read_positions_from_BAM(
@@ -179,7 +177,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       reference_path
     )
 
-    print (read_positions_df)
+    print (head(read_positions_df))
 
 
     current_error_rates <- predict_error_rates(
@@ -190,7 +188,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       beta = beta
     )
 
-    print (current_error_rates)
+    print (head(current_error_rates))
 
 
     return(current_error_rates)
