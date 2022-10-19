@@ -166,7 +166,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
-      select(-idx)
+      dplyr::select(-idx)
 
     print (mutations)
 
