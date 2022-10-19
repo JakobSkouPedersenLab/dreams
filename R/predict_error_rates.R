@@ -168,7 +168,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       bam_file_path = bam_file_path,
       reference_path = reference_path,
       batch_size = batch_size,
-      model = model,
+      model = unserial_model,
       beta = beta
     ) %>% dplyr::mutate(
       beta = beta

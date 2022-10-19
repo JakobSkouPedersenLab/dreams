@@ -14,7 +14,8 @@ predict_error_rates_parallel(
   bed_file = NULL,
   ncores = 1,
   log_file = NULL,
-  mm_rate_max = 0.05
+  mm_rate_max = 0.05,
+  batch_size = NULL
 )
 }
 \arguments{
