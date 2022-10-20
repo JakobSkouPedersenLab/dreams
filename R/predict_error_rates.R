@@ -92,7 +92,7 @@ predict_error_rates <- function(read_positions_df, model, beta) {
 #'
 #' @export
 
-predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_path, model,
+predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_path, model, prior_error_rates = NULL,
                                          beta = NULL, factor = NULL, bed_file = NULL, ncores = 1, log_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
 
   # If no beta value
@@ -171,7 +171,8 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       reference_path = reference_path,
       batch_size = batch_size,
       model = unserial_model,
-      beta = beta
+      beta = beta,
+      prior_error_rates = prior_error_rates
     ) %>% dplyr::mutate(
       beta = beta
     )
@@ -202,7 +203,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 #' @export
 
 predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_path, model,
-                                        beta = NULL, factor = NULL, bed_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
+                                        beta = NULL, factor = NULL, prior_error_rates = NULL, bed_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
 
   # If no beta value
 
@@ -219,6 +220,17 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       reference_path = reference_path
     )
   }
+
+
+  if (!is.null(prior_error_rates)) {
+    prior_error_rates <- prior_error_rates %>%
+      select(
+        "chr" = matches("chr|CHR|CHROM"),
+        "genomic_pos" = matches("pos|POS"),
+        "prior_error" = matches("mm_rate|error_rate|prior_error|prior_error_Rate")
+      )
+  }
+
 
   print(beta)
 
@@ -269,7 +281,10 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       reference_path
     )
 
-    print(head(read_positions_df))
+    if (!is.null(prior_error_rates)) {
+      read_positions_df <- read_positions_df %>% left_join(prior_error_rates)
+    }
+
 
     current_error_rates <- predict_error_rates(
       read_positions_df = read_positions_df,
