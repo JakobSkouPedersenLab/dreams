@@ -190,7 +190,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.
 
   # Filter heterozygote positions
 
-  read_positions_summarized <- read_positions_filtered %>%
+  read_positions_summarized <- read_positions %>%
     group_by(.data$chr, .data$genomic_pos) %>%
     summarize(n_mismatches = sum(obs != ref)) %>%
     ungroup()
