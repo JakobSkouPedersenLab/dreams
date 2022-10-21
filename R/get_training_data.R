@@ -162,6 +162,8 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
 filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
 
+  read_positions_filtered = read_positions %>% filter(obs != "N")
+
   # Load coverage data
 
   included_regions_granges <- bed_to_granges(bed_include_path)
