@@ -161,9 +161,6 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 #' @importFrom readr read_csv
 
 filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
-  read_positions_filtered <-
-    read_positions %>%
-    filter(.data$obs != "N")
 
   # Load coverage data
 
