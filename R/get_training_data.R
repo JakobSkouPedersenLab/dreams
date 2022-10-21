@@ -18,12 +18,12 @@ get_training_data <- function(bam_paths,
                               factor = 1,
                               common_positions_to_exclude_paths = NULL,
                               positions_to_exclude_paths = NULL,
-                              mm_rate_max = 1,
+                              mm_rate_max = 0.05,
                               verbose = F) {
 
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
-       (length(bam_paths) != length(positions_to_exclude_paths)))) {
+    (length(bam_paths) != length(positions_to_exclude_paths)))) {
     stop("Wrong number of exclude paths")
   }
 
@@ -89,7 +89,7 @@ get_training_data <- function(bam_paths,
 #' @keywords internal
 #'
 #' @return dataframe with training data for a bam file
-get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
+get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 0.05) {
   bam_df <- load_BAM(bam_path)
 
   # Add genomic positions of mismatches
@@ -165,7 +165,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 #'
 #' @importFrom readr read_csv
 
-filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
+filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.05, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
   read_positions_filtered <-
     read_positions %>%
     filter(.data$obs != "N")
@@ -218,7 +218,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   coverage_data_filtered <- coverage_data %>%
     semi_join(position_mm_rate,
-              by = c("chr", "genomic_pos")
+      by = c("chr", "genomic_pos")
     )
 
   # Remove unwanted positions based on exclude files
@@ -246,7 +246,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   return(list(
     data = read_positions_filtered,
     info = beta_info,
-    read_position_mm_rate = position_mm_rate))
+    read_position_mm_rate = position_mm_rate
+  ))
 }
 
 #' Title
