@@ -170,6 +170,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.
     read_positions %>%
     filter(.data$obs != "N")
 
+
+
   # Load coverage data
 
   included_regions_granges <- bed_to_granges(bed_include_path)
@@ -185,15 +187,13 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.
   coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
 
-  print("COVERAGE DATA")
-  print(dim(coverage_data))
-
   # Filter heterozygote positions
 
   read_positions_summarized <- read_positions_filtered %>%
     group_by(.data$chr, .data$genomic_pos) %>%
     summarize(n_mismatches = sum(obs != ref)) %>%
     ungroup()
+
 
   # Join with coverage dataframe - all positions if included_regions is NULL
 
@@ -203,18 +203,22 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.
     inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
     mutate(mm_rate = .data$n_mismatches / .data$coverage)
 
+
+  read_position_filter <- read_position_mm_rate %>%
+    filter(.data$mm_rate < mm_rate_max)
+
+
   position_mm_rate <- coverage_data %>%
     left_join(read_positions_summarized, by = c("chr", "genomic_pos")) %>%
     mutate(
       mm_rate = .data$n_mismatches / .data$coverage,
       across(where(is.numeric), coalesce, 0)
-    )
+    ) %>% filter(.data$mm_rate < mm_rate_max)
 
-  read_position_filter <- read_position_mm_rate %>%
-    filter(.data$mm_rate < mm_rate_max)
 
   read_positions_filtered <- read_positions_filtered %>%
     semi_join(read_position_filter, by = c("chr", "genomic_pos"))
+
 
   coverage_data_filtered <- coverage_data %>%
     anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
