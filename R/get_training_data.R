@@ -190,7 +190,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.
 
   # Filter heterozygote positions
 
-  read_positions_summarized <- read_positions %>%
+  read_positions_summarized <- read_positions_filtered %>%
     group_by(.data$chr, .data$genomic_pos) %>%
     summarize(n_mismatches = sum(obs != ref)) %>%
     ungroup()
@@ -217,7 +217,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 0.
     semi_join(read_position_filter, by = c("chr", "genomic_pos"))
 
   coverage_data_filtered <- coverage_data %>%
-     anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
+    anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
 
 
 
