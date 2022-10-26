@@ -279,18 +279,11 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       chr = q$chr,
       genomic_pos = q$genomic_pos,
       reference_path
-    )
-
-    print ("RP1")
-    print (head(read_positions_df))
+    ) %>% filter(obs != "N")
 
     if (!is.null(prior_error_rates)) {
       read_positions_df <- read_positions_df %>% left_join(prior_error_rates)
     }
-
-    print ("RP2")
-    print (head(read_positions_df))
-
 
     current_error_rates <- predict_error_rates(
       read_positions_df = read_positions_df,
