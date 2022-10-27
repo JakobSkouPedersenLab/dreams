@@ -10,7 +10,7 @@ get_training_data_from_bam(
   bed_include_path = NULL,
   factor = 1,
   positions_to_exclude_paths = NULL,
-  mm_rate_max = 1
+  mm_rate_max = 0.05
 )
 }
 \arguments{

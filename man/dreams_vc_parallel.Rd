@@ -11,6 +11,7 @@ dreams_vc_parallel(
   model,
   beta,
   alpha = 0.05,
+  prior_error_rates = NULL,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
   batch_size = NULL,
