@@ -76,6 +76,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
       )
     ) %>%
     strand_correct_umi_features() %>%
+    hardclip_correct_umi_features() %>%
     remove_softclips()
 
   return(bam_df)
@@ -112,4 +113,51 @@ strand_correct_umi_features <- function(df) {
         }
       )
     )
+}
+
+#' Hard clip correct UMI features (ce and cd)
+#'
+#' @param df data.frame converted from lists-of-lists (scanBam)
+#'
+#' @return data.frame with corrected UMI features
+#' @keywords internal
+#'
+hardclip_correct_umi_features <- function(df) {
+
+  # If UMI features not present -> return input
+  if (!all(c("ce", "cd") %in% colnames(df))) {
+    return(df)
+  }
+
+
+  # Filter soft clips and remove from sequence string
+  cigar <- df$cigar
+
+  hard_clips_start <- ifelse(stringr::str_detect(cigar, "^[0-9]*H"),
+    stringr::str_extract(string = cigar, pattern = "^[0-9]*") %>% as.numeric(),
+    0
+  )
+
+  hard_clips_end <- ifelse(stringr::str_detect(cigar, "[0-9]*H$"),
+    stringr::str_extract(string = cigar, pattern = "[0-9]*(?=H$)") %>% as.numeric(),
+    0
+  )
+  trim_list <- function(x, start, end) {
+    return(x[(start + 1):(length(x) - end)])
+  }
+  # Extract old ce and cd
+  cd <- df$cd
+  ce <- df$ce
+
+  # Trim UMI features
+  new_cd <- purrr::pmap(list(cd, hard_clips_start, hard_clips_end), trim_list)
+  new_ce <- purrr::pmap(list(ce, hard_clips_start, hard_clips_end), trim_list)
+
+  # Update cd and ce
+  df$cd <- new_cd
+  df$ce <- new_ce
+
+
+  # Return updated df
+  return(df)
 }
