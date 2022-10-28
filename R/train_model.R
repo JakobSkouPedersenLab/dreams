@@ -356,9 +356,9 @@ fit_model <- function(features, labels, input_structure,
   # Create a training checkpoint for every 10 epochs
   checkpoint_callback <-
     keras::callback_model_checkpoint(
-      filepath = paste0(model_file_path, "_checkpoint"),
+      filepath = paste0(model_file_path, ".{epoch:02d}_checkpoint.hdf5"),
       monitor = "val_loss",
-      save_freq = 10
+      save_freq = 1
     )
 
 
