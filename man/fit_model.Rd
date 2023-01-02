@@ -9,7 +9,6 @@ fit_model(
   labels,
   input_structure,
   lr,
-  decay,
   batch_size,
   epochs,
   min_delta,
@@ -27,8 +26,6 @@ fit_model(
 \item{input_structure}{input structure}
 
 \item{lr}{learning rate}
-
-\item{decay}{decay rate}
 
 \item{batch_size}{batch size}
 

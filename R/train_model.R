@@ -9,7 +9,6 @@
 #' @param epochs Integer. Number of training epochs.
 #' @param model_file_path String. Model output file path. Default is \code{NULL}.
 #' @param log_file_path String. Path to model output log file. Default is \code{NULL}.
-#' @param decay Numeric value between 0 and 1. Decay rate. Default is 0.
 #' @param l2_reg Numeric value between 0 and 1. Level of L2 regularization per layer. Default is 0.
 #' @param min_delta Numeric value between 0 and 1. Minimum delta for early stopping. Default is 0.
 #' @param patience Integer. Patience when reaching minimum delta. Default is 0.
@@ -25,7 +24,7 @@
 train_dreams_model <- function(training_data, layers,
                         model_features, lr, batch_size, epochs,
                         model_file_path = NULL, log_file_path = NULL,
-                        decay = 0, min_delta = 0, patience = 0, l2_reg = 0,
+                        min_delta = 0, patience = 0, l2_reg = 0,
                         validation_split = 0, ctx3_embed_dim = 3) {
   training_data <- prepare_training_data(
     training_data = training_data,
@@ -48,7 +47,6 @@ train_dreams_model <- function(training_data, layers,
     labels = training_data$labels,
     input_structure = model_structure,
     lr = lr,
-    decay = decay,
     batch_size = batch_size,
     epochs = epochs,
     min_delta = min_delta,
@@ -134,7 +132,8 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "local_complexity_1",
       "local_complexity_2",
       "n_other_errors",
-      "prior_error"
+      "prior_error",
+      "seq_length"
     )
   all_categorical_variables <-
     c(
@@ -292,7 +291,6 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
 #' @param labels input labels
 #' @param input_structure input structure
 #' @param lr learning rate
-#' @param decay decay rate
 #' @param batch_size batch size
 #' @param epochs number of training epochs
 #' @param min_delta minimum delta for early stopping
@@ -310,7 +308,6 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
 
 fit_model <- function(features, labels, input_structure,
                       lr,
-                      decay,
                       batch_size,
                       epochs,
                       min_delta,
@@ -397,8 +394,7 @@ fit_model <- function(features, labels, input_structure,
 
   # Optimizer
   opt <- keras::optimizer_adam(
-    learning_rate = lr,
-    decay = decay
+    learning_rate = lr
   )
 
   # Compile model

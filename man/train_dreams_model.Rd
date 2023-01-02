@@ -13,7 +13,6 @@ train_dreams_model(
   epochs,
   model_file_path = NULL,
   log_file_path = NULL,
-  decay = 0,
   min_delta = 0,
   patience = 0,
   l2_reg = 0,
@@ -37,8 +36,6 @@ train_dreams_model(
 \item{model_file_path}{String. Model output file path. Default is \code{NULL}.}
 
 \item{log_file_path}{String. Path to model output log file. Default is \code{NULL}.}
-
-\item{decay}{Numeric value between 0 and 1. Decay rate. Default is 0.}
 
 \item{min_delta}{Numeric value between 0 and 1. Minimum delta for early stopping. Default is 0.}
 

@@ -32,7 +32,7 @@ test_that("separate train model example", {
     epochs = 5,
     model_file_path = "~/Desktop/model.test",
     #log_file_path = "~/Desktop/log.test",
-    decay = 0, min_delta = 0, patience = 0, validation_split = 0.1
+    min_delta = 0, patience = 0, validation_split = 0.1
   )
 
   predict(
