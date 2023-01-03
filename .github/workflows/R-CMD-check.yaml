@@ -51,7 +51,13 @@ jobs:
       - name: Install Keras
         run: |
           Rscript -e "tensorflow::install_tensorflow()"
+          Rscript -e "tensorflow::tf_config()"
           Rscript -e "keras::install_keras()"
+          Rscript -e "keras:::keras_version()"
+          Rscript -e "reticulate::py_config()"
+
+
+
 
       - uses: r-lib/actions/check-r-package@v2
         with:
