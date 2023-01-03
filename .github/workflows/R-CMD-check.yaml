@@ -52,10 +52,9 @@ jobs:
       - name: Install Keras
         run: |
           Rscript -e "reticulate::conda_create('r-reticulate', packages = c('python==${{ matrix.config.python }}'))"
-          conda activate r-reticulate
-          Rscript -e "install.packages('remotes')"
-          Rscript -e "remotes::install_local()"
           Rscript -e "keras::install_keras(version = '${{ matrix.config.tf }}')"
+          conda init
+          conda activate r-reticulate
           Rscript -e "print('------------------ Installed config ----------------------')"
           Rscript -e "tensorflow::tf_config()"
           Rscript -e "keras:::keras_version()"
