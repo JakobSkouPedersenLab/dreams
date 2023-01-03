@@ -51,7 +51,6 @@ jobs:
 
       - name: Install Keras
         run: |
-          Rscript -e "reticulate::install_miniconda()"
           Rscript -e "reticulate::conda_create('r-reticulate', packages = c('python==${{ matrix.config.python }}'))"
           Rscript -e "keras::install_keras(version = '${{ matrix.config.tf }}')"
           Rscript -e "print('------------------ Installed config ----------------------')"
