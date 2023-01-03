@@ -49,18 +49,10 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        env:
-          RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
-        run: |
-          Rscript -e "install.packages('remotes')" -e "remotes::install_github('r-hub/sysreqs')"
-          sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
-          sudo -s eval "$sysreqs"
-
       - name: Install Keras
         run: |
           Rscript -e "reticulate::conda_create('r-reticulate', packages = c('python==${{ matrix.config.python }}'))"
+          Rscript -e "install.packages('remotes')"
           Rscript -e "remotes::install_local()"
           Rscript -e "keras::install_keras(version = '${{ matrix.config.tf }}')"
           Rscript -e "print('------------------ Installed config ----------------------')"
