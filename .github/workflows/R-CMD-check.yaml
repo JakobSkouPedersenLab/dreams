@@ -20,7 +20,6 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release', python: '3.8', tf: '2.11'}
           - {os: macos-latest,   r: 'release', python: '3.8', tf: '2.8'}
-          - {os: windows-latest, r: 'release', python: '3.6', tf: '2.6'}
           - {os: ubuntu-latest,   r: 'devel', python: '3.8', tf: '2.11', http-user-agent: 'release'}
           - {os: ubuntu-latest,   r: 'release', python: '3.8', tf: '2.11'}
           - {os: ubuntu-latest,   r: 'oldrel-1', python: '3.8', tf: '2.11'}
@@ -51,11 +50,7 @@ jobs:
 
       - name: Install Keras
         run: |
-
-          Rscript -e "reticulate::conda_create('r-reticulate', packages = c('python==${{ matrix.config.python }}'))"
-          Rscript -e "remotes::install_local()"
           Rscript -e "keras::install_keras(version = '${{ matrix.config.tf }}')"
-
           Rscript -e "print('------------------ Installed config ----------------------')"
           Rscript -e "tensorflow::tf_config()"
           Rscript -e "keras:::keras_version()"
