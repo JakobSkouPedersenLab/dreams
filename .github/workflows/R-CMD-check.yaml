@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Keras
         run: |
-          Rscript -e "tensorflow::install_tensorflow(version = \"${{ matrix.config.tf }}\")"
+          Rscript -e "tensorflow::install_tensorflow(version = '${{ matrix.config.tf }}')"
           Rscript -e "tensorflow::tf_config()"
           Rscript -e "keras::install_keras()"
           Rscript -e "keras:::keras_version()"
