@@ -12,17 +12,17 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (r ${{ matrix.config.r }}, python ${{ matrix.config.python }})
+    name: ${{ matrix.config.os }} (r ${{ matrix.config.r }}, python ${{ matrix.config.python }}, tf ${{ matrix.config.tf }})
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: macos-latest,   r: 'release', python: '3.8'}
-          - {os: windows-latest, r: 'release', python: '3.6'}
-          - {os: ubuntu-latest,   r: 'devel', python: '3.8', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release', python: '3.8'}
-          - {os: ubuntu-latest,   r: 'oldrel-1', python: '3.8'}
+          - {os: macos-latest,   r: 'release', python: '3.8', tf: '2.11'}
+          - {os: windows-latest, r: 'release', python: '3.6', tf: '2.6'}
+          - {os: ubuntu-latest,   r: 'devel', python: '3.8', tf: '2.11', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'release', python: '3.8', tf: '2.11'}
+          - {os: ubuntu-latest,   r: 'oldrel-1', python: '3.8', tf: '2.11'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Keras
         run: |
-          Rscript -e "tensorflow::install_tensorflow()"
+          Rscript -e "tensorflow::install_tensorflow(version = \"${{ matrix.config.tf }}\")"
           Rscript -e "tensorflow::tf_config()"
           Rscript -e "keras::install_keras()"
           Rscript -e "keras:::keras_version()"
