@@ -44,6 +44,10 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: whatever
+
       - name: Install Keras
         run: |
           Rscript -e "reticulate::install_miniconda()"
