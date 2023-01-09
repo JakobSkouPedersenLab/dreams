@@ -32,6 +32,8 @@ dreams_vc_parallel(
 
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
+\item{prior_error_rates}{Prior error rates}
+
 \item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
 
 \item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
@@ -48,6 +50,7 @@ A \code{\link[=data.frame]{data.frame()}} with information about the individual 
 \item{chr, genomic_pos}{The genomic position of the mutation.}
 \item{ref, alt}{The reference and alternative allele.}
 \item{EM_converged}{If the EM algorithm converged.}
+\item{prior_error_rates}{Prior error rates.}
 \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
 \item{tf_est}{The estiamted tumor fraction (allele fraction).}
 \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}

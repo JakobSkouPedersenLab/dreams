@@ -83,8 +83,9 @@ predict_error_rates <- function(read_positions_df, model, beta) {
 #' Parallel predict error rates
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' @inheritParams call_cancer
+#' @inheritParams dreams_vc_parallel
 #' @param bam_file_path Path to .BAM-file
+#'
 #'
 #' @import parallel
 #' @import doParallel
@@ -93,21 +94,21 @@ predict_error_rates <- function(read_positions_df, model, beta) {
 #' @export
 
 predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_path, model, prior_error_rates = NULL,
-                                         beta = NULL, factor = NULL, bed_file = NULL, ncores = 1, log_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
+                                         beta = NULL, ncores = 1, log_file = NULL, batch_size = NULL) {
 
-  # If no beta value
-
-  if (is.null(beta) && is.null(factor)) {
-    stop("Please provide beta factor of scaling factor")
-  } else if (is.null(beta)) {
-    beta <- calculate_beta_factor(
-      bam_file_path = bam_file_path,
-      factor = factor,
-      mm_rate_max = mm_rate_max,
-      bed_file = bed_file,
-      reference_path = reference_path
-    )
-  }
+  # # If no beta value
+  #
+  # if (is.null(beta) && is.null(factor)) {
+  #   stop("Please provide beta factor of scaling factor")
+  # } else if (is.null(beta)) {
+  #   beta <- calculate_beta_factor(
+  #     bam_file_path = bam_file_path,
+  #     factor = factor,
+  #     mm_rate_max = mm_rate_max,
+  #     bed_file = bed_file,
+  #     reference_path = reference_path
+  #   )
+  # }
 
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -165,9 +166,6 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       beta = beta
     )
 
-    print(head(current_error_rates))
-
-
     return(current_error_rates)
   }
 
@@ -181,7 +179,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 #' Parallel predict error rates
 #'
 #' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' @inheritParams call_cancer
+#' @inheritParams dreams_vc
 #' @param bam_file_path Path to .BAM-file
 #'
 #' @import parallel
@@ -191,25 +189,7 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
 #' @export
 
 predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_path, model,
-                                        beta = NULL, factor = NULL, prior_error_rates = NULL, bed_file = NULL, mm_rate_max = 0.05, batch_size = NULL) {
-
-  # If no beta value
-
-  print("INSIDE BATCHES")
-
-  if (is.null(beta) && is.null(factor)) {
-    stop("Please provide beta factor of scaling factor")
-  } else if (is.null(beta)) {
-    beta <- calculate_beta_factor(
-      bam_file_path = bam_file_path,
-      factor = factor,
-      mm_rate_max = mm_rate_max,
-      bed_file = bed_file,
-      reference_path = reference_path
-    )
-  }
-
-
+                                        beta = NULL, prior_error_rates = NULL, batch_size = NULL) {
   if (!is.null(prior_error_rates)) {
     prior_error_rates <- prior_error_rates %>%
       select(
@@ -230,7 +210,7 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
     )
 
   positions <- mutations_df %>%
-    select(chr, genomic_pos) %>%
+    select(.data$chr, .data$genomic_pos) %>%
     distinct()
 
   if (is.null(batch_size)) {

@@ -30,6 +30,8 @@ dreams_vc(
 
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
+\item{prior_error_rates}{Prior error rates}
+
 \item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
 
 \item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
@@ -46,6 +48,7 @@ A \code{\link[=data.frame]{data.frame()}} with information about the individual 
 \item{tf_est}{The estiamted tumor fraction (allele fraction).}
 \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
 \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+\item{prior_error_rates}{Prior error rates.}
 \item{count}{The count of the alternative allele.}
 \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
 \item{full_coverage}{The total coverage of the position (for reference).}

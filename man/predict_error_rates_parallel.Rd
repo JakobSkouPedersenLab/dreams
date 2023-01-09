@@ -11,11 +11,8 @@ predict_error_rates_parallel(
   model,
   prior_error_rates = NULL,
   beta = NULL,
-  factor = NULL,
-  bed_file = NULL,
   ncores = 1,
   log_file = NULL,
-  mm_rate_max = 0.05,
   batch_size = NULL
 )
 }
@@ -24,9 +21,19 @@ predict_error_rates_parallel(
 
 \item{bam_file_path}{Path to .BAM-file}
 
+\item{reference_path}{Path to reference genome e.g. FASTA-file.}
+
 \item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
 
+\item{prior_error_rates}{Prior error rates}
+
 \item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
+
+\item{ncores}{Number of processing cores}
+
+\item{log_file}{write log-file to this path}
+
+\item{batch_size}{Number of positions to process at a time}
 }
 \description{
 This function evaluate the presence (calls) of individual mutations from a predefined list.

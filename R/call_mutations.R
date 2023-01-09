@@ -9,6 +9,7 @@
 #' @param ncores Number of processing cores
 #' @param batch_size Number of positions to process at a time
 #' @param log_file write log-file to this path
+#' @param prior_error_rates Prior error rates
 
 
 
@@ -17,6 +18,7 @@
 #'   \item{chr, genomic_pos}{The genomic position of the mutation.}
 #'   \item{ref, alt}{The reference and alternative allele.}
 #'   \item{EM_converged}{If the EM algorithm converged.}
+#'   \item{prior_error_rates}{Prior error rates.}
 #'   \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
 #'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
 #'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
@@ -114,6 +116,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #' @param bam_file_path Path to .BAM-file
 #' @param reference_path Path to reference genome e.g. FASTA-file.
 #' @param batch_size Number of positions to process at a time
+#' @param prior_error_rates Prior error rates
 
 
 #' @return A [data.frame()] with information about the individual mutation calls, including:
@@ -125,6 +128,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
 #'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
 #'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
+#'   \item{prior_error_rates}{Prior error rates.}
 #'   \item{count}{The count of the alternative allele.}
 #'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
 #'   \item{full_coverage}{The total coverage of the position (for reference).}
