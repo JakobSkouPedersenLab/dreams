@@ -135,10 +135,6 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
   cl <- makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
-  print(mutations_df)
-
-  print("BEFORE FOREACH")
-
   error_rates <- foreach::foreach(
     i = index_list,
     .combine = rbind,
@@ -153,17 +149,9 @@ predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_
       sink(paste0(log_file, "_", i))
     }
 
-    print("INSIDE")
-    print("INSIDE2")
-
     mutations <- mutations_df %>%
       dplyr::filter(idx == i) %>%
       dplyr::select(-idx)
-
-
-    print("MUTATIONS")
-    print(head(mutations))
-
 
     current_error_rates <- predict_error_rates_batches(
       mutations_df = mutations,
@@ -232,9 +220,6 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
   }
 
 
-  print(beta)
-
-
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
@@ -243,8 +228,6 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
       "ref" = matches("ref|REF"),
       "alt" = matches("alt|ALT|obs|OBS")
     )
-
-  print(mutations_df)
 
   positions <- mutations_df %>%
     select(chr, genomic_pos) %>%
@@ -261,7 +244,7 @@ predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_p
 
   n_batches <- length(unique(position_batches$batch_idx))
 
-  print(paste0("Calling mutations in ", n_batches, " batches:"))
+  print(paste0("Predicting error rates in ", n_batches, " batches:"))
 
   count <- 1
 
