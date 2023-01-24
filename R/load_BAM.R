@@ -18,18 +18,27 @@
 #'
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
-
-
   # Get reference to BamFile
   bamFile <- BamFile(BamPath)
 
   # Param for loading the selected regions of BAM file
-  param <- ScanBamParam(
-    flag = scanBamFlag(isPaired = T, isProperPair = T, isUnmappedQuery = F, hasUnmappedMate = F, isSecondaryAlignment = F, isSupplementaryAlignment = FALSE),
-    tag = c("MD", "ce", "cd", "cE", "cD"),
-    which = GRanges(chr, IRanges(start = pos, end = pos)),
-    what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual"),
-  )
+
+  if (!is.null(chr) && is.null(pos)) {
+    param <- ScanBamParam(
+      flag = scanBamFlag(isPaired = T, isProperPair = T, isUnmappedQuery = F, hasUnmappedMate = F, isSecondaryAlignment = F, isSupplementaryAlignment = FALSE),
+      tag = c("MD", "ce", "cd", "cE", "cD"),
+      which = GRanges(chr, IRanges(1, 1e9)),
+      what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual"),
+    )
+  } else {
+    param <- ScanBamParam(
+      flag = scanBamFlag(isPaired = T, isProperPair = T, isUnmappedQuery = F, hasUnmappedMate = F, isSecondaryAlignment = F, isSupplementaryAlignment = FALSE),
+      tag = c("MD", "ce", "cd", "cE", "cD"),
+      which = GRanges(chr, IRanges(start = pos, end = pos)),
+      what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual"),
+    )
+
+  }
 
   # Load BAM file
   bam <- scanBam(bamFile, param = param)
