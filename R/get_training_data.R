@@ -168,14 +168,15 @@ get_training_data <- function(bam_paths,
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL) {
-  bam_df <- load_BAM(bam_path, chr = chr)
+  bam_df <- load_BAM(bam_path, chr = chr, index=paste0(bam_path, ".bai"), yieldSize= 5000)
 
   print("BAM FILE LOADED")
 
-
-
   # Add genomic positions of mismatches
   mismatch_bam_df <- extract_mismatch_positions(bam_df)
+
+  print("MISMATCHES extract")
+
 
   # Add features
   mismatch_positions_df <-
@@ -183,6 +184,9 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       bam_df = mismatch_bam_df,
       reference_path = reference_path
     )
+
+  print("FEATURES EXTRACTED")
+
 
   # Filter mismatches
   mismatches <-
