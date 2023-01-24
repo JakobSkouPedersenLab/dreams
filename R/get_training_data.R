@@ -168,7 +168,7 @@ get_training_data <- function(bam_paths,
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL) {
-  bam_df <- load_BAM(bam_path, chr = chr, index=paste0(bam_path, ".bai"), yieldSize= 5000)
+  bam_df <- load_BAM(bam_path, chr = chr)
 
   print("BAM FILE LOADED")
 
