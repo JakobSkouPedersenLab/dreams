@@ -89,6 +89,8 @@ get_training_data <- function(bam_paths,
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
   bam_df <- load_BAM(bam_path)
 
+  print ("BAM FILE LOADED")
+
   # Add genomic positions of mismatches
   mismatch_bam_df <- extract_mismatch_positions(bam_df)
 
