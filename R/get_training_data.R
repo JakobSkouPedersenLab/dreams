@@ -33,36 +33,37 @@ get_training_data_chr_wise <- function(bam_paths,
 
   n_bam_files <- length(bam_paths)
 
-  for (chr in chr_list) {
-    for (bam_idx in 1:n_bam_files) {
-      bam_path <- bam_paths[[bam_idx]]
 
-      if (verbose) {
-        cat("file ", bam_idx, "/", n_bam_files, "\n")
-      }
+  for (bam_idx in 1:n_bam_files) {
+    bam_path <- bam_paths[[bam_idx]]
 
-      # Combine sample specific position exclusion with common exclusion
-      if (!is.null(positions_to_exclude_paths)) {
-        current_positions_to_exclude_paths <- c(common_positions_to_exclude_paths, positions_to_exclude_paths[[bam_idx]])
-      } else {
-        current_positions_to_exclude_paths <- common_positions_to_exclude_paths
-      }
-
-
-      # Get training data for single bam file
-      current_training_data <- get_training_data_from_bam(
-        bam_path = bam_path,
-        reference_path = reference_path,
-        bed_include_path = bed_include_path,
-        positions_to_exclude_paths = current_positions_to_exclude_paths,
-        factor = factor,
-        mm_rate_max = mm_rate_max
-      )
-
-      training_data <- rbind(training_data, current_training_data$data)
-      info <- rbind(info, current_training_data$info)
+    if (verbose) {
+      cat("file ", bam_idx, "/", n_bam_files, "\n")
     }
+
+    # Combine sample specific position exclusion with common exclusion
+    if (!is.null(positions_to_exclude_paths)) {
+      current_positions_to_exclude_paths <- c(common_positions_to_exclude_paths, positions_to_exclude_paths[[bam_idx]])
+    } else {
+      current_positions_to_exclude_paths <- common_positions_to_exclude_paths
+    }
+
+
+    # Get training data for single bam file
+    current_training_data <- get_training_data_from_bam(
+      bam_path = bam_path,
+      reference_path = reference_path,
+      bed_include_path = bed_include_path,
+      positions_to_exclude_paths = current_positions_to_exclude_paths,
+      factor = factor,
+      mm_rate_max = mm_rate_max,
+      chr = chr
+    )
+
+    training_data <- rbind(training_data, current_training_data$data)
+    info <- rbind(info, current_training_data$info)
   }
+
 
   # Collect output info for beta calculation
   output_info <- data.frame(
