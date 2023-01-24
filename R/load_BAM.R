@@ -19,7 +19,7 @@
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
   # Get reference to BamFile
-  bamFile <- BamFile(BamPath, index=paste0(bam_path, ".bai"), yieldSize= 5000)
+  bamFile <- BamFile(BamPath, index=paste0(bam_path, ".bai"))
 
   # Param for loading the selected regions of BAM file
 
