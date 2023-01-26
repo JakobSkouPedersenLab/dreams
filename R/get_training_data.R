@@ -21,7 +21,6 @@ get_training_data_chr_wise <- function(bam_paths,
                                        mm_rate_max = 1,
                                        verbose = F,
                                        chr = NULL) {
-
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -101,7 +100,6 @@ get_training_data <- function(bam_paths,
                               positions_to_exclude_paths = NULL,
                               mm_rate_max = 1,
                               verbose = F) {
-
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -186,7 +184,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
     )
 
   print("FEATURES EXTRACTED")
-  print (nrow(mismatch_positions_df))
+  print(nrow(mismatch_positions_df))
 
   # Filter mismatches
   mismatches <-
@@ -195,11 +193,12 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       bam_file = bam_path,
       mm_rate_max = mm_rate_max,
       bed_include_path = bed_include_path,
-      positions_to_exclude_paths = positions_to_exclude_paths
+      positions_to_exclude_paths = positions_to_exclude_paths,
+      chr = chr
     )
 
   print("mismatches")
-  print (nrow(mismatches))
+  print(nrow(mismatches))
 
   positive_samples <- mismatches$data
   info <- mismatches$info
@@ -215,7 +214,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
     )
 
   print("negative")
-  print (nrow(negative_read_positions_df))
+  print(nrow(negative_read_positions_df))
 
   # Add features
   negative_samples <-
@@ -225,7 +224,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
     )
 
   print("negative samples")
-  print (nrow(negative_samples))
+  print(nrow(negative_samples))
 
   info <- info %>% mutate(n_matches = nrow(negative_samples))
   info <- info %>% mutate(beta = nrow(negative_samples) / (info$total_coverage - nrow(positive_samples)))
@@ -258,12 +257,18 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 #'
 #' @importFrom readr read_csv
 
-filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
+filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, chr = NULL, positions_to_exclude_paths = NULL) {
   read_positions_filtered <- read_positions %>% filter(obs != "N")
 
   # Load coverage data
 
-  included_regions_granges <- bed_to_granges(bed_include_path)
+  if (!is.null(bed_include_path)) {
+    included_regions_granges <- bed_to_granges(bed_include_path)
+  }
+
+  if (!is_null(chr)) {
+    included_regions_granges <- GRanges(chr, IRanges(1, 536870912))
+  }
 
   pp <- Rsamtools::PileupParam(
     max_depth = 250000000, min_base_quality = 13, min_mapq = 0,

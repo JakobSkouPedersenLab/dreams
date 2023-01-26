@@ -40,7 +40,9 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #' @keywords internal
 #'
 #' @importFrom purrr map2_int
-extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
+extract_features_from_bam <- function(bam_df, reference_path,
+                                      add_umi_features = all(c("cd", "ce") %in% colnames(bam_df)),
+                                      batch_size = NULL) {
 
   # If UMI features are asked for but not present
   if (add_umi_features & !all(c("cd", "ce") %in% colnames(bam_df))) {
@@ -50,6 +52,11 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
   if (nrow(bam_df) == 0) {
     return(data.frame())
   }
+
+  if (is.null(batch_size)) {
+    batch_size <- nrow(bam_df) + 1
+  }
+
 
   # Make genomic position features
   genomic_pos_feature_df <-
