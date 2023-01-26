@@ -53,9 +53,9 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
   if (is.null(batch_size)) {
     batch_size <- nrow(bam_df) + 1
-    bam_df_batches <- bam_df %>% mutate(batch_idx = (row_number() %/% batch_size))
   }
 
+  bam_df_batches <- bam_df %>% mutate(batch_idx = (row_number() %/% batch_size))
 
 
   n_batches <- length(unique(bam_df_batches$batch_idx))
