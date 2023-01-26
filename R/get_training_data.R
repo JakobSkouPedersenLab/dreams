@@ -20,7 +20,8 @@ get_training_data_chr_wise <- function(bam_paths,
                                        positions_to_exclude_paths = NULL,
                                        mm_rate_max = 1,
                                        verbose = F,
-                                       chr = NULL) {
+                                       chr = NULL,
+                                       batch_size = 32000) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -165,7 +166,8 @@ get_training_data <- function(bam_paths,
 #' @keywords internal
 #'
 #' @return dataframe with training data for a bam file
-get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL) {
+get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL,
+                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL) {
   bam_df <- load_BAM(bam_path, chr = chr)
 
   print("BAM FILE LOADED")
