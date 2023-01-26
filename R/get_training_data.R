@@ -268,7 +268,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     included_regions_granges <- bed_to_granges(bed_include_path)
   }
 
-  if (!is_null(chr)) {
+  if (!is.null(chr)) {
     included_regions_granges <- GRanges(chr, IRanges(1, 536870912))
   }
 
