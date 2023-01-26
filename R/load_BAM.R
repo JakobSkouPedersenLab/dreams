@@ -30,7 +30,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     param <- ScanBamParam(
       flag = scanBamFlag(isPaired = T, isProperPair = T, isUnmappedQuery = F, hasUnmappedMate = F, isSecondaryAlignment = F, isSupplementaryAlignment = FALSE),
       tag = c("MD", "ce", "cd", "cE", "cD"),
-      which = GRanges(chr, IRanges(1, 536870912)),
+      which = GRanges(chr, IRanges(pos, pos)),
       what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual"),
     )
   } else {
