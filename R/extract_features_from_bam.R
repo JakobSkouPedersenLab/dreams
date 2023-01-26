@@ -58,7 +58,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
 
 
-  n_batches <- length(unique(position_batches$batch_idx))
+  n_batches <- length(unique(bam_df_batches$batch_idx))
 
   print(paste0("Calling mutations in ", n_batches, " batches:"))
 
@@ -67,7 +67,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
   feature_data <- NULL
 
 
-  for (batch in sort(unique(position_batches$batch_idx))) {
+  for (batch in sort(unique(bam_df_batches$batch_idx))) {
     print(paste0("Calling batch ", count, "/", n_batches))
     count <- count + 1
 
