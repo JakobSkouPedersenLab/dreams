@@ -60,7 +60,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
   n_batches <- length(unique(bam_df_batches$batch_idx))
 
-  print(paste0("Calling mutations in ", n_batches, " batches:"))
+  print(paste0("extracting features in ", n_batches, " batches:"))
 
   count <- 1
 

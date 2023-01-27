@@ -290,6 +290,9 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     summarize(n_mismatches = n()) %>%
     ungroup()
 
+  print ("READ POSITION")
+  print (head(read_positions_summarized))
+
   # Join with coverage dataframe - all positions if included_regions is NULL
 
   # Remove positions with high mismatch rate in mismatch  and coverage data
