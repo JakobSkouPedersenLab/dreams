@@ -57,7 +57,6 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
   bam_df_batches <- bam_df %>% mutate(batch_idx = (row_number() %/% batch_size))
 
-
   n_batches <- length(unique(bam_df_batches$batch_idx))
 
   print(paste0("extracting features in ", n_batches, " batches:"))
@@ -68,11 +67,10 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
 
   for (batch in sort(unique(bam_df_batches$batch_idx))) {
-    print(paste0("Calling batch ", count, "/", n_batches))
+    print(paste0("Extracting batch ", count, "/", n_batches))
     count <- count + 1
 
     q <- bam_df_batches %>% filter(batch_idx == batch)
-
 
     # Make genomic position features
     genomic_pos_feature_df <-
