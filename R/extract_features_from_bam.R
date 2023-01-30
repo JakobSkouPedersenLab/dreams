@@ -118,7 +118,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
         n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
         n_insertions_in_read = str_count(.data$cigar, "I"),
         n_deletions_in_read = str_count(.data$cigar, "D"),
-        q = substring(.data$qual, .data$pos_idx, .data$pos_idx)),
+        q = substring(.data$qual, .data$pos_idx, .data$pos_idx),
         q2 = utf8ToInt(q)
       ) %>%
       # TODO: Move to filter function! Or do before calling this function!
