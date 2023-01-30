@@ -21,7 +21,8 @@ get_training_data_chr_wise <- function(bam_paths,
                                        mm_rate_max = 1,
                                        verbose = F,
                                        chr = NULL,
-                                       batch_size = 32000) {
+                                       batch_size = 32000,
+                                       n_reads = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -57,7 +58,8 @@ get_training_data_chr_wise <- function(bam_paths,
       positions_to_exclude_paths = current_positions_to_exclude_paths,
       factor = factor,
       mm_rate_max = mm_rate_max,
-      chr = chr
+      chr = chr,
+      n_reads = n_reads
     )
 
     training_data <- rbind(training_data, current_training_data$data)
@@ -172,8 +174,9 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
                                        factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL) {
   bam_df <- load_BAM(bam_path, chr = chr)
 
-  bam_df = bam_df %>% sample_n(n_reads)
-
+  if (!is.null(n_reads)) {
+    bam_df <- bam_df %>% sample_n(n_reads)
+  }
   print("BAM FILE LOADED")
 
   # Add genomic positions of mismatches
@@ -294,8 +297,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     summarize(n_mismatches = n()) %>%
     ungroup()
 
-  print ("READ POSITION")
-  print (head(read_positions_summarized))
+  print("READ POSITION")
+  print(head(read_positions_summarized))
 
   # Join with coverage dataframe - all positions if included_regions is NULL
 
@@ -305,23 +308,23 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
     mutate(mm_rate = .data$n_mismatches / .data$coverage)
 
-  print (head(read_position_mm_rate))
+  print(head(read_position_mm_rate))
 
   read_position_filter <- read_position_mm_rate %>%
     filter(.data$mm_rate < mm_rate_max)
 
-  print (head(read_position_filter))
+  print(head(read_position_filter))
 
   read_positions_filtered <- read_positions_filtered %>%
     semi_join(read_position_filter, by = c("chr", "genomic_pos"))
 
-  print (head(read_positions_filtered))
+  print(head(read_positions_filtered))
 
 
   coverage_data_filtered <- coverage_data %>%
     anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
 
-  print (head(coverage_data_filtered))
+  print(head(coverage_data_filtered))
 
 
   # Remove unwanted positions based on exclude files
