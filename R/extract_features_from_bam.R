@@ -65,6 +65,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
   feature_data <- NULL
 
+  print (head(bam_df))
 
   for (batch in sort(unique(bam_df_batches$batch_idx))) {
     print(paste0("Extracting batch ", count, "/", n_batches))
