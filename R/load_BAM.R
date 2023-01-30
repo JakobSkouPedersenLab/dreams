@@ -17,7 +17,7 @@
 #'
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   # Get reference to BamFile
-  bamFile <- BamFile(BamPath, index = paste0(bam_path, ".bai"))
+  bamFile <- BamFile(BamPath)
 
   # Param for loading the selected regions of BAM file
 
@@ -84,6 +84,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
       )
     ) %>%
     strand_correct_umi_features() %>%
+    strand_correct_qual_feature() %>%
     hardclip_correct_umi_features() %>%
     remove_softclips()
 
@@ -121,6 +122,26 @@ strand_correct_umi_features <- function(df) {
       )
     )
 }
+
+
+strand_correct_qual_feature <- function(df) {
+  # If UMI features not present -> return input
+  if (!all(c("qual") %in% colnames(df))) {
+    return(df)
+  }
+
+  df %>%
+    mutate(
+      qual = map2(
+        .data$strand,
+        .data$qual,
+        function(strand, qual) {
+          if (strand == "rev") rev(qual) else qual
+        }
+      )
+    )
+}
+
 
 #' Hard clip correct UMI features (ce and cd)
 #'

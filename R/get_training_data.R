@@ -273,10 +273,10 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   if (!is.null(bed_include_path)) {
     included_regions_granges <- bed_to_granges(bed_include_path)
-  }
-
-  if (!is.null(chr)) {
+  } else if (!is.null(chr)) {
     included_regions_granges <- GRanges(chr, IRanges(1, 536870912))
+  } else {
+    included_regions_granges <- GRanges(NULL, NULL)
   }
 
   pp <- Rsamtools::PileupParam(

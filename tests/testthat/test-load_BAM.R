@@ -12,7 +12,7 @@ test_that("Load empty bam", {
 
 test_that("Mini example - Load", {
   mini_bam_file <- system.file("extdata", "mini_example.bam", package = "dreams")
-  bam_df <- load_BAM(mini_bam_file)
+  bam_df <- load_BAM(BamPath = mini_bam_file)
 
   # Check number of reads
   expect_equal(nrow(bam_df), 4)

@@ -87,6 +87,8 @@ test_that("full example - get_training_data_from_bam", {
     mm_rate_max = 0.51
   )
 
+  print (samples_1$data$q2)
+
   expect_true(nrow(samples_1$data) == n_errors + n_errors * factor)
 
   n_errors <- 1
