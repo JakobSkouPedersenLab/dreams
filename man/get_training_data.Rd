@@ -12,7 +12,8 @@ get_training_data(
   common_positions_to_exclude_paths = NULL,
   positions_to_exclude_paths = NULL,
   mm_rate_max = 1,
-  verbose = F
+  verbose = F,
+  n_reads = NULL
 )
 }
 \arguments{

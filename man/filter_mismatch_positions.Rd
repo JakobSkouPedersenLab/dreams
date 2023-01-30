@@ -9,6 +9,7 @@ filter_mismatch_positions(
   bam_file,
   mm_rate_max = 1,
   bed_include_path = NULL,
+  chr = NULL,
   positions_to_exclude_paths = NULL
 )
 }

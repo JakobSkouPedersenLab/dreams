@@ -38,7 +38,7 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #' @return dataframe with read positions
 #' @keywords internal
 #'
-#' @importFrom purrr map2_int
+#' @importFrom purrr map2_int map2_chr
 extract_features_from_bam <- function(bam_df, reference_path,
                                       add_umi_features = all(c("cd", "ce") %in% colnames(bam_df)),
                                       batch_size = NULL) {

@@ -13,7 +13,9 @@ get_training_data_chr_wise(
   positions_to_exclude_paths = NULL,
   mm_rate_max = 1,
   verbose = F,
-  chr = NULL
+  chr = NULL,
+  batch_size = 32000,
+  n_reads = NULL
 )
 }
 \arguments{

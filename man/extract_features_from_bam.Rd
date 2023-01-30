@@ -7,7 +7,8 @@
 extract_features_from_bam(
   bam_df,
   reference_path,
-  add_umi_features = all(c("cd", "ce") \%in\% colnames(bam_df))
+  add_umi_features = all(c("cd", "ce") \%in\% colnames(bam_df)),
+  batch_size = NULL
 )
 }
 \arguments{
