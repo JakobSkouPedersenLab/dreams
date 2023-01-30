@@ -135,7 +135,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
     read_feature_df <-
       read_feature_df %>%
       mutate(
-        q = map2_int(.data$qual, .data$pos_idx, function(qual, pos_idx) qual[pos_idx])
+        q = map2_chr(.data$qual, .data$pos_idx, function(qual, pos_idx) qual[pos_idx])
       )
 
 
