@@ -1,4 +1,3 @@
-
 #' Load .BAM file into R as tibble
 #'
 #' @param BamPath Path to .BAM-file
@@ -17,15 +16,13 @@
 #' @importFrom rlang .data
 #'
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
-
   # Get reference to BamFile
-  bamFile <- BamFile(BamPath, index=paste0(bam_path, ".bai"))
+  bamFile <- BamFile(BamPath, index = paste0(bam_path, ".bai"))
 
   # Param for loading the selected regions of BAM file
 
   if (!is.null(chr) && is.null(pos)) {
-
-    print (paste0("USING ONLY CHROMOSOME ", chr))
+    print(paste0("USING ONLY CHROMOSOME ", chr))
 
     param <- ScanBamParam(
       flag = scanBamFlag(isPaired = T, isProperPair = T, isUnmappedQuery = F, hasUnmappedMate = F, isSecondaryAlignment = F, isSupplementaryAlignment = FALSE),
@@ -40,11 +37,10 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
       which = GRanges(chr, IRanges(start = pos, end = pos)),
       what = c("qname", "rname", "strand", "pos", "mpos", "seq", "flag", "qwidth", "isize", "cigar", "mapq", "qual"),
     )
-
   }
 
   # Load BAM file
-  bam <- scanBam(bamFile, param = param)
+  bam <- scanBam(bamFile, param = param, yieldsi)
 
   # Unpack tags
   for (i in 1:length(bam)) {
@@ -102,7 +98,6 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 #' @keywords internal
 #'
 strand_correct_umi_features <- function(df) {
-
   # If UMI features not present -> return input
   if (!all(c("ce", "cd") %in% colnames(df))) {
     return(df)
@@ -135,7 +130,6 @@ strand_correct_umi_features <- function(df) {
 #' @keywords internal
 #'
 hardclip_correct_umi_features <- function(df) {
-
   # If UMI features not present -> return input
   if (!all(c("ce", "cd") %in% colnames(df))) {
     return(df)

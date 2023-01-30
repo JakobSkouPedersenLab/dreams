@@ -100,7 +100,8 @@ get_training_data <- function(bam_paths,
                               common_positions_to_exclude_paths = NULL,
                               positions_to_exclude_paths = NULL,
                               mm_rate_max = 1,
-                              verbose = F) {
+                              verbose = F,
+                              n_reads = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -134,7 +135,8 @@ get_training_data <- function(bam_paths,
       bed_include_path = bed_include_path,
       positions_to_exclude_paths = current_positions_to_exclude_paths,
       factor = factor,
-      mm_rate_max = mm_rate_max
+      mm_rate_max = mm_rate_max,
+      n_reads = n_reads
     )
 
     training_data <- rbind(training_data, current_training_data$data)
@@ -167,10 +169,10 @@ get_training_data <- function(bam_paths,
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL,
-                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL) {
+                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL) {
   bam_df <- load_BAM(bam_path, chr = chr)
 
-  bam_df = bam_df %>% sample_n(100000)
+  bam_df = bam_df %>% sample_n(n_reads)
 
   print("BAM FILE LOADED")
 
