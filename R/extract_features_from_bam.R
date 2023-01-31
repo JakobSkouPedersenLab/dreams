@@ -150,7 +150,7 @@ extract_features_from_bam <- function(bam_df, reference_path,
     read_feature_df <-
       read_feature_df %>%
       mutate(
-        q2 = lapply(.data$q, function(q) utf8ToInt(q)),
+        q2 = unlist(lapply(.data$q, function(q) utf8ToInt(q))),
       )
 
     print (head(read_feature_df))
