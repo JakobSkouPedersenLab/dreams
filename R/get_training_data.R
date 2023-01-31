@@ -288,10 +288,16 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
-  count_data = Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges))  %>%
+  count_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos) %>%
-    mutate(ref =  as.character(getSeq(FaFile, param = GRanges(chr, IRanges(genomic_pos, genomic_pos)))),
-           is_mm = ref != nucleotide,
+    mutate(
+      ref = get_reference_seq(
+        chr = .data$chr,
+        genomic_pos = .data$genomic_pos,
+        buffer = 0,
+        reference_path = reference_path
+      ),
+      is_mm = ref != nucleotide,
     ) %>%
     select(-which_label)
 
@@ -302,12 +308,12 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     mutate(coverage = sum(count)) %>%
     filter(is_mm) %>%
     group_by(chr, genomic_pos, ref, obs, coverage) %>%
-    summarize(n_mismatches = sum(count))  %>%
-    mutate(mm_rate = mm_count/coverage)
+    summarize(n_mismatches = sum(count)) %>%
+    mutate(mm_rate = mm_count / coverage)
 
-  high_mismatch_positions = mm_data %>% filter(mm_rate > mm_rate_max)
+  high_mismatch_positions <- mm_data %>% filter(mm_rate > mm_rate_max)
 
-  read_positions_filtered = read_positions_filtered %>% anti_join(high_mismatch_positions)
+  read_positions_filtered <- read_positions_filtered %>% anti_join(high_mismatch_positions)
 
   coverage_data <- count_data %>%
     anti_join(high_mismatch_positions) %>%
