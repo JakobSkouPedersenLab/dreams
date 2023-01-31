@@ -279,52 +279,40 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     included_regions_granges <- GRanges(NULL, NULL)
   }
 
+
   pp <- Rsamtools::PileupParam(
     max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
     min_nucleotide_depth = 1, min_minor_allele_depth = 0,
-    distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
+    distinguish_strands = FALSE, distinguish_nucleotides = T,
     ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
-  coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
-    rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
-
-  # Filter heterozygote positions
-
-  read_positions_summarized <- read_positions %>%
-    group_by(.data$chr, .data$genomic_pos) %>%
-    summarize(n_mismatches = n()) %>%
-    ungroup()
-
-  print("READ POSITION")
-  print(head(read_positions_summarized))
-
-  # Join with coverage dataframe - all positions if included_regions is NULL
-
-  # Remove positions with high mismatch rate in mismatch  and coverage data
-
-  read_position_mm_rate <- read_positions_summarized %>%
-    inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
-    mutate(mm_rate = .data$n_mismatches / .data$coverage)
-
-  print(head(read_position_mm_rate))
-
-  read_position_filter <- read_position_mm_rate %>%
-    filter(.data$mm_rate < mm_rate_max)
-
-  print(head(read_position_filter))
-
-  read_positions_filtered <- read_positions_filtered %>%
-    semi_join(read_position_filter, by = c("chr", "genomic_pos"))
-
-  print(head(read_positions_filtered))
+  count_data = Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges))  %>%
+    dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos) %>%
+    mutate(ref =  as.character(getSeq(FaFile, param = GRanges(chr, IRanges(genomic_pos, genomic_pos)))),
+           is_mm = ref != nucleotide,
+    ) %>%
+    select(-which_label)
 
 
-  coverage_data_filtered <- coverage_data %>%
-    anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
 
-  print(head(coverage_data_filtered))
+  mm_data <- count_data %>%
+    group_by(chr, genomic_pos) %>%
+    mutate(coverage = sum(count)) %>%
+    filter(is_mm) %>%
+    group_by(chr, genomic_pos, ref, obs, coverage) %>%
+    summarize(n_mismatches = sum(count))  %>%
+    mutate(mm_rate = mm_count/coverage)
+
+  high_mismatch_positions = mm_data %>% filter(mm_rate > mm_rate_max)
+
+  read_positions_filtered = read_positions_filtered %>% anti_join(high_mismatch_positions)
+
+  coverage_data <- count_data %>%
+    anti_join(high_mismatch_positions) %>%
+    group_by(chr, genomic_pos) %>%
+    summarize(total_coverage = sum(count))
 
 
   # Remove unwanted positions based on exclude files
@@ -344,8 +332,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   # Output beta info
 
   beta_info <- data.frame(
-    n_mismatches = nrow(read_positions_filtered),
-    total_coverage = sum(coverage_data_filtered$coverage)
+    n_mismatches = mm_data$n_mismatches,
+    total_coverage = coverage_data$total_coverage
   )
 
 
