@@ -153,6 +153,8 @@ extract_features_from_bam <- function(bam_df, reference_path,
         q2 = lapply(.data$q, function(q) utf8ToInt(q)),
       )
 
+    print (head(read_feature_df))
+    print (read_feature_df$q2)
 
     # Join and select features: Read, genomic positions and UMI
     feature_df <-
