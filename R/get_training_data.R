@@ -323,6 +323,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     summarize(total_coverage = sum(count))
 
 
+
   # Remove unwanted positions based on exclude files
 
   if (!is.null(positions_to_exclude_paths)) {
@@ -340,8 +341,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   # Output beta info
 
   beta_info <- data.frame(
-    n_mismatches = mm_data$n_mismatches,
-    total_coverage = coverage_data$total_coverage
+    n_mismatches = sum(mm_data$n_mismatches),
+    total_coverage = sum(coverage_data$total_coverage)
   )
 
 
