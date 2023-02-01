@@ -69,7 +69,8 @@ get_training_data_chr_wise <- function(bam_paths,
 
   # Collect output info for beta calculation
   output_info <- data.frame(
-    total_mismatches = sum(info$n_mismatches),
+    n_mismatches = sum(info$n_mismatches),
+    total_mismatches = sum(info$total_mismatches),
     total_matches = sum(info$n_matches),
     total_coverage = sum(info$total_coverage)
   ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
