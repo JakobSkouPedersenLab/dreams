@@ -133,7 +133,10 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
       "local_complexity_2",
       "n_other_errors",
       "prior_error",
-      "seq_length"
+      "seq_length",
+      "q2",
+      "mapq"
+
     )
   all_categorical_variables <-
     c(
