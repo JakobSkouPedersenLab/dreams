@@ -207,7 +207,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
     )
 
   print("mismatches")
-  print(nrow(mismatches))
+  print(nrow(mismatches$data))
 
   positive_samples <- mismatches$data
   info <- mismatches$info
@@ -223,6 +223,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
     )
 
   print("negative")
+  print(head(negative_read_positions_df))
   print(nrow(negative_read_positions_df))
 
   # Add features
@@ -236,6 +237,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   print(nrow(negative_samples))
 
   info <- info %>% mutate(n_matches = nrow(negative_samples))
+  info <- info %>% mutate(n_mismatches = nrow(mismatches$data))
   info <- info %>% mutate(beta = nrow(negative_samples) / (info$total_coverage - nrow(positive_samples)))
 
   output_data <- rbind(positive_samples, negative_samples)
@@ -341,7 +343,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   # Output beta info
 
   beta_info <- data.frame(
-    n_mismatches = sum(mm_data$n_mismatches),
+    total_mismatches = sum(mm_data$n_mismatches),
     total_coverage = sum(coverage_data$total_coverage)
   )
 
