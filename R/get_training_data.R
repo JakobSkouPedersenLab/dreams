@@ -289,7 +289,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   )
 
   count_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
-    dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos) %>%
+    dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, obs = .data$nucleotide) %>%
     mutate(
       ref = get_reference_seq(
         chr = .data$chr,
@@ -297,7 +297,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
         buffer = 0,
         reference_path = reference_path
       ),
-      is_mm = ref != nucleotide,
+      is_mm = ref != obs,
     ) %>%
     select(-which_label)
 
