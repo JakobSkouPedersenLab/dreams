@@ -288,6 +288,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
+  print ("GETTING COUNT DATA")
+
   count_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, obs = .data$nucleotide) %>%
     mutate(
