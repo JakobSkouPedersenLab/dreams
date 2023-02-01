@@ -311,7 +311,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     filter(is_mm) %>%
     group_by(chr, genomic_pos, ref, obs, coverage) %>%
     summarize(n_mismatches = sum(count)) %>%
-    mutate(mm_rate = mm_count / coverage)
+    mutate(mm_rate = n_mismatches / coverage)
 
   high_mismatch_positions <- mm_data %>% filter(mm_rate > mm_rate_max)
 
