@@ -172,7 +172,9 @@ get_training_data <- function(bam_paths,
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL,
                                        factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL) {
-  bam_df <- load_BAM(bam_path, chr = chr)
+  bam <- BamFile(bam_path, yieldsize = 100000)
+
+  bam_df <- load_BAM(bam, chr = chr)
 
   if (!is.null(n_reads)) {
     bam_df <- bam_df %>% sample_n(n_reads)
@@ -199,7 +201,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   mismatches <-
     filter_mismatch_positions(
       read_positions = mismatch_positions_df,
-      bam_file = bam_path,
+      bam_file = bam,
       mm_rate_max = mm_rate_max,
       bed_include_path = bed_include_path,
       positions_to_exclude_paths = positions_to_exclude_paths,
@@ -290,7 +292,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     left_bins = NULL, query_bins = NULL, cycle_bins = NULL
   )
 
-  print ("GETTING COUNT DATA")
+  print("GETTING COUNT DATA")
 
   count_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
     dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, obs = .data$nucleotide) %>%

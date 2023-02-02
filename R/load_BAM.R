@@ -17,8 +17,12 @@
 #'
 load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   # Get reference to BamFile
-  bamFile <- BamFile(BamPath)
 
+  if (is.character(BamPath)) {
+    bamFile <- BamFile(BamPath)
+  } {
+    BamFile = BamPath
+  }
   # Param for loading the selected regions of BAM file
 
   if (!is.null(chr) && is.null(pos)) {
@@ -40,7 +44,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   }
 
   # Load BAM file
-  bam <- scanBam(bamFile, param = param, yieldsi)
+  bam <- scanBam(bamFile, param = param)
 
   # Unpack tags
   for (i in 1:length(bam)) {
