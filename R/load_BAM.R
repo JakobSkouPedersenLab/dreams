@@ -8,7 +8,7 @@
 #' @keywords internal
 #'
 #' @import stringr dplyr
-#' @importFrom Rsamtools ScanBamParam BamFile scanBam scanBamFlag
+#' @importFrom Rsamtools ScanBamParam BamFile scanBam scanBamFlag BamFile
 #' @importFrom purrr map2
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
@@ -19,8 +19,10 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   # Get reference to BamFile
 
   if (is.character(BamPath)) {
-    bamFile <- BamFile(BamPath)
+    print ("Loading bam")
+    bamFile <- Rsamtools::BamFile(BamPath)
   } else {
+    print ("received bam")
     BamFile = BamPath
   }
   # Param for loading the selected regions of BAM file
