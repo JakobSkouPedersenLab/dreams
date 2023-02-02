@@ -206,7 +206,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       chr = chr
     )
 
-  print("mismatches")
+  print("Mismatches")
   print(nrow(mismatches$data))
 
   positive_samples <- mismatches$data
@@ -222,7 +222,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       n_samples = n_samples
     )
 
-  print("negative")
+  print("Negative data")
   print(head(negative_read_positions_df))
   print(nrow(negative_read_positions_df))
 
@@ -233,7 +233,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       reference_path = reference_path
     )
 
-  print("negative samples")
+  print("Negative samples")
   print(nrow(negative_samples))
 
   info <- info %>% mutate(n_matches = nrow(negative_samples))

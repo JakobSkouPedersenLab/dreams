@@ -65,8 +65,6 @@ extract_features_from_bam <- function(bam_df, reference_path,
 
   feature_data <- NULL
 
-  print(head(bam_df))
-
   for (batch in sort(unique(bam_df_batches$batch_idx))) {
     print(paste0("Extracting batch ", count, "/", n_batches))
     count <- count + 1
@@ -152,9 +150,6 @@ extract_features_from_bam <- function(bam_df, reference_path,
       mutate(
         q2 = unlist(lapply(.data$q, function(q) utf8ToInt(q))),
       )
-
-    print(head(read_feature_df))
-    print(read_feature_df$q2)
 
     # Join and select features: Read, genomic positions and UMI
     feature_df <-
