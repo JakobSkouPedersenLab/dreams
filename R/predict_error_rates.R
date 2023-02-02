@@ -68,3 +68,183 @@ predict_error_rates <- function(read_positions_df, model, beta) {
 
   return(predicted_errors)
 }
+
+#' Parallel predict error rates
+#'
+#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
+#' @inheritParams dreams_vc_parallel
+#' @param bam_file_path Path to .BAM-file
+#'
+#'
+#' @import parallel
+#' @import doParallel
+#' @import dplyr
+#'
+#' @export
+
+predict_error_rates_parallel <- function(mutations_df, bam_file_path, reference_path, model, prior_error_rates = NULL,
+                                         beta = NULL, ncores = 1, log_file = NULL, batch_size = NULL) {
+
+  # # If no beta value
+  #
+  # if (is.null(beta) && is.null(factor)) {
+  #   stop("Please provide beta factor of scaling factor")
+  # } else if (is.null(beta)) {
+  #   beta <- calculate_beta_factor(
+  #     bam_file_path = bam_file_path,
+  #     factor = factor,
+  #     mm_rate_max = mm_rate_max,
+  #     bed_file = bed_file,
+  #     reference_path = reference_path
+  #   )
+  # }
+
+  if (nrow(mutations_df) == 0) {
+    return(data.frame())
+  }
+
+  if (nrow(mutations_df) < ncores) {
+    ncores <- max(nrow(mutations_df), 1)
+  }
+
+
+  serial_model <- keras::serialize_model(model)
+
+  mutations_df <- mutations_df %>%
+    select(
+      "chr" = matches("chr|CHR|CHROM"),
+      "genomic_pos" = matches("pos|POS"),
+      "ref" = matches("ref|REF"),
+      "alt" = matches("alt|ALT|obs|OBS")
+    ) %>%
+    mutate(idx = sort(row_number() %% ncores, decreasing = F))
+
+  index_list <- unique(mutations_df$idx)
+
+
+  cl <- makeCluster(ncores)
+  doParallel::registerDoParallel(cl)
+
+  error_rates <- foreach::foreach(
+    i = index_list,
+    .combine = rbind,
+    .packages = c("keras", "tensorflow", "parallel", "doParallel", "dplyr"),
+    .errorhandling = "pass",
+    .export = "predict_error_rates_batches"
+  ) %dopar% {
+    unserial_model <- keras::unserialize_model(serial_model)
+
+
+    if (!is.null(log_file)) {
+      sink(paste0(log_file, "_", i))
+    }
+
+    mutations <- mutations_df %>%
+      dplyr::filter(idx == i) %>%
+      dplyr::select(-idx)
+
+    current_error_rates <- predict_error_rates_batches(
+      mutations_df = mutations,
+      bam_file_path = bam_file_path,
+      reference_path = reference_path,
+      batch_size = batch_size,
+      model = unserial_model,
+      beta = beta,
+      prior_error_rates = prior_error_rates
+    ) %>% dplyr::mutate(
+      beta = beta
+    )
+
+    return(current_error_rates)
+  }
+
+  sink()
+  stopCluster(cl)
+  return(error_rates)
+}
+
+
+
+#' Parallel predict error rates
+#'
+#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
+#' @inheritParams dreams_vc
+#' @param bam_file_path Path to .BAM-file
+#'
+#' @import parallel
+#' @import doParallel
+#' @import dplyr
+#'
+#' @export
+
+predict_error_rates_batches <- function(mutations_df, bam_file_path, reference_path, model,
+                                        beta = NULL, prior_error_rates = NULL, batch_size = NULL) {
+  if (!is.null(prior_error_rates)) {
+    prior_error_rates <- prior_error_rates %>%
+      select(
+        "chr" = matches("chr|CHR|CHROM"),
+        "genomic_pos" = matches("pos|POS"),
+        "prior_error" = matches("mm_rate|error_rate|prior_error|prior_error_Rate")
+      )
+  }
+
+
+  # Clean up mutations
+  mutations_df <- mutations_df %>%
+    select(
+      "chr" = matches("chr|CHR|CHROM"),
+      "genomic_pos" = matches("pos|POS"),
+      "ref" = matches("ref|REF"),
+      "alt" = matches("alt|ALT|obs|OBS")
+    )
+
+  positions <- mutations_df %>%
+    select(.data$chr, .data$genomic_pos) %>%
+    distinct()
+
+  if (is.null(batch_size)) {
+    batch_size <- nrow(positions) + 1
+  }
+
+  position_batches <- positions %>% dplyr::mutate(batch_idx = (row_number() %/% !!batch_size))
+
+
+  error_rates <- NULL
+
+  n_batches <- length(unique(position_batches$batch_idx))
+
+  print(paste0("Predicting error rates in ", n_batches, " batches:"))
+
+  count <- 1
+
+  for (batch in sort(unique(position_batches$batch_idx))) {
+    print(paste0("Calling batch ", count, "/", n_batches))
+    count <- count + 1
+
+    q <- position_batches %>% filter(batch_idx == batch)
+
+    # Get read positions
+    read_positions_df <- get_read_positions_from_BAM(
+      bam_file_path = bam_file_path,
+      chr = q$chr,
+      genomic_pos = q$genomic_pos,
+      reference_path
+    ) %>% filter(.data$obs != "N")
+
+    if (!is.null(prior_error_rates)) {
+      read_positions_df <- read_positions_df %>% left_join(prior_error_rates)
+    }
+
+    current_error_rates <- predict_error_rates(
+      read_positions_df = read_positions_df,
+      model = model,
+      beta = beta
+    ) %>% dplyr::mutate(
+      beta = beta
+    )
+
+    error_rates <- rbind(error_rates, current_error_rates)
+  }
+
+  return(error_rates)
+}
