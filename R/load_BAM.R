@@ -20,7 +20,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
 
   if (is.character(BamPath)) {
     bamFile <- BamFile(BamPath)
-  } {
+  } else {
     BamFile = BamPath
   }
   # Param for loading the selected regions of BAM file
