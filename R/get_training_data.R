@@ -308,6 +308,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     select(-which_label)
 
 
+  print ("Calculate mismatch rates")
 
   mm_data <- count_data %>%
     group_by(chr, genomic_pos) %>%
@@ -320,6 +321,8 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   high_mismatch_positions <- mm_data %>% filter(mm_rate > mm_rate_max)
 
   read_positions_filtered <- read_positions_filtered %>% anti_join(high_mismatch_positions)
+
+  print ("Get coverage data")
 
   coverage_data <- count_data %>%
     anti_join(high_mismatch_positions) %>%
