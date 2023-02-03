@@ -26,10 +26,15 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
 
   n_batches <- length(unique(position_batches$batch_idx))
 
+  print(paste0("Getting read positions in ", n_batches, " batches:"))
 
   read_positions_df <- NULL
 
   for (batch in sort(unique(position_batches$batch_idx))) {
+
+    print(paste0("Extracting reads position batch ", count, "/", n_batches))
+
+
     q <- position_batches %>% filter(batch_idx == batch)
 
 
