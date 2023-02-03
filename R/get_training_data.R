@@ -22,7 +22,8 @@ get_training_data_chr_wise <- function(bam_paths,
                                        verbose = F,
                                        chr = NULL,
                                        batch_size = 32000,
-                                       n_reads = NULL) {
+                                       n_reads = NULL,
+                                       read_fraction = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -59,7 +60,8 @@ get_training_data_chr_wise <- function(bam_paths,
       factor = factor,
       mm_rate_max = mm_rate_max,
       chr = chr,
-      n_reads = n_reads
+      n_reads = n_reads,
+      read_fraction = read_fraction
     )
 
     training_data <- rbind(training_data, current_training_data$data)
@@ -171,12 +173,17 @@ get_training_data <- function(bam_paths,
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL,
-                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL) {
+                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL, read_fraction = NULL) {
   bam_df <- load_BAM(bam_path, chr = chr)
 
   if (!is.null(n_reads)) {
     bam_df <- bam_df %>% sample_n(n_reads)
   }
+
+  if (!is.null(read_fraction)) {
+    bam_df <- bam_df %>% sample_n(nrow(bam_df) * read_fraction)
+  }
+
   print("BAM FILE LOADED")
 
   # Add genomic positions of mismatches
