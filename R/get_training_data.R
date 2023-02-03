@@ -183,17 +183,22 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   }
 
   if (!is.null(read_fraction)) {
+    print ("read fraction")
+    print (nrow(bam_df) * read_fraction)
+    print (read_fraction)
+    print (dim(bam_df))
     bam_df <- bam_df %>% sample_n(nrow(bam_df) * read_fraction)
   }
 
   print("BAM FILE LOADED")
+  print(dim(bam_df))
 
   # Add genomic positions of mismatches
   mismatch_bam_df <- extract_mismatch_positions(bam_df)
 
   print("MISMATCHES extract")
-  print (dim(mismatch_bam_df))
-  print (head(mismatch_bam_df))
+  print(dim(mismatch_bam_df))
+  print(head(mismatch_bam_df))
 
 
 
