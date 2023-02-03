@@ -192,6 +192,9 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   mismatch_bam_df <- extract_mismatch_positions(bam_df)
 
   print("MISMATCHES extract")
+  print (dim(mismatch_bam_df))
+  print (head(mismatch_bam_df))
+
 
 
   # Add features
