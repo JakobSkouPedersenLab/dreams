@@ -253,6 +253,8 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
     return(data.frame())
   }
 
+  read_positions_df = read_positions_df %>% select(-q)
+
   # Clean up mutations
   mutations_df <- mutations_df %>%
     select(
