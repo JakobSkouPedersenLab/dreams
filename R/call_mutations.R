@@ -198,8 +198,6 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       .data$genomic_pos %in% q$genomic_pos
     )
 
-    print (current_mutations)
-
     # Call mutations
     calls <- call_mutations(
       mutations_df = current_mutations,
@@ -297,11 +295,6 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
 
   for (batch in sort(unique(position_batches$batch_idx))) {
     q <- position_batches %>% filter(batch_idx == batch)
-
-    print (head(read_positions_df))
-    print (head(q))
-    print (q$chr)
-    print (names(read_positions_df))
 
     current_read_positions_df <- read_positions_df %>% filter(
       .data$chr %in% q$chr,
