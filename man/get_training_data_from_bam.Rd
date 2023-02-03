@@ -12,7 +12,8 @@ get_training_data_from_bam(
   positions_to_exclude_paths = NULL,
   mm_rate_max = 1,
   chr = NULL,
-  n_reads = NULL
+  n_reads = NULL,
+  read_fraction = NULL
 )
 }
 \arguments{

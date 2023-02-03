@@ -105,7 +105,8 @@ get_training_data <- function(bam_paths,
                               positions_to_exclude_paths = NULL,
                               mm_rate_max = 1,
                               verbose = F,
-                              n_reads = NULL) {
+                              n_reads = NULL,
+                              read_fraction = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -140,7 +141,8 @@ get_training_data <- function(bam_paths,
       positions_to_exclude_paths = current_positions_to_exclude_paths,
       factor = factor,
       mm_rate_max = mm_rate_max,
-      n_reads = n_reads
+      n_reads = n_reads,
+      read_fraction = read_fraction
     )
 
     training_data <- rbind(training_data, current_training_data$data)
@@ -315,7 +317,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
     select(-which_label)
 
 
-  print ("Calculate mismatch rates")
+  print("Calculate mismatch rates")
 
   mm_data <- count_data %>%
     group_by(chr, genomic_pos) %>%
@@ -329,7 +331,7 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   read_positions_filtered <- read_positions_filtered %>% anti_join(high_mismatch_positions)
 
-  print ("Get coverage data")
+  print("Get coverage data")
 
   coverage_data <- count_data %>%
     anti_join(high_mismatch_positions) %>%
