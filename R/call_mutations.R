@@ -296,7 +296,7 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
 
     print (head(read_positions_df))
     print (head(q))
-
+    print (q$chr)
 
     current_read_positions_df <- read_positions_df %>% filter(
       .data$chr %in% q$chr,
