@@ -35,6 +35,8 @@ get_training_data_chr_wise <- function(bam_paths,
 
   n_bam_files <- length(bam_paths)
 
+  print ("read fraction")
+  print (read_fraction)
 
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
