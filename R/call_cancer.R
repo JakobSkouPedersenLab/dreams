@@ -40,7 +40,7 @@
 #' @seealso [call_mutations()], [train_dreams_model()]
 #'
 #' @export
-dreams_cc <- function(mutations_df, bam_file_path, reference_path, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
+dreams_cc <- function(mutations_df, bam_file_path, reference_path, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE, batch_size = NULL) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(
@@ -66,7 +66,8 @@ dreams_cc <- function(mutations_df, bam_file_path, reference_path, model, beta, 
     bam_file_path = bam_file_path,
     chr = mutations_df$chr,
     genomic_pos = mutations_df$genomic_pos,
-    reference_path
+    reference_path,
+    batch_size = batch_size
   )
 
   # Call cancer

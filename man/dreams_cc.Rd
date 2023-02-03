@@ -12,7 +12,8 @@ dreams_cc(
   beta,
   alpha = 0.05,
   calculate_confidence_intervals = FALSE,
-  use_turboem = TRUE
+  use_turboem = TRUE,
+  batch_size = NULL
 )
 }
 \arguments{
