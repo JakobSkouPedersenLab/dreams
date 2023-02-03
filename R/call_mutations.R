@@ -150,6 +150,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
+
   # Stop if mutations do not have the expected columns
   mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
   if (!all(mutations_expected_columns %in% colnames(mutations_df))) {
@@ -292,6 +293,9 @@ call_mutations <- function(mutations_df, read_positions_df, model, beta,
 
   for (batch in sort(unique(position_batches$batch_idx))) {
     q <- position_batches %>% filter(batch_idx == batch)
+
+    print (head(read_positions_df))
+    print (head(q))
 
 
     current_read_positions_df <- read_positions_df %>% filter(
