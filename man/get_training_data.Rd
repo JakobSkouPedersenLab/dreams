@@ -14,7 +14,8 @@ get_training_data(
   mm_rate_max = 1,
   verbose = F,
   n_reads = NULL,
-  read_fraction = NULL
+  read_fraction = NULL,
+  get_beta = NULL
 )
 }
 \arguments{

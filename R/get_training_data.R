@@ -154,7 +154,6 @@ get_training_data <- function(bam_paths,
   }
 
   if (!is.null(get_beta)) {
-
     # Collect output info for beta calculation
     output_info <- data.frame(
       total_mismatches = sum(info$n_mismatches),
@@ -162,8 +161,7 @@ get_training_data <- function(bam_paths,
       total_coverage = sum(info$total_coverage)
     ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
   } else {
-    output_info = NULL
-
+    output_info <- NULL
   }
   return(list(
     data = training_data,

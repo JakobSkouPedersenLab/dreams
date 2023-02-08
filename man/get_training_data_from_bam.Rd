@@ -13,7 +13,8 @@ get_training_data_from_bam(
   mm_rate_max = 1,
   chr = NULL,
   n_reads = NULL,
-  read_fraction = NULL
+  read_fraction = NULL,
+  get_beta = NULL
 )
 }
 \arguments{

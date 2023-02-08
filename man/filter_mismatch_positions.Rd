@@ -10,7 +10,8 @@ filter_mismatch_positions(
   mm_rate_max = 1,
   bed_include_path = NULL,
   chr = NULL,
-  positions_to_exclude_paths = NULL
+  positions_to_exclude_paths = NULL,
+  get_beta = NULL
 )
 }
 \arguments{
