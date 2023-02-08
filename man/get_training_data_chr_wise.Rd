@@ -14,7 +14,7 @@ get_training_data_chr_wise(
   mm_rate_max = 1,
   verbose = F,
   chr = NULL,
-  batch_size = 32000,
+  batch_size = NULL,
   n_reads = NULL,
   read_fraction = NULL,
   get_beta = NULL

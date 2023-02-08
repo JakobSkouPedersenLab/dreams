@@ -14,7 +14,8 @@ get_training_data_from_bam(
   chr = NULL,
   n_reads = NULL,
   read_fraction = NULL,
-  get_beta = NULL
+  get_beta = NULL,
+  batch_size
 )
 }
 \arguments{

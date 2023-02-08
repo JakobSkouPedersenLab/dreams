@@ -21,7 +21,7 @@ get_training_data_chr_wise <- function(bam_paths,
                                        mm_rate_max = 1,
                                        verbose = F,
                                        chr = NULL,
-                                       batch_size = 32000,
+                                       batch_size = NULL,
                                        n_reads = NULL,
                                        read_fraction = NULL,
                                        get_beta = NULL) {
@@ -65,7 +65,8 @@ get_training_data_chr_wise <- function(bam_paths,
       chr = chr,
       n_reads = n_reads,
       read_fraction = read_fraction,
-      get_beta = get_beta
+      get_beta = get_beta,
+      batch_size = batch_size
     )
 
     training_data <- rbind(training_data, current_training_data$data)
@@ -114,7 +115,8 @@ get_training_data <- function(bam_paths,
                               verbose = F,
                               n_reads = NULL,
                               read_fraction = NULL,
-                              get_beta = NULL) {
+                              get_beta = NULL,
+                              batch_size = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -151,7 +153,8 @@ get_training_data <- function(bam_paths,
       mm_rate_max = mm_rate_max,
       n_reads = n_reads,
       read_fraction = read_fraction,
-      get_beta = get_beta
+      get_beta = get_beta,
+      batch_size = batch_size
     )
 
     training_data <- rbind(training_data, current_training_data$data)
@@ -187,7 +190,7 @@ get_training_data <- function(bam_paths,
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL,
-                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL, read_fraction = NULL, get_beta = NULL) {
+                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL, read_fraction = NULL, get_beta = NULL, batch_size) {
   bam_df <- load_BAM(bam_path, chr = chr)
 
   if (!is.null(n_reads)) {
@@ -211,7 +214,8 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   mismatch_positions_df <-
     extract_features_from_bam(
       bam_df = mismatch_bam_df,
-      reference_path = reference_path
+      reference_path = reference_path,
+      batch_size = batch_size
     )
 
   # Filter mismatches
