@@ -35,8 +35,8 @@ get_training_data_chr_wise <- function(bam_paths,
 
   n_bam_files <- length(bam_paths)
 
-  print ("read fraction")
-  print (read_fraction)
+  print("read fraction")
+  print(read_fraction)
 
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
@@ -108,7 +108,8 @@ get_training_data <- function(bam_paths,
                               mm_rate_max = 1,
                               verbose = F,
                               n_reads = NULL,
-                              read_fraction = NULL) {
+                              read_fraction = NULL,
+                              get_beta = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -144,20 +145,26 @@ get_training_data <- function(bam_paths,
       factor = factor,
       mm_rate_max = mm_rate_max,
       n_reads = n_reads,
-      read_fraction = read_fraction
+      read_fraction = read_fraction,
+      get_beta = get_beta
     )
 
     training_data <- rbind(training_data, current_training_data$data)
     info <- rbind(info, current_training_data$info)
   }
 
-  # Collect output info for beta calculation
-  output_info <- data.frame(
-    total_mismatches = sum(info$n_mismatches),
-    total_matches = sum(info$n_matches),
-    total_coverage = sum(info$total_coverage)
-  ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
+  if (!is.null(get_beta)) {
 
+    # Collect output info for beta calculation
+    output_info <- data.frame(
+      total_mismatches = sum(info$n_mismatches),
+      total_matches = sum(info$n_matches),
+      total_coverage = sum(info$total_coverage)
+    ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
+  } else {
+    output_info = NULL
+
+  }
   return(list(
     data = training_data,
     info = output_info
@@ -177,7 +184,7 @@ get_training_data <- function(bam_paths,
 #'
 #' @return dataframe with training data for a bam file
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL,
-                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL, read_fraction = NULL) {
+                                       factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1, chr = NULL, n_reads = NULL, read_fraction = NULL, get_beta = NULL) {
   bam_df <- load_BAM(bam_path, chr = chr)
 
   if (!is.null(n_reads)) {
@@ -185,22 +192,15 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   }
 
   if (!is.null(read_fraction)) {
-    print ("read fraction")
-    print (nrow(bam_df) * read_fraction)
-    print (read_fraction)
-    print (dim(bam_df))
+    print("read fraction")
+    print(nrow(bam_df) * read_fraction)
+    print(read_fraction)
+    print(dim(bam_df))
     bam_df <- bam_df %>% sample_n(nrow(bam_df) * read_fraction)
   }
 
-  print("BAM FILE LOADED")
-  print(dim(bam_df))
-
   # Add genomic positions of mismatches
   mismatch_bam_df <- extract_mismatch_positions(bam_df)
-
-  print("MISMATCHES extract")
-  print(dim(mismatch_bam_df))
-  print(head(mismatch_bam_df))
 
 
 
@@ -211,9 +211,6 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       reference_path = reference_path
     )
 
-  print("FEATURES EXTRACTED")
-  print(nrow(mismatch_positions_df))
-
   # Filter mismatches
   mismatches <-
     filter_mismatch_positions(
@@ -222,11 +219,9 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       mm_rate_max = mm_rate_max,
       bed_include_path = bed_include_path,
       positions_to_exclude_paths = positions_to_exclude_paths,
-      chr = chr
+      chr = chr,
+      get_beta = get_beta
     )
-
-  print("Mismatches")
-  print(nrow(mismatches$data))
 
   positive_samples <- mismatches$data
   info <- mismatches$info
@@ -240,10 +235,6 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
       bam_df = bam_df,
       n_samples = n_samples
     )
-
-  print("Negative data")
-  print(head(negative_read_positions_df))
-  print(nrow(negative_read_positions_df))
 
   # Add features
   negative_samples <-
@@ -287,7 +278,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 #'
 #' @importFrom readr read_csv
 
-filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, chr = NULL, positions_to_exclude_paths = NULL) {
+filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, chr = NULL, positions_to_exclude_paths = NULL, get_beta = NULL) {
   read_positions_filtered <- read_positions %>% filter(obs != "N")
 
   # Load coverage data
@@ -301,54 +292,54 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   }
 
 
-  pp <- Rsamtools::PileupParam(
-    max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
-    min_nucleotide_depth = 1, min_minor_allele_depth = 0,
-    distinguish_strands = FALSE, distinguish_nucleotides = T,
-    ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
-    left_bins = NULL, query_bins = NULL, cycle_bins = NULL
-  )
+  if (mm_rate_max != 1 && !is.null(get_beta)) {
+    pp <- Rsamtools::PileupParam(
+      max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
+      min_nucleotide_depth = 1, min_minor_allele_depth = 0,
+      distinguish_strands = FALSE, distinguish_nucleotides = T,
+      ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
+      left_bins = NULL, query_bins = NULL, cycle_bins = NULL
+    )
 
-  print("GETTING COUNT DATA")
+    print("GETTING COUNT DATA")
 
-  bam <- BamFile(bam_file, yieldSize = 100000)
+    bam <- BamFile(bam_file, yieldSize = 100000)
 
-  count_data <- Rsamtools::pileup(bam, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
-    dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, obs = .data$nucleotide) %>%
-    mutate(
-      ref = get_reference_seq(
-        chr = .data$chr,
-        genomic_pos = .data$genomic_pos,
-        buffer = 0,
-        reference_path = reference_path
-      ),
-      is_mm = ref != obs,
-    ) %>%
-    select(-which_label)
-
-
-  print("Calculate mismatch rates")
-
-  mm_data <- count_data %>%
-    group_by(chr, genomic_pos) %>%
-    mutate(coverage = sum(count)) %>%
-    filter(is_mm) %>%
-    group_by(chr, genomic_pos, ref, obs, coverage) %>%
-    summarize(n_mismatches = sum(count)) %>%
-    mutate(mm_rate = n_mismatches / coverage)
-
-  high_mismatch_positions <- mm_data %>% filter(mm_rate > mm_rate_max)
-
-  read_positions_filtered <- read_positions_filtered %>% anti_join(high_mismatch_positions)
-
-  print("Get coverage data")
-
-  coverage_data <- count_data %>%
-    anti_join(high_mismatch_positions) %>%
-    group_by(chr, genomic_pos) %>%
-    summarize(total_coverage = sum(count))
+    count_data <- Rsamtools::pileup(bam, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
+      dplyr::rename(chr = .data$seqnames, genomic_pos = .data$pos, obs = .data$nucleotide) %>%
+      mutate(
+        ref = get_reference_seq(
+          chr = .data$chr,
+          genomic_pos = .data$genomic_pos,
+          buffer = 0,
+          reference_path = reference_path
+        ),
+        is_mm = ref != obs,
+      ) %>%
+      select(-which_label)
 
 
+    print("Calculate mismatch rates")
+
+    mm_data <- count_data %>%
+      group_by(chr, genomic_pos) %>%
+      mutate(coverage = sum(count)) %>%
+      filter(is_mm) %>%
+      group_by(chr, genomic_pos, ref, obs, coverage) %>%
+      summarize(n_mismatches = sum(count)) %>%
+      mutate(mm_rate = n_mismatches / coverage)
+
+    high_mismatch_positions <- mm_data %>% filter(mm_rate > mm_rate_max)
+
+    read_positions_filtered <- read_positions_filtered %>% anti_join(high_mismatch_positions)
+
+    print("Get coverage data")
+
+    coverage_data <- count_data %>%
+      anti_join(high_mismatch_positions) %>%
+      group_by(chr, genomic_pos) %>%
+      summarize(total_coverage = sum(count))
+  }
 
   # Remove unwanted positions based on exclude files
 
@@ -366,10 +357,17 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 
   # Output beta info
 
-  beta_info <- data.frame(
-    total_mismatches = sum(mm_data$n_mismatches),
-    total_coverage = sum(coverage_data$total_coverage)
-  )
+  if (!is.null(get_beta)) {
+    beta_info <- data.frame(
+      total_mismatches = sum(mm_data$n_mismatches),
+      total_coverage = sum(coverage_data$total_coverage)
+    )
+  } else {
+    beta_info <- data.frame(
+      total_mismatches = NULL,
+      total_coverage = NULL
+    )
+  }
 
 
   return(list(
