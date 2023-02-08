@@ -23,7 +23,8 @@ get_training_data_chr_wise <- function(bam_paths,
                                        chr = NULL,
                                        batch_size = 32000,
                                        n_reads = NULL,
-                                       read_fraction = NULL) {
+                                       read_fraction = NULL,
+                                       get_beta = NULL) {
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
     (length(bam_paths) != length(positions_to_exclude_paths)))) {
@@ -63,20 +64,24 @@ get_training_data_chr_wise <- function(bam_paths,
       mm_rate_max = mm_rate_max,
       chr = chr,
       n_reads = n_reads,
-      read_fraction = read_fraction
+      read_fraction = read_fraction,
+      get_beta = get_beta
     )
 
     training_data <- rbind(training_data, current_training_data$data)
     info <- rbind(info, current_training_data$info)
   }
 
-
-  # Collect output info for beta calculation
-  output_info <- data.frame(
-    total_mismatches = sum(info$total_mismatches),
-    total_matches = sum(info$n_matches),
-    total_coverage = sum(info$total_coverage)
-  ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
+  if (!is.null(get_beta)) {
+    # Collect output info for beta calculation
+    output_info <- data.frame(
+      total_mismatches = sum(info$n_mismatches),
+      total_matches = sum(info$n_matches),
+      total_coverage = sum(info$total_coverage)
+    ) %>% mutate(beta = .data$total_matches / (.data$total_coverage - .data$total_mismatches))
+  } else {
+    output_info <- NULL
+  }
 
   return(list(
     data = training_data,

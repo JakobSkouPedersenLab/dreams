@@ -16,7 +16,8 @@ get_training_data_chr_wise(
   chr = NULL,
   batch_size = 32000,
   n_reads = NULL,
-  read_fraction = NULL
+  read_fraction = NULL,
+  get_beta = NULL
 )
 }
 \arguments{
