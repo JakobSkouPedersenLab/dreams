@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# dreams
+# DREAMS
 
 <!-- badges: start -->
 
@@ -13,7 +13,7 @@ coverage](https://codecov.io/gh/JakobSkouPedersenLab/dreams/branch/main/graph/ba
 v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <!-- badges: end -->
-
+DREAMS is an analysis pipeline that applies a neural network to low-frequency variant calling and circulating tumor DNA detection from next-generation DNA sequencing data.
 ## Installation
 
 You can install the development version of dreams from
@@ -52,17 +52,22 @@ model = train_dreams_model(
 # Call variants using DREAMS-vc
 
 variant_calls = dreams_vc(
-  bam_path = "/path/test_bam_file",
-  positions = "positions_file",
+  mutations_df = "/path/mutation_file",
+  bam_file_path = "/path/test_bam_file",
+  reference_path = "/path/hg38.fa",
+  beta = 10^{-5},
   model = model,
-  ...
-)
+  ...)
 
 # Call cancer using DREAMS-cc
 
 cancer_calls = dreams_cc(
-  bam_path = "/path/test_bam_file",
-  positions = "positions_file",
+  mutations_df = "/path/mutation_file",
+  bam_file_path = "/path/test_bam_file",
+  reference_path = "/path/hg38.fa",
+  beta = 10^{-5},
   model = model,
   ...)
 ```
+## About DREAMS
+For technical details describing how DREAMS works please see our [article](https://doi.org/10.1186/s13059-023-02920-1)
