@@ -55,7 +55,7 @@ variant_calls = dreams_vc(
   mutations_df = "/path/mutation_file",
   bam_file_path = "/path/test_bam_file",
   reference_path = "/path/hg38.fa",
-  beta = 10^(-5),
+  beta = 10^-5,
   model = model,
   ...)
 
@@ -65,7 +65,7 @@ cancer_calls = dreams_cc(
   mutations_df = "/path/mutation_file",
   bam_file_path = "/path/test_bam_file",
   reference_path = "/path/hg38.fa",
-  beta = 10^(-5),
+  beta = 10^-5,
   model = model,
   ...)
 ```
