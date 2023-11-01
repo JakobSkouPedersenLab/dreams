@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# dreams
+# DREAMS
 
 <!-- badges: start -->
 
@@ -14,6 +14,10 @@ v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/li
 
 <!-- badges: end -->
 
+DREAMS is an analysis pipeline that applies a neural network to
+low-frequency variant calling and circulating tumor DNA detection from
+next-generation DNA sequencing data.
+
 ## Installation
 
 You can install the development version of dreams from
@@ -22,6 +26,10 @@ You can install the development version of dreams from
 ``` r
 # install.packages("devtools")
 devtools::install_github("JakobSkouPedersenLab/dreams")
+reticulate::install_python(version='3.10')
+library(dreams)
+library(keras)
+install_keras()
 ```
 
 ## Basic functions
@@ -35,7 +43,7 @@ library(dreams)
 training_data = get_training_data(
   bam_paths = "/path/bam_file",
   reference_path = "/path/hg38.fa",
-  ...)
+  ...)$data
 
 # The model can be trained using a neural network
 # - and requires basic settings for keras
@@ -49,20 +57,29 @@ model = train_dreams_model(
   epochs = 100,
   ...)
   
+
 # Call variants using DREAMS-vc
 
 variant_calls = dreams_vc(
-  bam_path = "/path/test_bam_file",
-  positions = "positions_file",
+  mutations_df = mutations_df,
+  bam_file_path = "/path/test_bam_file",
+  reference_path = "/path/hg38.fa",
+  beta = 10^-5,
   model = model,
-  ...
-)
+  ...)
 
 # Call cancer using DREAMS-cc
 
 cancer_calls = dreams_cc(
-  bam_path = "/path/test_bam_file",
-  positions = "positions_file",
+  mutations_df = mutations_df,
+  bam_file_path = "/path/test_bam_file",
+  reference_path = "/path/hg38.fa",
+  beta = 10^-5,
   model = model,
   ...)
 ```
+
+## About DREAMS
+
+For technical details describing how DREAMS works please see our
+[article](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-023-02920-1).
