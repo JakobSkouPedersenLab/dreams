@@ -1,3 +1,4 @@
+source("renv/activate.R")
 require(usethis)
 require(devtools)
 require(pkgdown)
