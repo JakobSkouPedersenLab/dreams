@@ -1,17 +1,30 @@
+
 #' Extract training data from BAM files
 #'
 #' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract training data from.
 #' @param reference_path String. Path to reference genome fasta file.
 #' @param bed_include_path String. Path to bed-file with regions to include. Default is \code{NULL}.
-#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.
-#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
 #' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
+#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
+#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.
 #' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
 #' @param verbose TODO: Write this
 #'
+#' @return A list containing two elements:
+#' \itemize{
+#'   \item `data`: A `tbl_df` with dimensions 2 x 22.
+#'   \item `info`: A `data.frame` with dimensions 1 x 4.
+#' }
 #' @export
-#' @return \code{data.frame} with training data for a bam file
-#' @seealso [train_dreams_model()] Function for training model
+#'
+#' @examples
+#' # Assume example paths for bam and reference files
+#' bam_file <- "/path/bam_file"
+#' ref_file <- "/path/hg38.fa"
+#'
+#' # Get training data
+#' training_data <- get_training_data(bam_paths = bam_file, reference_path = ref_file)
+#' @seealso [train_dreams_model()] Function for training model.
 get_training_data <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,
@@ -80,12 +93,13 @@ get_training_data <- function(bam_paths,
 #' @param bam_path Path to BAM file
 #' @param reference_path Path to reference file
 #' @param bed_include_path BED regions to include
-#' @param positions_to_exclude_paths positions to exclude from training
 #' @param factor ratio between negative and positive data
+#' @param positions_to_exclude_paths positions to exclude from training
 #' @param mm_rate_max maximum mismatch rate in position
 #' @keywords internal
 #'
-#' @return dataframe with training data for a bam file
+#' @return `data.frame` with training data for a \code{.bam} file
+
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
   bam_df <- load_BAM(bam_path)
 
@@ -141,9 +155,6 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
   return(output_list)
 }
-
-
-
 
 
 
@@ -236,7 +247,6 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
 #' @return granges object
 #' @keywords internal
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
-
 bed_to_granges <- function(bed_path) {
   if (is.null(bed_path)) {
     return(GRanges())

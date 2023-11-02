@@ -31,15 +31,19 @@ devtools::install_github("JakobSkouPedersenLab/dreams")
 ## Basic functions
 
 ``` r
+
 library(dreams)
 
-# For training data DREAMS requires one or more bam-files
-# and a reference genome
+# For training, data DREAMS requires one or more bam-files
+# and a reference genome.
 
-training_data = get_training_data(
+data = get_training_data(
   bam_paths = "/path/bam_file",
   reference_path = "/path/hg38.fa",
-  ...)$data
+  ...)
+
+training_data = data$data
+beta = data$info$beta
 
 # The model can be trained using a neural network
 # - and requires basic settings for keras
@@ -60,7 +64,7 @@ variant_calls = dreams_vc(
   mutations_df = mutations_df,
   bam_file_path = "/path/test_bam_file",
   reference_path = "/path/hg38.fa",
-  beta = 10^-5,
+  beta = beta,
   model = model,
   ...)
 
@@ -70,7 +74,7 @@ cancer_calls = dreams_cc(
   mutations_df = mutations_df,
   bam_file_path = "/path/test_bam_file",
   reference_path = "/path/hg38.fa",
-  beta = 10^-5,
+  beta = beta,
   model = model,
   ...)
 ```

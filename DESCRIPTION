@@ -45,13 +45,13 @@ Imports:
     keras,
     parallel,
     doParallel,
-    foreach
+    foreach,
+    turboEM
 Suggests: 
     knitr,
     covr,
     testthat (>= 3.0.0),
     rmarkdown,
-    turboEM,
     learnr
 Config/testthat/edition: 3
 URL: https://github.com/JakobSkouPedersenLab/dreams

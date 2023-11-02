@@ -33,10 +33,22 @@ get_training_data(
 \item{verbose}{TODO: Write this}
 }
 \value{
-\code{data.frame} with training data for a bam file
+A list containing two elements:
+\itemize{
+\item \code{data}: A \code{tbl_df} with dimensions 2 x 22.
+\item \code{info}: A \code{data.frame} with dimensions 1 x 4.
+}
 }
 \description{
 Extract training data from BAM files
+}
+\examples{
+# Assume example paths for bam and reference files
+bam_file <- "/path/bam_file"
+ref_file <- "/path/hg38.fa"
+
+# Get training data
+training_data <- get_training_data(bam_paths = bam_file, reference_path = ref_file)
 }
 \seealso{
 \code{\link[=train_dreams_model]{train_dreams_model()}} Function for training model
