@@ -26,10 +26,6 @@ You can install the development version of dreams from
 ``` r
 # install.packages("devtools")
 devtools::install_github("JakobSkouPedersenLab/dreams")
-reticulate::install_python(version='3.10')
-library(dreams)
-library(keras)
-install_keras()
 ```
 
 ## Basic functions

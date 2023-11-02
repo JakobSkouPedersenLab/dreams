@@ -17,7 +17,7 @@ Authors@R:
       comment = c(ORCID = "0000-0002-1401-6527")
     )
   )
-Description: What the package does (one paragraph).
+Description: DREAMS is an analysis pipeline that applies a neural network to low-frequency variant calling and circulating tumor DNA detection from next-generation DNA sequencing data.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
