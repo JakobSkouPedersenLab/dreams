@@ -31,6 +31,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set CRAN Mirror
+        run: |
+          echo 'options(repos = c(CRAN = "https://cloud.r-project.org/"))' > ~/.Rprofile
+
       - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: actions/setup-python@v4
