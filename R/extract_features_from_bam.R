@@ -30,16 +30,22 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 }
 
 
-#' Title
+#' Extract Features from BAM Data
 #'
-#' @param bam_df dataframe from load_BAM
-#' @param reference_path reference genome path
-#' @param add_umi_features Check if umi information is available
+#' @param bam_df A DataFrame originating from 'load_BAM' and processed by extract_mismatch_positions' containing alignment data.
+#' @param reference_path Path to the reference genome file in FASTA format.
+#' @param add_umi_features Check if umi information is available.
 #'
-#' @return dataframe with read positions
+#' @return A DataFrame with extracted features, including read positions and possibly UMI data.
 #' @keywords internal
 #'
 #' @importFrom purrr map2_int
+#'
+#' @examples
+#' # Assuming 'bam_data' is a DataFrame obtained from 'load_BAM'
+#' bam_data_processed <- extract_mismatch_positions(bam_data)
+#' features <- extract_features_from_bam(bam_data_processed, "/path/to/reference.fasta")
+#'
 extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
 
   # If UMI features are asked for but not present

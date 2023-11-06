@@ -34,6 +34,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
   # Load BAM file
   bam <- scanBam(bamFile, param = param)
 
+
   # Unpack tags
   for (i in 1:length(bam)) {
     # Default tags
@@ -132,6 +133,7 @@ hardclip_correct_umi_features <- function(df) {
 
   # Filter soft clips and remove from sequence string
   cigar <- df$cigar
+
 
   hard_clips_start <- ifelse(stringr::str_detect(cigar, "^[0-9]*H"),
     stringr::str_extract(string = cigar, pattern = "^[0-9]*") %>% as.numeric(),

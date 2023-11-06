@@ -51,5 +51,5 @@ ref_file <- "/path/hg38.fa"
 training_data <- get_training_data(bam_paths = bam_file, reference_path = ref_file)
 }
 \seealso{
-\code{\link[=train_dreams_model]{train_dreams_model()}} Function for training model
+\code{\link[=train_dreams_model]{train_dreams_model()}} Function for training model.
 }
