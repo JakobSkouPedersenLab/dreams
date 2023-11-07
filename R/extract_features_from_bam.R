@@ -41,10 +41,6 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #'
 #' @importFrom purrr map2_int
 #'
-#' @examples
-#' # Assuming 'bam_data' is a DataFrame obtained from 'load_BAM'
-#' bam_data_processed <- extract_mismatch_positions(bam_data)
-#' features <- extract_features_from_bam(bam_data_processed, "/path/to/reference.fasta")
 #'
 extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
 
@@ -67,7 +63,8 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
       )
     ) %>%
     mutate(
-      context11 = get_reference_seq(
+      context11 =
+        get_reference_seq(
         chr = .data$chr,
         genomic_pos = .data$genomic_pos,
         buffer = 5,

@@ -1,13 +1,20 @@
 
 #' Extract training data from BAM files
 #'
-#' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract training data from.
+#' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract
+#'   training data from.
 #' @param reference_path String. Path to reference genome fasta file.
-#' @param bed_include_path String. Path to bed-file with regions to include. Default is \code{NULL}.
-#' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
-#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
-#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.
-#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
+#' @param bed_include_path String. Path to bed-file with regions to include.
+#'   Default is \code{NULL}.
+#' @param factor Number between 0 and 1. Ratio between negative and positive
+#'   data. Default is 1.
+#' @param common_positions_to_exclude_paths Vector of strings. List of files
+#'   with positions to exclude from all samples. Default is \code{NULL}.
+#' @param positions_to_exclude_paths Vector of strings. List of files with
+#'   positions to exclude from training with length equal to number of samples.
+#'   Default is \code{NULL}.
+#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position.
+#'   Default is 1.
 #' @param verbose TODO: Write this
 #'
 #' @return A list containing two elements:
@@ -17,13 +24,6 @@
 #' }
 #' @export
 #'
-#' @examples
-#' # Assume example paths for bam and reference files
-#' bam_file <- "/path/bam_file"
-#' ref_file <- "/path/hg38.fa"
-#'
-#' # Get training data
-#' training_data <- get_training_data(bam_paths = bam_file, reference_path = ref_file)
 #' @seealso [train_dreams_model()] Function for training model.
 get_training_data <- function(bam_paths,
                               reference_path,

@@ -2,19 +2,22 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{get_mismatch_genomic_pos_list}
 \alias{get_mismatch_genomic_pos_list}
-\title{Title get_mismatch_genomic_pos_list}
+\title{Get list of genomic positions with mismatches}
 \usage{
 get_mismatch_genomic_pos_list(pos, MDtag)
 }
 \arguments{
 \item{pos}{Genomic position}
 
-\item{MDtag}{MDtag from BAM column}
+\item{MDtag}{MD tag string from the BAM file that contains information about matches, mismatches, and deletions in the read alignment.}
 }
 \value{
-genomic positions
+A list of genomic positions where mismatches occur, corresponding to each MD tag provided.
 }
 \description{
-Title get_mismatch_genomic_pos_list
+This function computes the genomic positions of mismatches in sequencing reads based on the MD tag from BAM files.
+The MD tag describes how the read aligns to the reference genome, including mismatches. The function identifies these
+mismatches and computes their positions relative to the start of the alignment, aiding in variant calling and analysis
+of sequencing errors.
 }
 \keyword{internal}

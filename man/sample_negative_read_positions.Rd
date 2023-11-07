@@ -2,7 +2,7 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{sample_negative_read_positions}
 \alias{sample_negative_read_positions}
-\title{Title sample_negative_read_positions}
+\title{Sample_negative_read_positions}
 \usage{
 sample_negative_read_positions(bam_df, n_samples)
 }
@@ -15,6 +15,6 @@ sample_negative_read_positions(bam_df, n_samples)
 negative_read_positions
 }
 \description{
-Title sample_negative_read_positions
+Sample_negative_read_positions
 }
 \keyword{internal}

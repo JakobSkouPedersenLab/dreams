@@ -42,14 +42,6 @@ A list containing two elements:
 \description{
 Extract training data from BAM files
 }
-\examples{
-# Assume example paths for bam and reference files
-bam_file <- "/path/bam_file"
-ref_file <- "/path/hg38.fa"
-
-# Get training data
-training_data <- get_training_data(bam_paths = bam_file, reference_path = ref_file)
-}
 \seealso{
 \code{\link[=train_dreams_model]{train_dreams_model()}} Function for training model.
 }

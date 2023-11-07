@@ -7,16 +7,20 @@
 load_BAM(BamPath, chr = NULL, pos = NULL)
 }
 \arguments{
-\item{BamPath}{Path to .BAM-file}
+\item{BamPath}{The file path to the .BAM file to be loaded.}
 
-\item{chr}{Vector of chromosomes of interest (strings)}
+\item{chr}{A vector of chromosome identifiers indicating the chromosomes of interest for the analysis. (strings)}
 
-\item{pos}{Vector of positions of interest (numeric)}
+\item{pos}{A vector of numeric positions indicating the specific locations of interest within the chromosomes. (numeric)}
 }
 \value{
-.BAM file in tibble format
+A tibble (data frame) containing the extracted alignment data from the .BAM file, including processed UMI
+features and genomic positions, as well as any necessary corrections for alignment issues such as hard clipping.
 }
 \description{
-Load .BAM file into R as tibble
+This function reads alignment data from a .BAM file and formats it as a tibble (data frame) in R.
+It allows for the selection of specific genomic regions by specifying chromosomes and positions, and it extracts
+relevant alignment data including tags for further analysis. The function also includes processing of UMI tags
+and correction for hard clips in the CIGAR strings.
 }
 \keyword{internal}

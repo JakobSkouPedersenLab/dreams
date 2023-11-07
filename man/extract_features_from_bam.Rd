@@ -23,10 +23,4 @@ A DataFrame with extracted features, including read positions and possibly UMI d
 \description{
 Extract Features from BAM Data
 }
-\examples{
-# Assuming 'bam_data' is a DataFrame obtained from 'load_BAM'
-bam_data_processed <- extract_mismatch_positions(bam_data)
-features <- extract_features_from_bam(bam_data_processed, "/path/to/reference.fasta")
-
-}
 \keyword{internal}
