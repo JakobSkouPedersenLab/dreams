@@ -10,11 +10,14 @@ extract_mismatch_positions(bam_df)
 \item{bam_df}{A dataframe obtained from the \code{load_BAM} function.}
 }
 \value{
-A dataframe of mismatch positions, which includes the genomic positions of all identified mismatches across the reads.
+A dataframe of mismatch positions, which includes the genomic
+positions of all identified mismatches across the reads.
 }
 \description{
-This function filters a dataframe for reads that contain mismatches when compared to the reference genome,
-as indicated by the MD tag within the BAM data. It then extracts the genomic positions of these mismatches, providing
-a detailed account of where the sequencing reads do not match the reference sequence.
+This function filters a dataframe for reads that contain
+mismatches when compared to the reference genome, as indicated by the MD
+tag within the BAM data. It then extracts the genomic positions of these
+mismatches, providing a detailed account of where the sequencing reads do
+not match the reference sequence.
 }
 \keyword{internal}

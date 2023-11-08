@@ -2,25 +2,21 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{get_match_genomic_pos_list}
 \alias{get_match_genomic_pos_list}
-\title{Get list of genomic positions with matches}
+\title{Get_match_genomic_pos_list}
 \usage{
 get_match_genomic_pos_list(pos, cigar, MDtag)
 }
 \arguments{
-\item{pos}{A list of starting positions for each read on the genome.}
+\item{pos}{position_list}
 
-\item{cigar}{A list of CIGAR strings corresponding to each read, describing the alignment.}
+\item{cigar}{cigar string list}
 
-\item{MDtag}{A list of MD tags from the BAM file that provide details of matches and mismatches.}
+\item{MDtag}{mdtag list}
 }
 \value{
-A list of positions for each read where the bases match the reference genome.
+match_positions
 }
 \description{
-This function identifies genomic positions that correspond to matching bases
-in the sequencing reads as per the CIGAR and MD tag information. It effectively filters out
-insertions, deletions, and mismatches to provide positions of only matched bases. Such information
-can be crucial for accurate representation of sequencing coverage and identification of regions
-with high-confidence alignment.
+Get_match_genomic_pos_list
 }
 \keyword{internal}

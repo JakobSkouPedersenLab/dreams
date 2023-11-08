@@ -2,7 +2,7 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{correct_pos_idx_w_cigar}
 \alias{correct_pos_idx_w_cigar}
-\title{Correct positions index with CIGAR}
+\title{Title correct_pos_idx_w_cigar}
 \usage{
 correct_pos_idx_w_cigar(df)
 }
@@ -13,8 +13,6 @@ correct_pos_idx_w_cigar(df)
 df
 }
 \description{
-This function adjusts read positions in a dataframe based on CIGAR string information from a BAM file.
-It processes the CIGAR string to identify insertions and deletions, which are then used to correct the read positions.
-This is important for accurate read mapping and subsequent analyses.
+Title correct_pos_idx_w_cigar
 }
 \keyword{internal}

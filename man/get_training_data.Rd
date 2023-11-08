@@ -16,19 +16,26 @@ get_training_data(
 )
 }
 \arguments{
-\item{bam_paths}{Vector of strings. Paths to \code{.bam} files to extract training data from.}
+\item{bam_paths}{Vector of strings. Paths to \code{.bam} files to extract
+training data from.}
 
 \item{reference_path}{String. Path to reference genome fasta file.}
 
-\item{bed_include_path}{String. Path to bed-file with regions to include. Default is \code{NULL}.}
+\item{bed_include_path}{String. Path to bed-file with regions to include.
+Default is \code{NULL}.}
 
-\item{factor}{Number between 0 and 1. Ratio between negative and positive data. Default is 1.}
+\item{factor}{Number between 0 and 1. Ratio between negative and positive
+data. Default is 1.}
 
-\item{common_positions_to_exclude_paths}{Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.}
+\item{common_positions_to_exclude_paths}{Vector of strings. List of files
+with positions to exclude from all samples. Default is \code{NULL}.}
 
-\item{positions_to_exclude_paths}{Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.}
+\item{positions_to_exclude_paths}{Vector of strings. List of files with
+positions to exclude from training with length equal to number of samples.
+Default is \code{NULL}.}
 
-\item{mm_rate_max}{Number between 0 and 1. Maximum mismatch rate in position. Default is 1.}
+\item{mm_rate_max}{Number between 0 and 1. Maximum mismatch rate in position.
+Default is 1.}
 
 \item{verbose}{TODO: Write this}
 }

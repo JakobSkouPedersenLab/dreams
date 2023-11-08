@@ -9,15 +9,19 @@ get_mismatch_genomic_pos_list(pos, MDtag)
 \arguments{
 \item{pos}{Genomic position}
 
-\item{MDtag}{MD tag string from the BAM file that contains information about matches, mismatches, and deletions in the read alignment.}
+\item{MDtag}{MD tag string from the BAM file that contains information about
+matches, mismatches, and deletions in the read alignment.}
 }
 \value{
-A list of genomic positions where mismatches occur, corresponding to each MD tag provided.
+A list of genomic positions where mismatches occur, corresponding to
+each MD tag provided.
 }
 \description{
-This function computes the genomic positions of mismatches in sequencing reads based on the MD tag from BAM files.
-The MD tag describes how the read aligns to the reference genome, including mismatches. The function identifies these
-mismatches and computes their positions relative to the start of the alignment, aiding in variant calling and analysis
-of sequencing errors.
+This function computes the genomic positions of mismatches in
+sequencing reads based on the MD tag from BAM files. The MD tag describes
+how the read aligns to the reference genome, including mismatches. The
+function identifies these mismatches and computes their positions relative
+to the start of the alignment, aiding in variant calling and analysis of
+sequencing errors.
 }
 \keyword{internal}
