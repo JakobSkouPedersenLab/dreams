@@ -2,17 +2,23 @@
 % Please edit documentation in R/sequence_position_handling_indels.R
 \name{expand_cigar}
 \alias{expand_cigar}
-\title{Expand CIGAR string}
+\title{Expand CIGAR String into Sequence of Operations}
 \usage{
 expand_cigar(cigar)
 }
 \arguments{
-\item{cigar}{CIGAR string}
+\item{cigar}{A character string representing the CIGAR operations from an
+alignment.}
 }
 \value{
-List of expanded CIGAR string
+A character string with each CIGAR operation expanded to show the
+full sequence of alignment operations. For example, '2M1I' would expand to
+'MMI'.
 }
 \description{
-Expand CIGAR string
+This function expands a condensed CIGAR string into a sequence
+of operations. It removes operations at the beginning and end of the string
+that represent hard clipping ('H') and deletions ('D'), as these do not
+contribute to the alignment sequence.
 }
 \keyword{internal}

@@ -1,11 +1,18 @@
-#' Expand CIGAR string
+
+#' Expand CIGAR String into Sequence of Operations
 #'
-#' @param cigar CIGAR string
+#' @description This function expands a condensed CIGAR string into a sequence
+#'   of operations. It removes operations at the beginning and end of the string
+#'   that represent hard clipping ('H') and deletions ('D'), as these do not
+#'   contribute to the alignment sequence.
+#' @param cigar A character string representing the CIGAR operations from an
+#'   alignment.
 #'
-#' @return List of expanded CIGAR string
+#' @return A character string with each CIGAR operation expanded to show the
+#'   full sequence of alignment operations. For example, '2M1I' would expand to
+#'   'MMI'.
 #' @keywords internal
 #'
-
 expand_cigar <- function(cigar) {
 
   cigar = str_remove_all(cigar, pattern = "^[0-9]+[HD]")
@@ -22,62 +29,75 @@ expand_cigar <- function(cigar) {
   return(expanded_cigar)
 }
 
-#' Expand MD tag
+#' Clean Insertions in CIGAR Sequence
 #'
-#' @param md MD tag (`string`)
+#' @description This function adjusts the sequence of CIGAR operations by
+#'   cleaning up insertion operations. It removes any insertions that follow
+#'   deletions and consolidates consecutive insertions that follow any operation
+#'   other than deletions into a single insertion, while removing the operation
+#'   that precedes the insertions.
+#' @param cigar A string representing the sequence output from expand_cigar.
 #'
-#' @return List of expanded MD tag
+#' @return A string of the CIGAR sequence after cleaning up the insertion
+#'   operations.
 #' @keywords internal
 #'
-expand_md <- function(md) {
-  # Use strsplit with a regular expression that matches numbers or single non-digit characters
-  split_string <- strsplit(md, "(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)", perl = TRUE)
-  split_elements <- split_string[[1]]
+clean_insertions <- function(cigar) {
 
-  # Use a vectorized approach to create a string with 'M' for numbers and 'D' for '^'
-  str <- vapply(split_elements, function(element) {
-    if (grepl("^[0-9]+$", element)) {
-      return(strrep("M", as.numeric(element)))
-    } else if (startsWith(element, "^")) {
-      return(strrep("D", nchar(element) - 1))
-    } else {
-      return(element)
+   # Remove insertions that follow deletions.
+  cigar <- gsub("DI+", "D", cigar)
+
+  # For 'I's following any letter except 'D', keep one 'I' and remove the
+  # preceding letter
+  cigar <- gsub("([A-HJ-Z])I+", "I", cigar)
+
+  return(cigar)
+}
+
+#' Get genomic positions of insertions and deletions
+#'
+#' @description This function takes a CIGAR string as input and returns the
+#'   genomic start positions of insertions and deletions. Deletions start on
+#'   their actual position, whereas insertions start positions are annotated on
+#'   the base prior to the insertion.
+#' @param pos Start position of CIGAR string in genome.
+#' @param cigar CIGAR string.
+#'
+#' @return A list with two elements:
+#'         - `I_positions`: a numeric vector with the positions of 'I's.
+#'         - `D_positions`: a numeric vector with the positions of the first 'D'
+#'   in each sequence of 'D's.
+#'
+#' @keywords internal
+get_positions_of_indels <- function(pos, cigar) {
+  expanded_cigar <- expand_cigar(cigar)
+  cigar <- clean_insertions(expanded_cigar)
+  # Find all matches for 'I's.
+  I_positions <- gregexpr("I", cigar)
+  # Convert the positions to a list of more readable numbers (1-based indices).
+  I_positions <- unlist(I_positions)
+  # Remove the -1 values which indicate no match found.
+  I_positions <- I_positions[I_positions != -1]
+
+  # Initialize an empty vector to store the indexes for D's.
+  D_positions <- c()
+  # Loop through the string
+  for (i in seq(nchar(cigar))) {
+    # Check if the character is 'D'
+    if (substr(cigar, i, i) == "D") {
+      # Check if it's the start of a 'D' sequence or if the previous character
+      # is not a 'D'
+      if (i == 1 || substr(cigar, i - 1, i - 1) != "D") {
+        D_positions <- c(D_positions, i)
+      }
     }
-  }, character(1))
-
-  # Collapse the vector into a single string
-  str <- paste0(str, collapse = "")
-  return(str)
+  }
+  # Return a list containing positions of 'I's and the specified 'D's
+  list(I_positions = I_positions + pos, D_positions = D_positions + pos)
 }
 
-#' Combined CIGAR and MD tag
-#'
-#' @param cigar CIGAR string
-#' @param md MD tag (`string`)
-#'
-#' @return List of combined CIGAR and MD tag
-#' @keywords internal
-#'
-combine_sequences <- function(cigar, md) {
-  cigar <- expand_cigar(cigar)
-  md <- expand_md(md)
-  # Split both strings into arrays of characters
-  cigar_chars <- strsplit(cigar, "")[[1]]
-  md_chars <- strsplit(md, "")[[1]]
 
-  # Use vectorized comparison to identify positions where md_chars is not 'M'
-  # and it should override the cigar_chars
-  replace_indices <- which(md_chars != "M")
 
-  # Create a combined vector initialized to cigar_chars
-  combined_chars <- cigar_chars
 
-  # Replace the corresponding indices in combined_chars with md_chars
-  combined_chars[replace_indices] <- md_chars[replace_indices]
-
-  # Collapse the character vector back into a single string
-  combined <- paste0(combined_chars, collapse = "")
-  return(combined)
-}
 
 
