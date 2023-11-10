@@ -15,10 +15,8 @@
 #'
 expand_cigar <- function(cigar) {
 
-  cigar = str_remove_all(cigar, pattern = "^[0-9]+[HD]")
-  cigar = str_remove_all(cigar, pattern = "[0-9]+[HD]$")
   # Extract the operation counts and types
-  operations <- str_extract_all(cigar, "[MIDNSHP=X]")[[1]]
+  operations <- str_extract_all(cigar, "[MIDNP=X]")[[1]]
   counts <- as.numeric(str_extract_all(cigar, "\\d+")[[1]])
 
   # Use sapply to repeat each operation count times and concatenate them
@@ -121,13 +119,48 @@ get_positions_indels <- function(pos, cigar) {
 #' # combined_positions <- combine_positions(pos, cigar)
 #'
 combine_positions <- function(pos, cigar) {
-  # Obtain the positions of insertions and deletions using the get_positions_of_indels function
-  positions <- get_positions_of_indels(pos, cigar)
+  # Obtain the positions of insertions and deletions using the
+  # get_positions_of_indels function
+  positions <- get_positions_indels(pos, cigar)
 
-  # Combine the positions of 'I's and the first 'D' in each sequence of 'D's into a single vector
-  # and return this combined list of positions
+  # Combine the positions of 'I's and the first 'D' in each sequence of 'D's
+  # into a single vector and return this combined list of positions
   c(positions$I_positions, positions$D_positions)
 }
+
+
+#' Extract lengths of insertions and deletions
+#'
+#' This function extracts numeric lengths that appear before 'I' and 'D' in a
+#' CIGAR string.
+#'
+#' @param cigar A character string representing a CIGAR string.
+#' @return A list containing two elements: `I_length` and `D_length`.
+#' Each element is a vector of numbers (as character strings) that appear before 'I' and 'D' in the CIGAR string.
+#' @keywords internal
+#' @importFrom stringr str_extract_all
+#'
+extract_lengths_indels <- function(cigar) {
+  # Use stringr to extract numbers before 'I'
+  numbers_D_0 <- gsub("(\\d+)(?=D)", "0", cigar, perl = TRUE)
+  I_length <- as.numeric(str_extract_all(numbers_D_0,  "\\d+(?=[ID])")[[1]])
+
+  # Use stringr to extract numbers before 'D'
+  numbers_I_0 <- gsub("(\\d+)(?=I)", "0", cigar, perl = TRUE)
+  D_length <- as.numeric(str_extract_all(numbers_I_0,  "\\d+(?=[ID])")[[1]])
+
+  # Return the results as a list
+  list(I_length = I_length, D_length = D_length)
+}
+
+extract_lengths_insertions <- function(cigar){
+  return(extract_lengths_indels(cigar)$I_length)
+}
+
+extract_lengths_deletions <- function(cigar){
+  return(extract_lengths_indels(cigar)$D_length)
+}
+
 
 
 
@@ -135,31 +168,31 @@ combine_positions <- function(pos, cigar) {
 #'
 #' @description This function filters a dataframe for reads that contain indels
 #'   when compared to the reference genome, as indicated by the cigar string in
-#'   the BAM data. It then extracts the genomic positions of these mismatches,
+#'   the BAM data. It then extracts the genomic positions of these indels,
 #'   providing a detailed account of where the sequencing reads do not match the
 #'   reference sequence.
 #'
 #' @param bam_df A dataframe obtained from the `load_BAM` function.
 #'
-#' @return A dataframe of mismatch positions, which includes the genomic
+#' @return A dataframe of indel positions, which includes the genomic
 #'   positions of all identified indels across the reads.
 #' @keywords internal
 #' @importFrom tidyr unnest
 extract_mismatch_positions_indels <- function(bam_df) {
-  mismatch_positions <-
+  indels_positions <-
     bam_df %>%
-    # Get all reads with at least one mismatch
-    filter(str_detect(.data$cigar, "I|D")) %>%
-    # Select reads that have mismatches, which are indicated by the presence of
-    # base letters (ATCG) in the MD tag
-    mutate(
-      genomic_pos = get_minimum_position(pos = .data$pos, cigar = .data$cigar)
-    ) %>%
+    # Get all reads with at least one indel
+    filter(str_detect(.data$cigar, "I|D"))
+  # len_insertions <- unlist(lapply(indels_positions$cigar, extract_lengths_insertions))
+  indels_positions <- indels_positions %>%
+    # Select reads that have indels and provide the lengths.
+    mutate(genomic_pos = combine_positions(pos = .data$pos, cigar = .data$cigar)) %>%
     # Expand the list column so that each mismatch position has its own row in
     # the dataframe.
-    unnest(.data$genomic_pos)
+    unnest(genomic_pos)
 
-  return(mismatch_positions)
+
+  return(indels_positions)
 }
 
 

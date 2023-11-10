@@ -86,7 +86,8 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
     ) %>%
     strand_correct_umi_features() %>%
     hardclip_correct_umi_features() %>%
-    remove_softclips()
+    remove_softclips() %>%
+    remove_hardclips()
 
   # Return the fully processed tibble.
   return(bam_df)
@@ -253,5 +254,29 @@ remove_softclips <- function(df) {
   }
 
   # Return the dataframe with soft clipped bases removed
+  return(df)
+}
+
+
+#' Remove Hard Clipping from CIGAR Strings in a DataFrame
+#'
+#' @description This function processes a dataframe containing CIGAR strings
+#' in one of its columns. It removes the hard clipping ('H') and deletions ('D')
+#' at the beginning and end of each CIGAR string. Hard clipping and deletions
+#' do not contribute to the alignment sequence, and their removal simplifies
+#' further processing of these strings.
+#'
+#' @param df A dataframe with a column named 'cigar', which contains CIGAR strings.
+#'
+#' @return A dataframe identical to the input, except the CIGAR strings in the
+#' 'cigar' column are modified to exclude initial and terminal hard clipping
+#' and deletions.
+#'
+#'@keywords internal
+remove_hardclips <- function(df){
+  cigar <- df$cigar
+  cigar <- str_remove_all(cigar, pattern = "^[0-9]+[HD]")
+  cigar <- str_remove_all(cigar, pattern = "[0-9]+[HD]$")
+  df$cigar = cigar
   return(df)
 }

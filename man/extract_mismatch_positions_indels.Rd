@@ -2,7 +2,7 @@
 % Please edit documentation in R/sequence_position_handling_indels.R
 \name{extract_mismatch_positions_indels}
 \alias{extract_mismatch_positions_indels}
-\title{Extract mismatch positions from BAM data}
+\title{Extract indels positions from BAM data}
 \usage{
 extract_mismatch_positions_indels(bam_df)
 }
@@ -11,13 +11,13 @@ extract_mismatch_positions_indels(bam_df)
 }
 \value{
 A dataframe of mismatch positions, which includes the genomic
-positions of all identified mismatches across the reads.
+positions of all identified indels across the reads.
 }
 \description{
-This function filters a dataframe for reads that contain
-mismatches when compared to the reference genome, as indicated by the MD
-tag within the BAM data. It then extracts the genomic positions of these
-mismatches, providing a detailed account of where the sequencing reads do
-not match the reference sequence.
+This function filters a dataframe for reads that contain indels
+when compared to the reference genome, as indicated by the cigar string in
+the BAM data. It then extracts the genomic positions of these mismatches,
+providing a detailed account of where the sequencing reads do not match the
+reference sequence.
 }
 \keyword{internal}
