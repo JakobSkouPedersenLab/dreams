@@ -69,7 +69,7 @@ clean_insertions <- function(cigar) {
 #'   in each sequence of 'D's.
 #'
 #' @keywords internal
-get_positions_of_indels <- function(pos, cigar) {
+get_positions_indels <- function(pos, cigar) {
   expanded_cigar <- expand_cigar(cigar)
   cigar <- clean_insertions(expanded_cigar)
   # Find all matches for 'I's.
@@ -92,11 +92,75 @@ get_positions_of_indels <- function(pos, cigar) {
       }
     }
   }
-  # Return a list containing positions of 'I's and the specified 'D's
-  list(I_positions = I_positions + pos, D_positions = D_positions + pos)
+  # Return a list containing positions of 'I's and the specified 'D's. #
+  # Calculate the genomic positions of mismatches by adding the mismatch indices
+  # to the start position The `- 1` corrects the offset to match the genomic
+  # coordinate system
+  list(I_positions = I_positions + pos-1, D_positions = D_positions + pos-1)
 }
 
 
+
+#' Combine Positions of Insertions and Deletions
+#'
+#' @description This function identifies and combines the positions of
+#'   insertions ('I') and deletions ('D'). The positions are returned as a
+#'   single vector, calculated based on the start position of the CIGAR string
+#'   in the genome.
+#'
+#' @param pos Integer, the start position of the CIGAR string in the genome.
+#' @param cigar String, the CIGAR string representing genomic alignments.
+#'
+#' @return A numeric vector containing the combined positions of insertions and
+#'   deletions. Returns an empty vector if there are no insertions or deletions.
+#' @keywords internal
+#' @examples
+#' # Assuming you have a pos and a cigar string
+#' # pos <- 10
+#' # cigar <- "8M1I4M2D"
+#' # combined_positions <- combine_positions(pos, cigar)
+#'
+combine_positions <- function(pos, cigar) {
+  # Obtain the positions of insertions and deletions using the get_positions_of_indels function
+  positions <- get_positions_of_indels(pos, cigar)
+
+  # Combine the positions of 'I's and the first 'D' in each sequence of 'D's into a single vector
+  # and return this combined list of positions
+  c(positions$I_positions, positions$D_positions)
+}
+
+
+
+#' Extract indels positions from BAM data
+#'
+#' @description This function filters a dataframe for reads that contain indels
+#'   when compared to the reference genome, as indicated by the cigar string in
+#'   the BAM data. It then extracts the genomic positions of these mismatches,
+#'   providing a detailed account of where the sequencing reads do not match the
+#'   reference sequence.
+#'
+#' @param bam_df A dataframe obtained from the `load_BAM` function.
+#'
+#' @return A dataframe of mismatch positions, which includes the genomic
+#'   positions of all identified indels across the reads.
+#' @keywords internal
+#' @importFrom tidyr unnest
+extract_mismatch_positions_indels <- function(bam_df) {
+  mismatch_positions <-
+    bam_df %>%
+    # Get all reads with at least one mismatch
+    filter(str_detect(.data$cigar, "I|D")) %>%
+    # Select reads that have mismatches, which are indicated by the presence of
+    # base letters (ATCG) in the MD tag
+    mutate(
+      genomic_pos = get_minimum_position(pos = .data$pos, cigar = .data$cigar)
+    ) %>%
+    # Expand the list column so that each mismatch position has its own row in
+    # the dataframe.
+    unnest(.data$genomic_pos)
+
+  return(mismatch_positions)
+}
 
 
 
