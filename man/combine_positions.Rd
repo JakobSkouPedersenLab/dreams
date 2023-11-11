@@ -2,30 +2,30 @@
 % Please edit documentation in R/sequence_position_handling_indels.R
 \name{combine_positions}
 \alias{combine_positions}
-\title{Combine Positions of Insertions and Deletions}
+\title{Combine Positions from CIGAR Strings}
 \usage{
 combine_positions(pos, cigar)
 }
 \arguments{
-\item{pos}{Integer, the start position of the CIGAR string in the genome.}
+\item{pos}{A numeric vector representing positions.}
 
-\item{cigar}{String, the CIGAR string representing genomic alignments.}
+\item{cigar}{A character vector of CIGAR strings. Each CIGAR string
+corresponds to a position in \code{pos}. The length of \code{cigar} must match the
+length of \code{pos}.}
 }
 \value{
-A numeric vector containing the combined positions of insertions and
-deletions. Returns an empty vector if there are no insertions or deletions.
+A list where each element is a numeric vector. Each vector contains
+combined positions of 'I's and the first 'D' from each sequence of 'D's in
+the corresponding CIGAR string.
 }
 \description{
-This function identifies and combines the positions of
-insertions ('I') and deletions ('D'). The positions are returned as a
-single vector, calculated based on the start position of the CIGAR string
-in the genome.
+This function takes two vectors \code{pos} and \code{cigar}, and combines the positions
+of insertions ('I') and the first deletion ('D') in each sequence of 'D's from
+the CIGAR strings. It returns a list of combined positions for each pair of
+\code{pos} and \code{cigar}. The function relies on \code{get_positions_indels} to extract
+insertion and deletion positions from CIGAR strings.
 }
-\examples{
-# Assuming you have a pos and a cigar string
-# pos <- 10
-# cigar <- "8M1I4M2D"
-# combined_positions <- combine_positions(pos, cigar)
-
+\seealso{
+\code{\link{get_positions_indels}}
 }
 \keyword{internal}

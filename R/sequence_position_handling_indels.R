@@ -98,34 +98,40 @@ get_positions_indels <- function(pos, cigar) {
 }
 
 
-
-#' Combine Positions of Insertions and Deletions
+#' Combine Positions from CIGAR Strings
 #'
-#' @description This function identifies and combines the positions of
-#'   insertions ('I') and deletions ('D'). The positions are returned as a
-#'   single vector, calculated based on the start position of the CIGAR string
-#'   in the genome.
+#' This function takes two vectors `pos` and `cigar`, and combines the positions
+#' of insertions ('I') and the first deletion ('D') in each sequence of 'D's from
+#' the CIGAR strings. It returns a list of combined positions for each pair of
+#' `pos` and `cigar`. The function relies on `get_positions_indels` to extract
+#' insertion and deletion positions from CIGAR strings.
 #'
-#' @param pos Integer, the start position of the CIGAR string in the genome.
-#' @param cigar String, the CIGAR string representing genomic alignments.
+#' @param pos A numeric vector representing positions.
+#' @param cigar A character vector of CIGAR strings. Each CIGAR string
+#'   corresponds to a position in `pos`. The length of `cigar` must match the
+#'   length of `pos`.
 #'
-#' @return A numeric vector containing the combined positions of insertions and
-#'   deletions. Returns an empty vector if there are no insertions or deletions.
+#' @return A list where each element is a numeric vector. Each vector contains
+#'   combined positions of 'I's and the first 'D' from each sequence of 'D's in
+#'   the corresponding CIGAR string.
+#'
+#'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate
+#'
 #' @keywords internal
-#' @examples
-#' # Assuming you have a pos and a cigar string
-#' # pos <- 10
-#' # cigar <- "8M1I4M2D"
-#' # combined_positions <- combine_positions(pos, cigar)
-#'
+#' @seealso \code{\link{get_positions_indels}}
 combine_positions <- function(pos, cigar) {
-  # Obtain the positions of insertions and deletions using the
-  # get_positions_of_indels function
-  positions <- get_positions_indels(pos, cigar)
 
-  # Combine the positions of 'I's and the first 'D' in each sequence of 'D's
-  # into a single vector and return this combined list of positions
-  c(positions$I_positions, positions$D_positions)
+  combined_positions_list <- lapply(seq_along(pos), function(i) {
+    pos <- pos[i]
+    cigar <- cigar[i]
+
+    positions <- get_positions_indels(pos, cigar)
+
+    c(positions$I_positions, positions$D_positions)
+  })
+  return(combined_positions_list)
 }
 
 
@@ -135,8 +141,9 @@ combine_positions <- function(pos, cigar) {
 #' CIGAR string.
 #'
 #' @param cigar A character string representing a CIGAR string.
-#' @return A list containing two elements: `I_length` and `D_length`.
-#' Each element is a vector of numbers (as character strings) that appear before 'I' and 'D' in the CIGAR string.
+#' @return A list containing two elements: `I_length` and `D_length`. Each
+#'   element is a vector of numbers (as character strings) that appear before
+#'   'I' and 'D' in the CIGAR string.
 #' @keywords internal
 #' @importFrom stringr str_extract_all
 #'
@@ -153,47 +160,91 @@ extract_lengths_indels <- function(cigar) {
   list(I_length = I_length, D_length = D_length)
 }
 
-extract_lengths_insertions <- function(cigar){
+#' Extract Lengths of Insertions from CIGAR Strings
+#'
+#' @description
+#' This function processes a given CIGAR string and extracts the lengths of all
+#' insertion operations. It leverages the `extract_lengths_indels` function
+#' to parse the CIGAR string and isolate the lengths corresponding to insertions.
+#'
+#' @param cigar A character vector of CIGAR strings, each representing the alignment
+#'   of a single read in a BAM file.
+#'
+#' @return A numeric vector where each element represents the total length of
+#'   insertions in the corresponding CIGAR string.
+#' @keywords internal
+#' @seealso \code{\link{extract_lengths_indels}}
+#'
+extract_lengths_insertions <- function(cigar) {
+  # Extract lengths of insertions from the CIGAR string using
+  # the extract_lengths_indels function and return the result.
   return(extract_lengths_indels(cigar)$I_length)
 }
 
-extract_lengths_deletions <- function(cigar){
+#' Extract Lengths of Deletions from CIGAR Strings
+#'
+#' @description
+#' This function processes a given CIGAR string and extracts the lengths of all
+#' deletion operations. It utilizes the `extract_lengths_indels` function
+#' to parse the CIGAR string and isolate the lengths corresponding to deletions.
+#'
+#' @param cigar A character vector of CIGAR strings, each representing the alignment
+#'   of a single read in a BAM file.
+#'
+#' @return A numeric vector where each element represents the total length of
+#'   deletions in the corresponding CIGAR string.
+#' @keywords internal
+#' @seealso \code{\link{extract_lengths_indels}}
+#'
+extract_lengths_deletions <- function(cigar) {
+  # Extract lengths of deletions from the CIGAR string using
+  # the extract_lengths_indels function and return the result.
   return(extract_lengths_indels(cigar)$D_length)
 }
 
-
-
-
-#' Extract indels positions from BAM data
+#' Extract Indel Positions and lengths from BAM Data
 #'
-#' @description This function filters a dataframe for reads that contain indels
-#'   when compared to the reference genome, as indicated by the cigar string in
-#'   the BAM data. It then extracts the genomic positions of these indels,
-#'   providing a detailed account of where the sequencing reads do not match the
-#'   reference sequence.
+#' @description This function processes a dataframe obtained from `load_BAM`cto
+#' identify and extract the genomic positions of indels. It filters the
+#' dataframe for reads that contain indels, as indicated by the CIGAR string,
+#' and then calculates the precise genomic positions and length of these indels.
 #'
-#' @param bam_df A dataframe obtained from the `load_BAM` function.
+#' @param bam_df A dataframe obtained from the `load_BAM` function, containing
+#'   BAM data including fields for CIGAR strings and positions.
 #'
-#' @return A dataframe of indel positions, which includes the genomic
-#'   positions of all identified indels across the reads.
+#' @return A dataframe detailing the genomic positions of indels. This includes
+#'   columns for the positions of insertions and deletions and their respective
+#'   lengths.
+#'
 #' @keywords internal
+#'
 #' @importFrom tidyr unnest
-extract_mismatch_positions_indels <- function(bam_df) {
-  indels_positions <-
-    bam_df %>%
-    # Get all reads with at least one indel
-    filter(str_detect(.data$cigar, "I|D"))
-  # len_insertions <- unlist(lapply(indels_positions$cigar, extract_lengths_insertions))
-  indels_positions <- indels_positions %>%
-    # Select reads that have indels and provide the lengths.
-    mutate(genomic_pos = combine_positions(pos = .data$pos, cigar = .data$cigar)) %>%
-    # Expand the list column so that each mismatch position has its own row in
-    # the dataframe.
-    unnest(genomic_pos)
+#' @importFrom dplyr filter, mutate
+#' @importFrom stringr str_detect
+#'
+extract_indel_pos_len <- function(bam_df) {
+  # Filter to retain only reads with indels (based on CIGAR string)
+  indels_positions <- bam_df %>%
+    filter(str_detect(.data$cigar, "\\d+[ID]"))
 
+  # Extract lengths of insertions and deletions from the CIGAR string
+  len_insertions <- unlist(lapply(indels_positions$cigar, extract_lengths_insertions))
+  len_deletions <- unlist(lapply(indels_positions$cigar, extract_lengths_deletions))
+
+  # Add a column with genomic positions of indels
+  indels_positions <- indels_positions %>%
+    mutate(genomic_pos = combine_positions(pos = .data$pos, cigar = .data$cigar)) %>%
+    # Expand each list of genomic positions into individual rows
+    unnest(.data$genomic_pos)
+
+  # Add columns for lengths of insertions and deletions
+  indels_positions <- indels_positions %>%
+    mutate(len_insertions = len_insertions,
+           len_deletions = len_deletions)
 
   return(indels_positions)
 }
+
 
 
 
