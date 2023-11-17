@@ -1,26 +1,50 @@
-#' Title correct_pos_idx_w_cigar
+#' Adjust Position Indices in BAM Data with CIGAR Strings
 #'
-#' @param df dataframe_with_bam_data
-#' @return df
+#' @description This function takes a dataframe containing BAM file data and adjusts the position indices
+#' based on CIGAR strings. CIGAR strings in BAM files provide information about alignment of reads to the
+#' reference genome, including insertions, deletions, and padding. This function processes the CIGAR strings
+#' to correct the read positions accordingly, accounting for insertions (I), deletions (D), hard clips (H),
+#' and matches/mismatches (M). The adjusted position indices help in accurately mapping the reads back to
+#' the reference sequence.
+#'
+#' @param df A dataframe containing BAM file data, which must include a column for CIGAR strings and a column
+#' for position indices (`pos_idx`).
+#'
+#' @return A modified dataframe with corrected position indices accounting for CIGAR string operations.
+#' The dataframe also includes additional columns that detail the size and index of insertions and deletions,
+#' along with a logical column indicating whether a position is within a deletion.
+#'
 #' @keywords internal
+#'
+#' @importFrom dplyr mutate
 #' @importFrom rlang .data
 #' @importFrom purrr map pmap pmap_dbl pmap_lgl
 #' @importFrom stringr str_extract_all str_remove_all str_locate_all
+#'
 correct_pos_idx_w_cigar <- function(df) {
   df %>% mutate(
-    # Raw processing of CIGAR
-    cigar = str_remove_all(.data$cigar, pattern = "^[0-9]+[HD]"),
-    cigar = str_remove_all(.data$cigar, pattern = "[0-9]+[HD]$"),
+
+    # Extract numerical values from CIGAR strings and convert them to numeric
     cigar_pos = str_extract_all(string = .data$cigar, pattern = "\\d+(?=[HMID]+)") %>% lapply(as.numeric),
+
+    # Identify indices of insertions in CIGAR strings
     insert_idx = str_remove_all(string = .data$cigar, pattern = "[\\d]") %>%
       str_locate_all(pattern = "I") %>%
       map(function(x) x[, "start"]),
+
+    # Identify indices of deletions and hard clippings in CIGAR strings
     del_idx = .data$cigar %>%
       str_remove_all(pattern = "[\\d]") %>%
       str_locate_all(pattern = "[HD]") %>%
       map(function(x) x[, "start"]),
+
+    # Calculate sizes of insertions
     ind_sz = map2(.data$cigar_pos, .data$insert_idx, function(x, y) x[y]),
+
+    # Calculate sizes of deletions and hard clippings
     del_sz = map2(.data$cigar_pos, .data$del_idx, function(x, y) x[y]),
+
+    # Compute the read index for insertions
     insert_read_index =
       map2(
         .data$cigar_pos, .data$insert_idx,
@@ -29,6 +53,8 @@ correct_pos_idx_w_cigar <- function(df) {
           cumsum(cigar_pos)[insert_idx]
         }
       ),
+
+    # Compute the read index for deletions and hard clippings
     del_read_index = pmap(
       list(
         .data$cigar_pos,
@@ -40,7 +66,7 @@ correct_pos_idx_w_cigar <- function(df) {
         cumsum(cigar_pos)[del_idx]
       }
     ),
-    # Processing of read position
+    # Adjust position index for insertions
     ind_cor = pmap_dbl(
       list(
         .data$ind_sz,
@@ -51,6 +77,8 @@ correct_pos_idx_w_cigar <- function(df) {
         sum(ind_sz[insert_read_index < pos_idx])
       }
     ),
+
+    # Adjust position index for deletions and hard clippings
     del_cor = pmap_dbl(
       list(
         .data$del_sz,
@@ -61,6 +89,8 @@ correct_pos_idx_w_cigar <- function(df) {
         sum(del_sz[del_read_index < pos_idx])
       }
     ),
+
+    # Determine if the position is within a deletion range
     is_in_deletion = pmap_lgl(
       list(
         .data$del_sz,
@@ -71,10 +101,15 @@ correct_pos_idx_w_cigar <- function(df) {
         any((del_read_index - del_sz + 1 <= pos_idx) & (pos_idx <= del_read_index))
       }
     ),
+
+    # Preserve original position index for reference
     old_pos_idx = .data$pos_idx,
+
+    # Calculate the final adjusted position index
     pos_idx = .data$pos_idx + .data$ind_cor - .data$del_cor
   )
 }
+
 
 #' Get list of genomic positions with mismatches
 #'
@@ -216,6 +251,7 @@ sample_negative_read_positions <- function(bam_df, n_samples) {
 #'   positions of all identified mismatches across the reads.
 #' @keywords internal
 #' @importFrom tidyr unnest
+#' @importFrom dplyr filter
 extract_mismatch_positions <- function(bam_df) {
   mismatch_positions <-
     bam_df %>%

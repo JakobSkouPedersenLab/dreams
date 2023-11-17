@@ -12,13 +12,13 @@ BAM data including fields for CIGAR strings and positions.}
 }
 \value{
 A dataframe detailing the genomic positions of indels. This includes
-columns for the positions of insertions and deletions and their respective
-lengths.
+columns for the positions of indels and their respective
+lengths and base composition.
 }
 \description{
 This function processes a dataframe obtained from \code{load_BAM}cto
 identify and extract the genomic positions of indels. It filters the
 dataframe for reads that contain indels, as indicated by the CIGAR string,
-and then calculates the precise genomic positions and length of these indels.
+and then calculates the precise genomic positions, length and bases of these indels.
 }
 \keyword{internal}

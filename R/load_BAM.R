@@ -66,6 +66,7 @@ load_BAM <- function(BamPath, chr = NULL, pos = NULL) {
       genomic_pos <- as.numeric(as.character(str_extract(names(bam[i]), "[0-9]*$")))
       bam[[i]]$genomic_pos <- rep(genomic_pos, length(bam[[i]]$rname))
     }
+
   }
 
   # Combine the list of tibbles into one data frame, tidying up the column names in the process.

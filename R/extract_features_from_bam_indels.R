@@ -1,49 +1,3 @@
-#' Calculate Shannon Entropy for K-mers in a String
-#'
-#' @description This function computes the Shannon entropy for all possible k-mers within a given string.
-#' Shannon entropy is a measure of the unpredictability of the k-mer composition, with higher
-#' values indicating more diversity. This function is useful in bioinformatics for analyzing the
-#' complexity of sequences.
-#'
-#' @param s A string for which the Shannon entropy is to be calculated.
-#' @param k The size of the k-mers (substrings of length k) to be considered for entropy calculation.
-#' The default value is 2.
-#' @param alphabet A vector of characters representing the possible nucleotides or readings in the string.
-#' The default set includes "A", "C", "G", "T", "N".
-#'
-#' @return Returns a numeric value representing the Shannon entropy of the k-mers in the string.
-#' This entropy value is a measure of the randomness or diversity of k-mer composition.
-#' @keywords internal
-#'
-#' @importFrom stringi stri_count_fixed
-#' @importFrom stats setNames
-#' @importFrom base apply
-#' @importFrom base c
-#' @importFrom base expand.grid
-#' @importFrom base log10
-#' @importFrom base nchar
-#' @importFrom base rowSums
-#' @importFrom dplyr %>%
-calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
-
-  # Generate k-mers
-  alphabet_k_rep_list <- rep(list(alphabet), k)
-  k_mer_df <- expand.grid(alphabet_k_rep_list)
-  k_mer_vec <- apply(k_mer_df, 1, paste0, collapse = "")
-
-  s_length <- nchar(s) - (k - 1)
-
-  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
-
-  freq_mat <- t(count_mat) / s_length
-
-
-
-  # Shannon entropy
-  H <- -rowSums(freq_mat * log10(freq_mat), na.rm = TRUE)
-
-  return(as.numeric(H))
-}
 
 
 #' Extract Features from BAM Data
@@ -58,18 +12,19 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 #' @importFrom purrr map2_int
 #'
 #'
-extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
+extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
 
   # If UMI features are asked for but not present
   if (add_umi_features & !all(c("cd", "ce") %in% colnames(bam_df))) {
     stop("UMI features (ce and cd) are not available in bam_df!")
   }
-
+  # Return an empty dataframe if the input dataframe has no rows
   if (nrow(bam_df) == 0) {
     return(data.frame())
   }
 
-  # Make genomic position features
+  # Create genomic position features by selecting distinct chromosomes, positions, and strands
+  # and calculating various genomic features such as local complexity and GC content
   genomic_pos_feature_df <-
     distinct(
       base::data.frame(
@@ -95,7 +50,7 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
       trinucleotide_ctx = paste0(.data$ctx_minus1, .data$ref, .data$ctx_plus1)
     )
 
-  # Make read specific features
+  # Create read-specific features from the BAM data, adjusting for insertions, deletions, and errors
   read_feature_df <-
     bam_df %>%
     mutate(
@@ -119,14 +74,15 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
     # TODO: Move to filter function! Or do before calling this function!
     filter(.data$fragment_size != 0)
 
-  # Features for output
+  # Define the features to be included in the output
   selected_features <-
     c(
       "qname", "chr", "genomic_pos", "obs", "ref",
       "strand", "first_in_pair", "read_index", "fragment_size",
       "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
       "local_complexity_1", "local_complexity_2", "local_GC",
-      "n_other_errors", "n_insertions_in_read", "n_deletions_in_read", "seq_length"
+      "n_other_errors", "n_insertions_in_read", "n_deletions_in_read",
+      "len_insertions", "len_deletions", "str_insertion", "str_deletion", "seq_length"
     )
 
   # Add UMI features if asked
@@ -154,22 +110,6 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
   return(feature_df)
 }
 
-#' Get reference sequence
-#'
-#' @param chr chromosome
-#' @param genomic_pos genomic_position
-#' @param buffer how many neighbors to include
-#' @param reference_path reference genome fa
-#'
-#' @importFrom Rsamtools FaFile getSeq
-#' @keywords internal
 
-get_reference_seq <- function(chr, genomic_pos, buffer, reference_path) {
-  FaFile <- FaFile(reference_path)
-
-  Fa <- getSeq(FaFile, param = GRanges(chr, IRanges(genomic_pos - buffer, genomic_pos + buffer)))
-
-  return(as.character(Fa, use.names = FALSE))
-}
 
 

@@ -207,19 +207,20 @@ extract_lengths_deletions <- function(cigar) {
 #' @description This function processes a dataframe obtained from `load_BAM`cto
 #' identify and extract the genomic positions of indels. It filters the
 #' dataframe for reads that contain indels, as indicated by the CIGAR string,
-#' and then calculates the precise genomic positions and length of these indels.
+#' and then calculates the precise genomic positions, length and bases of these indels.
 #'
 #' @param bam_df A dataframe obtained from the `load_BAM` function, containing
 #'   BAM data including fields for CIGAR strings and positions.
 #'
 #' @return A dataframe detailing the genomic positions of indels. This includes
-#'   columns for the positions of insertions and deletions and their respective
-#'   lengths.
+#'   columns for the positions of indels and their respective
+#'   lengths and base composition.
 #'
 #' @keywords internal
 #'
 #' @importFrom tidyr unnest
-#' @importFrom dplyr filter, mutate
+#' @importFrom dplyr filter
+#' @importFrom dplyr mutate
 #' @importFrom stringr str_detect
 #'
 extract_indel_pos_len <- function(bam_df) {
@@ -238,11 +239,15 @@ extract_indel_pos_len <- function(bam_df) {
     unnest(.data$genomic_pos)
 
   # Add columns for lengths of insertions and deletions
-  indels_positions <- indels_positions %>%
+  indels_len <- indels_positions %>%
     mutate(len_insertions = len_insertions,
            len_deletions = len_deletions)
 
-  return(indels_positions)
+  indels_str <- indels_len %>%
+    mutate(str_insertion = substring(.data$seq, .data$genomic_pos + 1 - .data$pos, .data$genomic_pos - .data$pos + .data$len_insertions),
+           str_deletion = substring(.data$seq, .data$genomic_pos + 1 - .data$pos, .data$genomic_pos - .data$pos + .data$len_deletions))
+
+  return(indels_str)
 }
 
 
