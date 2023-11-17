@@ -60,8 +60,8 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     mutate(
       obs = ifelse(
         .data$is_in_deletion,
-        "N",
-        substring(.data$seq, .data$pos_idx, .data$pos_idx)
+        "D",
+        "I"
       ),
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
