@@ -116,11 +116,11 @@ get_positions_indels <- function(pos, cigar) {
 #'   the corresponding CIGAR string.
 #'
 #'
-#' @importFrom magrittr %>%
+#' @importFrom dplyr %>%
 #' @importFrom dplyr mutate
 #'
 #' @keywords internal
-#' @seealso \code{\link{get_positions_indels}}
+#'
 combine_positions <- function(pos, cigar) {
 
   combined_positions_list <- lapply(seq_along(pos), function(i) {
@@ -173,7 +173,6 @@ extract_lengths_indels <- function(cigar) {
 #' @return A numeric vector where each element represents the total length of
 #'   insertions in the corresponding CIGAR string.
 #' @keywords internal
-#' @seealso \code{\link{extract_lengths_indels}}
 #'
 extract_lengths_insertions <- function(cigar) {
   # Extract lengths of insertions from the CIGAR string using

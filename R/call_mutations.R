@@ -237,7 +237,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
 #'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
 #' }
-#'
+#' @import foreach
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export

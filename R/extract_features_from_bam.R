@@ -17,12 +17,6 @@
 #'
 #' @importFrom stringi stri_count_fixed
 #' @importFrom stats setNames
-#' @importFrom base apply
-#' @importFrom base c
-#' @importFrom base expand.grid
-#' @importFrom base log10
-#' @importFrom base nchar
-#' @importFrom base rowSums
 #' @importFrom dplyr %>%
 calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
 

@@ -19,7 +19,4 @@ This function processes a given CIGAR string and extracts the lengths of all
 insertion operations. It leverages the \code{extract_lengths_indels} function
 to parse the CIGAR string and isolate the lengths corresponding to insertions.
 }
-\seealso{
-\code{\link{extract_lengths_indels}}
-}
 \keyword{internal}

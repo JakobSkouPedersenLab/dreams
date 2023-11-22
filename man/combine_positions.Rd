@@ -25,7 +25,4 @@ the CIGAR strings. It returns a list of combined positions for each pair of
 \code{pos} and \code{cigar}. The function relies on \code{get_positions_indels} to extract
 insertion and deletion positions from CIGAR strings.
 }
-\seealso{
-\code{\link{get_positions_indels}}
-}
 \keyword{internal}
