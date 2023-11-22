@@ -2,21 +2,27 @@
 % Please edit documentation in R/extract_features_from_bam.R
 \name{calc_string_entropy_k_mer}
 \alias{calc_string_entropy_k_mer}
-\title{Title}
+\title{Calculate Shannon Entropy for K-mers in a String}
 \usage{
 calc_string_entropy_k_mer(s, k = 2, alphabet = c("A", "C", "G", "T", "N"))
 }
 \arguments{
-\item{s}{string}
+\item{s}{A string for which the Shannon entropy is to be calculated.}
 
-\item{k}{kmer size}
+\item{k}{The size of the k-mers (substrings of length k) to be considered for entropy calculation.
+The default value is 2.}
 
-\item{alphabet}{possible readings}
+\item{alphabet}{A vector of characters representing the possible nucleotides or readings in the string.
+The default set includes "A", "C", "G", "T", "N".}
 }
 \value{
-shannon entropy
+Returns a numeric value representing the Shannon entropy of the k-mers in the string.
+This entropy value is a measure of the randomness or diversity of k-mer composition.
 }
 \description{
-Title
+This function computes the Shannon entropy for all possible k-mers within a given string.
+Shannon entropy is a measure of the unpredictability of the k-mer composition, with higher
+values indicating more diversity. This function is useful in bioinformatics for analyzing the
+complexity of sequences.
 }
 \keyword{internal}

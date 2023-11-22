@@ -2,17 +2,25 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{correct_pos_idx_w_cigar}
 \alias{correct_pos_idx_w_cigar}
-\title{Title correct_pos_idx_w_cigar}
+\title{Adjust Position Indices in BAM Data with CIGAR Strings}
 \usage{
 correct_pos_idx_w_cigar(df)
 }
 \arguments{
-\item{df}{dataframe_with_bam_data}
+\item{df}{A dataframe containing BAM file data, which must include a column for CIGAR strings and a column
+for position indices (\code{pos_idx}).}
 }
 \value{
-df
+A modified dataframe with corrected position indices accounting for CIGAR string operations.
+The dataframe also includes additional columns that detail the size and index of insertions and deletions,
+along with a logical column indicating whether a position is within a deletion.
 }
 \description{
-Title correct_pos_idx_w_cigar
+This function takes a dataframe containing BAM file data and adjusts the position indices
+based on CIGAR strings. CIGAR strings in BAM files provide information about alignment of reads to the
+reference genome, including insertions, deletions, and padding. This function processes the CIGAR strings
+to correct the read positions accordingly, accounting for insertions (I), deletions (D), hard clips (H),
+and matches/mismatches (M). The adjusted position indices help in accurately mapping the reads back to
+the reference sequence.
 }
 \keyword{internal}
