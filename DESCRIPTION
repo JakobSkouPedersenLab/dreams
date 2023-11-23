@@ -31,7 +31,6 @@ Imports:
     readr,
     rlang,
     Rsamtools,
-    stringi,
     stringr,
     tibble,
     tidyr,

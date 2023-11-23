@@ -15,8 +15,6 @@
 #' This entropy value is a measure of the randomness or diversity of k-mer composition.
 #' @keywords internal
 #'
-#' @importFrom stringi stri_count_fixed
-#' @importFrom stats setNames
 #' @importFrom dplyr %>%
 calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
 
@@ -27,9 +25,30 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 
   s_length <- nchar(s) - (k - 1)
 
-  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
+  count_occurrences <- function(patterns, in_strings) {
+    counts_list <- lapply(in_strings, function(in_string) {
+      sapply(patterns, function(pattern) {
+        pattern_length <- nchar(pattern)
+        num_matches <- 0
+        for (i in 1:(nchar(in_string) - pattern_length + 1)) {
+          substring <- substr(in_string, i, i + pattern_length - 1)
+          if (substring == pattern) {
+            num_matches <- num_matches + 1
+          }
+        }
+        num_matches
+      })
+    })
+    counts_matrix <- do.call(cbind, counts_list)
+    colnames(counts_matrix) <- in_strings
+    return(counts_matrix)
+  }
 
-  freq_mat <- t(count_mat) / s_length
+  count_mat_matrix <- count_occurrences(k_mer_vec, s)
+
+  print(count_mat_matrix)
+
+  freq_mat <- t(count_mat_matrix) / s_length
 
 
 
