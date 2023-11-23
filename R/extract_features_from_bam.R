@@ -46,8 +46,6 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 
   count_mat_matrix <- count_occurrences(k_mer_vec, s)
 
-  print(count_mat_matrix)
-
   freq_mat <- t(count_mat_matrix) / s_length
 
 
