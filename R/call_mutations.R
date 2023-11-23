@@ -34,7 +34,7 @@
 #'
 #' @import parallel
 #' @import doParallel
-#'
+#' @importFrom foreach %dopar%
 #' @export
 
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,

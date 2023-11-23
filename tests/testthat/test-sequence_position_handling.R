@@ -204,7 +204,7 @@ test_that("simple examples 3 with hardclips", {
   # SEQ: T-T
   ex1 <- data.frame(
     pos_idx = 1:3,
-    cigar = "3H1M1D1M"
+    cigar = "1M1D1M"
   )
 
   res1 <- ex1 %>% correct_pos_idx_w_cigar()
@@ -230,7 +230,7 @@ test_that("simple examples 3 with hardclips", {
   # SEQ: TAA-TTT
   ex3 <- data.frame(
     pos_idx = 1:5,
-    cigar = "3H1M2I1D3M3H"
+    cigar = "1M2I1D3M"
   )
 
   res3 <- ex3 %>% correct_pos_idx_w_cigar()
@@ -243,7 +243,7 @@ test_that("simple examples 3 with hardclips", {
   # SEQ: TAA-TTT
   ex4 <- data.frame(
     pos_idx = 1:5,
-    cigar = "3H1M2I1H3M3H"
+    cigar = "1M2I1H3M"
   )
 
   res4 <- ex4 %>% correct_pos_idx_w_cigar()
