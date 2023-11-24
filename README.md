@@ -25,13 +25,14 @@ You can install the development version of dreams from
 
 ``` r
 # install.packages("devtools")
+# install.packages("keras")
+# keras::install_keras()
 devtools::install_github("JakobSkouPedersenLab/dreams")
 ```
 
 ## Basic functions
 
 ``` r
-
 library(dreams)
 
 # For training, data DREAMS requires one or more bam-files
