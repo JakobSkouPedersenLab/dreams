@@ -40,7 +40,8 @@ Imports:
     parallel,
     doParallel,
     foreach,
-    turboEM
+    turboEM,
+    reticulate
 Suggests: 
     knitr,
     covr,
