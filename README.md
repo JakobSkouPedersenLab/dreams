@@ -25,10 +25,39 @@ You can install the development version of dreams from
 
 ``` r
 # install.packages("devtools")
-# install.packages("keras")
-# keras::install_keras()
 devtools::install_github("JakobSkouPedersenLab/dreams")
 ```
+
+### Additional setup (If needed)
+
+If you encounter any issues related to TensorFlow integrations within R,
+follow these steps to ensure a proper setup:
+
+1.  **Specify Python Environment**: Use the `reticulate` package to
+    specify the Python environment for R. Replace `<ENVIRONMENT_NAME>`
+    with your Python environment name.
+
+    ``` r
+    reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
+    ```
+
+2.  **Install Keras within the Correct Environment**: Install Keras in
+    the specified Python environment.
+
+    ``` r
+    keras::install_keras(envname = "<ENVIRONMENT_NAME>")
+    ```
+
+### Usage
+
+After installation, follow these steps at the start of each R session:
+
+1.  **Set the Correct Environment**: Use `reticulate` to set the Python
+    environment.
+
+    ``` r
+    reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
+    ```
 
 ## Basic functions
 
