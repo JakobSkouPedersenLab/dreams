@@ -70,33 +70,17 @@ clean_insertions <- function(cigar) {
 get_positions_indels <- function(pos, cigar) {
   expanded_cigar <- expand_cigar(cigar)
   cigar <- clean_insertions(expanded_cigar)
-  # Find all matches for 'I's.
-  I_positions <- gregexpr("I", cigar)
-  # Convert the positions to a list of more readable numbers (1-based indices).
-  I_positions <- unlist(I_positions)
-  # Remove the -1 values which indicate no match found.
+
+  # Find all start positions of insertions
+  I_positions <- as.numeric(unlist(gregexpr("I+", cigar, perl = TRUE)))
   I_positions <- I_positions[I_positions != -1]
 
-  # Initialize an empty vector to store the indexes for D's.
-  D_positions <- c()
-  # Loop through the string
-  for (i in seq(nchar(cigar))) {
-    # Check if the character is 'D'
-    if (substr(cigar, i, i) == "D") {
-      # Check if it's the start of a 'D' sequence or if the previous character
-      # is not a 'D'
-      if (i == 1 || substr(cigar, i - 1, i - 1) != "D") {
-        D_positions <- c(D_positions, i)
-      }
-    }
-  }
-  # Return a list containing positions of 'I's and the specified 'D's. #
-  # Calculate the genomic positions of mismatches by adding the mismatch indices
-  # to the start position The `- 1` corrects the offset to match the genomic
-  # coordinate system
+  # Find start positions of deletions
+  D_positions <- as.numeric(unlist(gregexpr("D+", cigar, perl = TRUE)))
+  D_positions <- D_positions[D_positions != -1]
+  # Return a list containing positions of 'I's and 'D's.
   list(I_positions = I_positions + pos-1, D_positions = D_positions + pos-1)
 }
-
 
 #' Combine Positions from CIGAR Strings
 #'
@@ -128,6 +112,7 @@ combine_positions <- function(pos, cigar) {
     cigar <- cigar[i]
 
     positions <- get_positions_indels(pos, cigar)
+
 
     c(positions$I_positions, positions$D_positions)
   })
