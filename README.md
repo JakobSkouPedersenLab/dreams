@@ -86,7 +86,7 @@ model = train_dreams_model(
   batch_size = 10000,
   epochs = 100,
   ...)
-  
+
 
 # Call variants using DREAMS-vc
 
@@ -107,6 +107,27 @@ cancer_calls = dreams_cc(
   beta = beta,
   model = model,
   ...)
+```
+
+### Saving and Loading Models
+
+You can save your trained models for later use and load them as needed.
+This is especially useful for reusing models without the need to retrain
+them. Below are the steps to save and load models using the `keras`
+package in R.
+
+To save a trained model, use the `save_model_hdf5` function from the
+`keras` package. Specify the file path where you want to save the model.
+To load a previously saved model, use the load_model_hdf5 function.
+
+``` r
+library(keras)
+
+# Save the model
+save_model_hdf5(model, filepath = "path/to/your_model.h5", overwrite = TRUE, include_optimizer = TRUE)
+
+# Load the model
+loaded_model <- load_model_hdf5(filepath = "path/to/your_model.h5", custom_objects = NULL, compile = TRUE)
 ```
 
 ## About DREAMS
