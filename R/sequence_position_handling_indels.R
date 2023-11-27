@@ -73,11 +73,13 @@ get_positions_indels <- function(pos, cigar) {
 
   # Find all start positions of insertions
   I_positions <- as.numeric(unlist(gregexpr("I+", cigar, perl = TRUE)))
-  I_positions <- I_positions[I_positions != -1]
+  # Filter out all values smaller than 1
+  I_positions <- I_positions[I_positions >= 1]
 
   # Find start positions of deletions
   D_positions <- as.numeric(unlist(gregexpr("D+", cigar, perl = TRUE)))
-  D_positions <- D_positions[D_positions != -1]
+  # Filter out all values smaller than 1
+  D_positions <- D_positions[D_positions >= 1]
   # Return a list containing positions of 'I's and 'D's.
   list(I_positions = I_positions + pos-1, D_positions = D_positions + pos-1)
 }
