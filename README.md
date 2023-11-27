@@ -33,16 +33,13 @@ devtools::install_github("JakobSkouPedersenLab/dreams")
 If you encounter any issues related to TensorFlow integrations within R,
 follow these steps to ensure a proper setup:
 
-1.  **Specify Python Environment**: Use the `reticulate` package to
-    specify the Python environment for R. Replace `<ENVIRONMENT_NAME>`
-    with your Python environment name.
+1.  **Specify Python Environment**:
 
     ``` r
     reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
     ```
 
-2.  **Install Keras within the Correct Environment**: Install Keras in
-    the specified Python environment.
+2.  **Install Keras within the Correct Environment**:
 
     ``` r
     keras::install_keras(envname = "<ENVIRONMENT_NAME>")
@@ -50,10 +47,9 @@ follow these steps to ensure a proper setup:
 
 ### Usage
 
-After installation, follow these steps at the start of each R session:
+After installation, set the environment at the start of each R session:
 
-1.  **Set the Correct Environment**: Use `reticulate` to set the Python
-    environment.
+1.  **Set the Correct Environment**:
 
     ``` r
     reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
@@ -112,10 +108,6 @@ cancer_calls = dreams_cc(
 ### Saving and Loading Models
 
 You can save your trained models for later use and load them as needed.
-This is especially useful for reusing models without the need to retrain
-them. Below are the steps to save and load models using the `keras`
-package in R.
-
 To save a trained model, use the `save_model_hdf5` function from the
 `keras` package. Specify the file path where you want to save the model.
 To load a previously saved model, use the load_model_hdf5 function.
