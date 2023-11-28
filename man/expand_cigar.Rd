@@ -17,8 +17,6 @@ full sequence of alignment operations. For example, '2M1I' would expand to
 }
 \description{
 This function expands a condensed CIGAR string into a sequence
-of operations. It removes operations at the beginning and end of the string
-that represent hard clipping ('H') and deletions ('D'), as these do not
-contribute to the alignment sequence.
+of operations.
 }
 \keyword{internal}

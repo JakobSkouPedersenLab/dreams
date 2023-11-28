@@ -57,12 +57,8 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       pos_idx = .data$genomic_pos - .data$pos + 1
     ) %>%
     correct_pos_idx_w_cigar() %>%
-    mutate(
-      obs = ifelse(
-        .data$is_in_deletion,
-        "D",
-        "I"
-      ),
+    mutate(obs = .data$indel_type,
+      pos_index = .data$genomic_pos - .data$pos + 1,
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
       read_index = if_else(.data$strand == "fwd", .data$pos_idx, .data$seq_length - .data$pos_idx + 1),
@@ -82,16 +78,17 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
       "local_complexity_1", "local_complexity_2", "local_GC",
       "n_other_errors", "n_insertions_in_read", "n_deletions_in_read",
-      "len_insertions", "len_deletions", "str_insertion", "str_deletion", "seq_length"
+      "indel_length", "indel_seq", "seq_length"
     )
+
 
   # Add UMI features if asked
   if (add_umi_features) {
     read_feature_df <-
       read_feature_df %>%
       mutate(
-        umi_count = map2_int(.data$cd, .data$pos_idx, function(cd, pos_idx) cd[pos_idx]),
-        umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx])
+        umi_count = map2_int(.data$cd, .data$pos_index, function(cd, pos_index) cd[pos_index]),
+        umi_errors = map2_int(.data$ce, .data$pos_index, function(ce, pos_index) ce[pos_index])
       )
 
     # Add UMI features to selection
