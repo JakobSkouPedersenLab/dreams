@@ -31,29 +31,20 @@ devtools::install_github("JakobSkouPedersenLab/dreams")
 ### Additional setup (If needed)
 
 If you encounter any issues related to TensorFlow integrations within R,
-follow these steps to ensure a proper setup:
+install Keras within the correct python environment to ensure a proper
+setup:
 
-1.  **Specify Python Environment**:
-
-    ``` r
-    reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
-    ```
-
-2.  **Install Keras within the Correct Environment**:
-
-    ``` r
-    keras::install_keras(envname = "<ENVIRONMENT_NAME>")
-    ```
+``` r
+keras::install_keras(envname = "<ENVIRONMENT_NAME>")
+```
 
 ### Usage
 
 After installation, set the environment at the start of each R session:
 
-1.  **Set the Correct Environment**:
-
-    ``` r
-    reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
-    ```
+``` r
+reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
+```
 
 ## Basic functions
 
