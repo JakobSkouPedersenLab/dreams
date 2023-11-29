@@ -4,14 +4,15 @@
 \alias{clean_insertions}
 \title{Clean Insertions in CIGAR Sequence}
 \usage{
-clean_insertions(cigar)
+clean_insertions(expanded_cigar)
 }
 \arguments{
-\item{cigar}{A string representing the sequence output from expand_cigar.}
+\item{expanded_cigar}{A string representing the sequence output from
+expand_cigar.}
 }
 \value{
 A string of the CIGAR sequence after cleaning up the insertion
-operations.
+operations. For example, 'MMDDIMMII' would be to MMDDMI'.
 }
 \description{
 This function adjusts the sequence of CIGAR operations by

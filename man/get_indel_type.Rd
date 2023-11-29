@@ -12,11 +12,11 @@ get_indel_type(pos, cigar)
 \item{cigar}{String, the CIGAR string representing genomic alignments.}
 }
 \value{
-A character vector containing the types of indels (either 'I' for insertions or 'D' for deletions)
-in the CIGAR string.
+A character vector containing the types of indels (either 'I' for
+insertions or 'D' for deletions) in the CIGAR string.
 }
 \description{
-This function utilizes \code{get_indel_info} to determine the types
-of indels in a given CIGAR string.
+This function utilizes \code{get_indel_info} to determine the types of indels in a
+given CIGAR string.
 }
 \keyword{internal}

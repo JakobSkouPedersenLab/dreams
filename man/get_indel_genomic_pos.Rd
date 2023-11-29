@@ -7,15 +7,18 @@
 get_indel_genomic_pos(pos, cigar)
 }
 \arguments{
-\item{pos}{Integer, the starting genomic position for the CIGAR string analysis.}
+\item{pos}{Integer, the starting genomic position for the CIGAR string
+analysis.}
 
 \item{cigar}{String, the CIGAR string representing genomic alignments.}
 }
 \value{
-An integer vector containing the genomic positions of the indels in the CIGAR string.
+An integer vector containing the genomic positions of the indels in
+the CIGAR string.
 }
 \description{
-This function uses the \code{get_indel_info} function to extract the genomic positions of
-indels from a given CIGAR string, starting from a specified genomic position.
+This function uses the \code{get_indel_info} function to extract the genomic
+positions of indels from a given CIGAR string, starting from a specified
+genomic position.
 }
 \keyword{internal}

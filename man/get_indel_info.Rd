@@ -2,22 +2,25 @@
 % Please edit documentation in R/sequence_position_handling_indels.R
 \name{get_indel_info}
 \alias{get_indel_info}
-\title{Extract Indel Information from a CIGAR String}
+\title{Extract Indel Information from CIGAR String and Genomic Position}
 \usage{
 get_indel_info(pos, cigar)
 }
 \arguments{
-\item{pos}{Integer, the starting genomic position of the CIGAR string.}
+\item{pos}{An integer representing the starting genomic position of the CIGAR
+string.}
 
-\item{cigar}{String, the CIGAR string representing genomic alignments.}
+\item{cigar}{A character string representing the CIGAR format.}
 }
 \value{
-A list containing three elements: \code{genomic_pos} ,
-\code{indel_length}, and \code{indel_type} .
+A list containing the following elements:
+- \code{genomic_pos}: An integer vector of the genomic positions of the indels.
+- \code{indel_length}: An integer vector of the lengths of the indels.
+- \code{indel_type}: A character vector of the types of the indels
+(either 'I' for insertion or 'D' for deletion).
 }
 \description{
-This function takes a genomic position and a CIGAR string as input and extracts
-information about indels present in the CIGAR string.
-It returns the genomic positions, lengths, and types of these indels.
+This function takes a genomic position and a CIGAR string as input and
+extracts information about indels. It processes the CIGAR string to determine
+the genomic positions, lengths, and indel type.
 }
-\keyword{internal}
