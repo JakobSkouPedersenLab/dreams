@@ -104,7 +104,7 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
   bam_df <- load_BAM(bam_path)
 
   # Add genomic positions of mismatches
-  mismatch_bam_df <- extract_mismatch_positions(bam_df)
+  mismatch_bam_df <- extract_indel_info(bam_df)
 
   # Add features
   mismatch_positions_df <-
@@ -242,34 +242,4 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   ))
 }
 
-#' Convert a BED File to a GRanges Object
-#'
-#' This function reads a BED file and converts it into a GRanges object. BED files typically contain genomic intervals
-#' (like regions of the genome associated with certain features or annotations) and are formatted in a specific way.
-#' The function adjusts for the zero-based indexing of BED format to the one-based indexing used in GRanges.
-#'
-#' @param bed_pathA A string specifying the path to the BED file to be converted.
-#' @return A GRanges object representing the genomic intervals from the BED file.
-#' @keywords internal
-#' @importFrom GenomicRanges makeGRangesFromDataFrame
-#' @importFrom dplyr mutate
-#'
-bed_to_granges <- function(bed_path) {
-  # Check for a null input and return an empty GRanges object if true
-  if (is.null(bed_path)) {
-    return(GRanges())
-  }
 
-  # Read the BED file with specified column names and delimiter
-  # Automatically adjust for BED's zero-based start position
-
-  df <- readr::read_delim(bed_path, delim = "\t", col_names = c("chrom", "start", "end"),
-                          show_col_types = FALSE) %>%
-    mutate(start = .data$start + 1) # Adjust start positions to 1-based indexing
-
-  # Convert the dataframe to a GRanges object
-  grange_from_bed <- makeGRangesFromDataFrame(df, start.field = "start",
-                                              end.field = c("end", "stop"))
-  # Return the constructed GRanges object
-  return(grange_from_bed)
-}
