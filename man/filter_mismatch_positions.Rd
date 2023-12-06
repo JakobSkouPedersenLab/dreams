@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_training_data.R
 \name{filter_mismatch_positions}
 \alias{filter_mismatch_positions}
-\title{Title}
+\title{Filter Mismatch Positions in Sequencing Data}
 \usage{
 filter_mismatch_positions(
   read_positions,
@@ -13,20 +13,20 @@ filter_mismatch_positions(
 )
 }
 \arguments{
-\item{read_positions}{dataframe of read positions}
+\item{read_positions}{A dataframe containing positions of reads (fx df obtained from extract_features_from_bam()) . Each row should represent a unique read position with relevant information such as observed nucleotides.}
 
-\item{bam_file}{bam file path}
+\item{bam_file}{A string specifying the path to a BAM file.}
 
-\item{mm_rate_max}{maximum mm_rate for positions}
+\item{mm_rate_max}{A numeric value representing the maximum mismatch rate allowed for positions. Defaults to 1. Positions with a mismatch rate higher than this threshold will be excluded.}
 
-\item{bed_include_path}{bed regions to include in training data}
+\item{bed_include_path}{An optional string specifying the path to a BED file that contains genomic regions to include in the analysis. If \code{NULL}, all regions are included.}
 
-\item{positions_to_exclude_paths}{positions to exclude from training}
+\item{positions_to_exclude_paths}{An optional vector of strings specifying paths to files containing positions that should be excluded from the analysis. If \code{NULL}, no positions are excluded.}
 }
 \value{
-filtered read position dataframe
+A list with two elements: \code{data} containing the filtered read positions dataframe, and \code{info} containing a dataframe with summary information such as the number of mismatches and total coverage.
 }
 \description{
-Title
+This function filters read positions from sequencing data based on mismatch rates and specific genomic regions. It is designed to process data from BAM files and can include or exclude specific regions and positions as needed.
 }
 \keyword{internal}

@@ -158,17 +158,20 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
 
 
-#' Title
+#' Filter Mismatch Positions in Sequencing Data
 #'
-#' @param read_positions dataframe of read positions
-#' @param bam_file bam file path
-#' @param mm_rate_max maximum mm_rate for positions
-#' @param bed_include_path bed regions to include in training data
-#' @param positions_to_exclude_paths positions to exclude from training
+#' This function filters read positions from sequencing data based on mismatch rates and specific genomic regions. It is designed to process data from BAM files and can include or exclude specific regions and positions as needed.
+#'
+#' @param read_positions A dataframe containing positions of reads (fx df obtained from extract_features_from_bam()) . Each row should represent a unique read position with relevant information such as observed nucleotides.
+#' @param bam_file A string specifying the path to a BAM file.
+#' @param mm_rate_max A numeric value representing the maximum mismatch rate allowed for positions. Defaults to 1. Positions with a mismatch rate higher than this threshold will be excluded.
+#' @param bed_include_path An optional string specifying the path to a BED file that contains genomic regions to include in the analysis. If `NULL`, all regions are included.
+#' @param positions_to_exclude_paths An optional vector of strings specifying paths to files containing positions that should be excluded from the analysis. If `NULL`, no positions are excluded.
 #' @keywords internal
 #'
-#' @return filtered read position dataframe
+#' @return A list with two elements: `data` containing the filtered read positions dataframe, and `info` containing a dataframe with summary information such as the number of mismatches and total coverage.
 #'
+#' @importFrom Rsamtools pileup
 #' @importFrom readr read_csv
 
 filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {

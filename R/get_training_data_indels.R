@@ -1,5 +1,5 @@
 
-#' Extract training data from BAM files
+#' Extract training data from BAM files (indel)
 #'
 #' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract
 #'   training data from.
@@ -25,7 +25,7 @@
 #' @export
 #'
 #' @seealso [train_dreams_model()] Function for training model.
-get_training_data <- function(bam_paths,
+get_training_data_indel <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,
                               factor = 1,
@@ -61,7 +61,7 @@ get_training_data <- function(bam_paths,
 
 
     # Get training data for single bam file
-    current_training_data <- get_training_data_from_bam(
+    current_training_data <- get_training_data_from_bam_indel(
       bam_path = bam_path,
       reference_path = reference_path,
       bed_include_path = bed_include_path,
@@ -88,57 +88,62 @@ get_training_data <- function(bam_paths,
 }
 
 
-#' Title
+#' Extract Training Data from BAM File (indels)
 #'
-#' @param bam_path Path to BAM file
-#' @param reference_path Path to reference file
-#' @param bed_include_path BED regions to include
-#' @param factor ratio between negative and positive data
-#' @param positions_to_exclude_paths positions to exclude from training
-#' @param mm_rate_max maximum mismatch rate in position
+#' Extracts training data from a BAM file by integrating information from reference and BED files.
+#' It processes genomic positions of indels, extracts features, filters based on mismatch rates,
+#' and combines positive and negative samples to form the training dataset.
+#'
+#' @param bam_path Path to the BAM file.
+#' @param reference_path Path to the reference genome file.
+#' @param bed_include_path Optional; BED file defining regions to include in the analysis.
+#' @param factor The ratio of negative to positive data in the output.
+#' @param positions_to_exclude_paths Optional; paths to files defining positions to exclude from training.
+#' @param mm_rate_max Maximum mismatch rate allowed in a position.
 #' @keywords internal
 #'
-#' @return `data.frame` with training data for a \code{.bam} file
-
-get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
+#' @return A list with two elements: `data`, a `data.frame` containing the combined positive and negative training data,
+#' and `info`, a `data.frame` containing metadata about the training set.
+#'
+get_training_data_from_bam_indel <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
   bam_df <- load_BAM(bam_path)
 
-  # Add genomic positions of mismatches
-  mismatch_bam_df <- extract_indel_info(bam_df)
+  # Add genomic positions of indels
+  indel_bam_df <- extract_indel_info(bam_df)
 
   # Add features
-  mismatch_positions_df <-
-    extract_features_from_bam(
-      bam_df = mismatch_bam_df,
+  indels_positions_df <-
+    extract_features_from_bam_indels(
+      bam_df = indel_bam_df,
       reference_path = reference_path
     )
 
-  # Filter mismatches
-  mismatches <-
+  # Filter indels
+  indels <-
     filter_mismatch_positions(
-      read_positions = mismatch_positions_df,
+      read_positions = indels_positions_df,
       bam_file = bam_path,
       mm_rate_max = mm_rate_max,
       bed_include_path = bed_include_path,
       positions_to_exclude_paths = positions_to_exclude_paths
     )
 
-  positive_samples <- mismatches$data
-  info <- mismatches$info
+  positive_samples <- indels$data
+  info <- indels$info
 
   n_samples <- nrow(positive_samples) * factor
 
 
   # Generate negative samples
   negative_read_positions_df <-
-    sample_negative_read_positions(
+    sample_negative_read_positions_indels(
       bam_df = bam_df,
       n_samples = n_samples
     )
 
   # Add features
   negative_samples <-
-    extract_features_from_bam(
+    extract_features_from_bam_indels_negatives(
       bam_df = negative_read_positions_df,
       reference_path = reference_path
     )
@@ -158,88 +163,5 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
 
 
-#' Title
-#'
-#' @param read_positions dataframe of read positions
-#' @param bam_file bam file path
-#' @param mm_rate_max maximum mm_rate for positions
-#' @param bed_include_path bed regions to include in training data
-#' @param positions_to_exclude_paths positions to exclude from training
-#' @keywords internal
-#'
-#' @return filtered read position dataframe
-#'
-#' @importFrom readr read_csv
-
-filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
-
-  read_positions_filtered = read_positions %>% filter(obs != "N")
-
-  # Load coverage data
-
-  included_regions_granges <- bed_to_granges(bed_include_path)
-
-  pp <- Rsamtools::PileupParam(
-    max_depth = 250000000, min_base_quality = 13, min_mapq = 0,
-    min_nucleotide_depth = 1, min_minor_allele_depth = 0,
-    distinguish_strands = FALSE, distinguish_nucleotides = FALSE,
-    ignore_query_Ns = TRUE, include_deletions = TRUE, include_insertions = FALSE,
-    left_bins = NULL, query_bins = NULL, cycle_bins = NULL
-  )
-
-  coverage_data <- Rsamtools::pileup(bam_file, pileupParam = pp, scanBamParam = ScanBamParam(which = included_regions_granges)) %>%
-    rename(chr = .data$seqnames, genomic_pos = .data$pos, coverage = .data$count)
-
-  # Filter heterozygote positions
-
-  read_positions_summarized <- read_positions %>%
-    group_by(.data$chr, .data$genomic_pos) %>%
-    summarize(n_mismatches = n()) %>%
-    ungroup()
-
-  # Join with coverage dataframe - all positions if included_regions is NULL
-
-  # Remove positions with high mismatch rate in mismatch  and coverage data
-
-  read_position_mm_rate <- read_positions_summarized %>%
-    inner_join(coverage_data, by = c("chr", "genomic_pos")) %>%
-    mutate(mm_rate = .data$n_mismatches / .data$coverage)
-
-  read_position_filter <- read_position_mm_rate %>%
-    filter(.data$mm_rate < mm_rate_max)
-
-  read_positions_filtered <- read_positions_filtered %>%
-    semi_join(read_position_filter, by = c("chr", "genomic_pos"))
-
-  coverage_data_filtered <- coverage_data %>%
-    anti_join(read_position_mm_rate %>% filter(.data$mm_rate > mm_rate_max), by = c("chr", "genomic_pos"))
-
-  # Remove unwanted positions based on exclude files
-
-  if (!is.null(positions_to_exclude_paths)) {
-    for (p in positions_to_exclude_paths) {
-      positions_to_exclude <- read_csv(p, show_col_types = FALSE)
-
-      read_positions_filtered <- read_positions_filtered %>%
-        anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
-
-      coverage_data_filtered <- coverage_data_filtered %>%
-        anti_join(positions_to_exclude, by = c("chr", "genomic_pos"))
-    }
-  }
-
-  # Output beta info
-
-  beta_info <- data.frame(
-    n_mismatches = nrow(read_positions_filtered),
-    total_coverage = sum(coverage_data_filtered$coverage)
-  )
-
-
-  return(list(
-    data = read_positions_filtered,
-    info = beta_info
-  ))
-}
 
 

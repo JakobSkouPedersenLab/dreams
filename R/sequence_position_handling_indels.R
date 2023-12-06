@@ -211,6 +211,30 @@ get_indel_type <- function(pos, cigar){
   return(get_indel_info(pos, cigar)$indel_type)
 }
 
+#' Sample Negative Read Positions with Indels information
+#'
+#' This function takes a data frame of BAM file reads and a number of samples,
+#' then generates a sample of negative read positions. It adds additional columns
+#' for indel information, initializing them to default values.
+#'
+#' @param bam_df A data frame representing BAM file reads.
+#' @param n_samples The number of negative read positions to sample.
+#' @return A data frame similar to `bam_df` but with additional columns:
+#' `indel_length` (initialized to 0), `indel_type` (empty string), and `indel_seq` (empty string).
+#'
+#' @keywords internal
+#'
+sample_negative_read_positions_indels <- function(bam_df, n_samples){
+  sample_negatives <- sample_negative_read_positions(
+    bam_df,
+    n_samples) %>%
+    mutate(indel_length = 0,
+           indel_type = "",
+           indel_seq = "")
+  return(sample_negatives)
+
+}
+
 
 #' Extract Indel Information from BAM Data Frame
 #'

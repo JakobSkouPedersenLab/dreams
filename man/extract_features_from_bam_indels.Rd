@@ -11,7 +11,7 @@ extract_features_from_bam_indels(
 )
 }
 \arguments{
-\item{bam_df}{A DataFrame originating from 'load_BAM' and processed by extract_mismatch_positions' containing alignment data.}
+\item{bam_df}{A DataFrame originating from 'load_BAM' and processed by extract_indel_info' containing alignment data.}
 
 \item{reference_path}{Path to the reference genome file in FASTA format.}
 

@@ -2,7 +2,7 @@
 
 #' Extract Features from BAM Data
 #'
-#' @param bam_df A DataFrame originating from 'load_BAM' and processed by extract_mismatch_positions' containing alignment data.
+#' @param bam_df A DataFrame originating from 'load_BAM' and processed by extract_indel_info' containing alignment data.
 #' @param reference_path Path to the reference genome file in FASTA format.
 #' @param add_umi_features Check if umi information is available.
 #'
@@ -78,7 +78,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
       "local_complexity_1", "local_complexity_2", "local_GC",
       "n_other_errors", "n_insertions_in_read", "n_deletions_in_read",
-      "indel_length", "indel_seq", "seq_length"
+      "seq_length", "indel_length", "indel_type", "indel_seq"
     )
 
 
@@ -107,6 +107,25 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
   return(feature_df)
 }
 
-
+#' Extract Features from BAM for Indels in Negative Samples
+#'
+#' This function processes a BAM file data frame and a reference path to extract features
+#' specifically for indels (insertions or deletions) in negative samples. It enhances the data frame
+#' with observed values set to reference values.
+#'
+#' @param bam_df A data frame representing BAM file reads.
+#' @param reference_path Path to the reference used in feature extraction.
+#' @return A modified data frame where each entry is enriched with additional features, particularly
+#' for indels in negative samples. The 'obs' column is added, which is set equal to the 'ref' column.
+#'
+#' @keywords internal
+#'
+extract_features_from_bam_indels_negatives <- function(bam_df, reference_path){
+  extract_features_negatives <- extract_features_from_bam_indels(
+    bam_df,
+    reference_path) %>%
+    mutate(obs = ref)
+  return(extract_features_negatives)
+  }
 
 
