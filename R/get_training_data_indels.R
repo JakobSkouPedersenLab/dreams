@@ -19,13 +19,13 @@
 #'
 #' @return A list containing two elements:
 #' \itemize{
-#'   \item `data`: A `tbl_df` with dimensions 2 x 22.
-#'   \item `info`: A `data.frame` with dimensions 1 x 4.
+#'   \item `data`: A `tbl_df`
+#'   \item `info`: A `data.frame`
 #' }
 #' @export
 #'
 #' @seealso [train_dreams_model()] Function for training model.
-get_training_data_indel <- function(bam_paths,
+get_training_data_indels <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,
                               factor = 1,

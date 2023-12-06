@@ -54,13 +54,12 @@ library(dreams)
 # For training, data DREAMS requires one or more bam-files
 # and a reference genome.
 
-data = get_training_data(
+training_data = get_training_data(
   bam_paths = "/path/bam_file",
   reference_path = "/path/hg38.fa",
   ...)
 
-training_data = data$data
-beta = data$info$beta
+beta = training_data$info$beta
 
 # The model can be trained using a neural network
 # - and requires basic settings for keras

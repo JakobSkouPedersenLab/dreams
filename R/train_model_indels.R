@@ -21,15 +21,15 @@
 #' @export
 #' @family Train model
 #' @seealso [get_training_data()] Function for getting training data
-train_dreams_model <- function(training_data, layers,
+train_dreams_model_indels <- function(training_data, layers,
                         model_features, lr, batch_size, epochs,
                         model_file_path = NULL, log_file_path = NULL,
                         min_delta = 0, patience = 0, l2_reg = 0,
                         validation_split = 0, ctx3_embed_dim = 3) {
   training_data$data %>%
-    filter(.data$obs %in% c("A", "T", "C", "G"))
+    filter(.data$obs %in% c("A", "T", "C", "G", "D", "I"))
 
-  training_data <- prepare_training_data(
+  training_data <- prepare_training_data_indels(
     training_data = training_data,
     model_features = model_features
   )
@@ -76,16 +76,22 @@ train_dreams_model <- function(training_data, layers,
 
 
 
-#' Prepare training data
+#' Prepare Training Data with Indel Information
 #'
-#' @param training_data training data
-#' @param model_features selected features
+#' This function processes training data by selecting specific features and the observed values (obs)
+#' for genomic data, including nucleotide bases and indels (insertions 'I' and deletions 'D'). It then
+#' prepares this data for use in machine learning models, particularly those that require categorical
+#' data to be converted into a one-hot encoded format.
 #'
-#' @return prepared training data
+#' @param training_data A data frame containing the training data.
+#' @param model_features A vector of selected feature names to be used in the model.
+#'
+#' @return A list with two elements: `features` containing the selected features of the training data,
+#' and `labels` containing the one-hot encoded labels.
 #' @keywords internal
 #' @importFrom keras to_categorical
-
-prepare_training_data <- function(training_data, model_features) {
+#'
+prepare_training_data_indels <- function(training_data, model_features) {
 
   # Load training data
   training_data <- training_data %>%
@@ -100,7 +106,7 @@ prepare_training_data <- function(training_data, model_features) {
   training_data_labels <-
     training_data %>%
     select(.data$obs) %>%
-    mutate(obs = as.numeric(factor(.data$obs, levels = c("A", "T", "C", "G"))) - 1) %>%
+    mutate(obs = as.numeric(factor(.data$obs, levels = c("A", "T", "C", "G", "D", "I"))) - 1) %>%
     as.matrix() %>%
     keras::to_categorical()
 
