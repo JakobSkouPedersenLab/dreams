@@ -72,6 +72,7 @@ model = train_dreams_model(
   lr = 0.01,
   batch_size = 10000,
   epochs = 100,
+  model_file_path = NULL,
   ...)
 ```
 
@@ -126,16 +127,25 @@ cancer_calls = dreams_cc(
 You can save your trained models for later use and load them as needed.
 To save a trained model, use the `save_model_hdf5` function from the
 `keras` package. Specify the file path where you want to save the model.
-To load a previously saved model, use the load_model_hdf5 function.
+Similarly, when training a model using the `train_dreams_model`
+function, you can directly specify a file path where to save the model
+using the `model_file_path` argument. This allows for automatic saving
+of the model upon training completion.
+
+As default `model_file_path = NULL`, and the model won’t be saved
+automatically. You can then manually save the model using
+`save_model_hdf5`.
+
+To load a previously saved model, use the `load_model_hdf5` function.
 
 ``` r
 library(keras)
 
 # Save the model
-save_model_hdf5(model, filepath = "path/to/your_model.h5", overwrite = TRUE, include_optimizer = TRUE)
+save_model_hdf5(model, filepath = "path/to/your_model.h5")
 
 # Load the model
-loaded_model <- load_model_hdf5(filepath = "path/to/your_model.h5", custom_objects = NULL, compile = TRUE)
+loaded_model <- load_model_hdf5(filepath = "path/to/your_model.h5")
 ```
 
 ## About DREAMS
