@@ -9,16 +9,18 @@ prepare_training_data_indels(training_data, model_features)
 \arguments{
 \item{training_data}{A data frame containing the training data.}
 
-\item{model_features}{A vector of selected feature names to be used in the model.}
+\item{model_features}{A vector of selected feature names to be used in the
+model.}
 }
 \value{
-A list with two elements: \code{features} containing the selected features of the training data,
-and \code{labels} containing the one-hot encoded labels.
+A list with two elements: \code{features} containing the selected features
+of the training data, and \code{labels} containing the one-hot encoded labels.
 }
 \description{
-This function processes training data by selecting specific features and the observed values (obs)
-for genomic data, including nucleotide bases and indels (insertions 'I' and deletions 'D'). It then
-prepares this data for use in machine learning models, particularly those that require categorical
-data to be converted into a one-hot encoded format.
+This function processes training data by selecting specific features and the
+observed values (obs) for genomic data, including nucleotide bases and indels
+(insertions 'I' and deletions 'D'). It then prepares this data for use in
+machine learning models, particularly those that require categorical data to
+be converted into a one-hot encoded format.
 }
 \keyword{internal}

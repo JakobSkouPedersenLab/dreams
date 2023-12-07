@@ -1,19 +1,27 @@
 
 #' Train error model
 #'
-#' @param training_data \code{data.frame} Input training data (Generated from [get_training_data()])
+#' @param training_data \code{data.frame} Input training data (Generated from
+#'   [get_training_data()])
 #' @param layers Numeric vector. Number of nodes in each layer.
-#' @param model_features Vector of feature names. Selected features for model training.
+#' @param model_features Vector of feature names. Selected features for model
+#'   training.
 #' @param lr Numeric value between 0 and 1. Learning rate.
 #' @param batch_size Integer. Batch size.
 #' @param epochs Integer. Number of training epochs.
-#' @param model_file_path String. Model output file path. Default is \code{NULL}.
-#' @param log_file_path String. Path to model output log file. Default is \code{NULL}.
-#' @param l2_reg Numeric value between 0 and 1. Level of L2 regularization per layer. Default is 0.
-#' @param min_delta Numeric value between 0 and 1. Minimum delta for early stopping. Default is 0.
+#' @param model_file_path String. Model output file path. Default is
+#'   \code{NULL}.
+#' @param log_file_path String. Path to model output log file. Default is
+#'   \code{NULL}.
+#' @param l2_reg Numeric value between 0 and 1. Level of L2 regularization per
+#'   layer. Default is 0.
+#' @param min_delta Numeric value between 0 and 1. Minimum delta for early
+#'   stopping. Default is 0.
 #' @param patience Integer. Patience when reaching minimum delta. Default is 0.
-#' @param validation_split Numeric value between 0 and 1. Validation split ratio. Default is 0.
-#' @param ctx3_embed_dim Integer. Number of dimensions to embed trinucleotide context to. Default is 3.
+#' @param validation_split Numeric value between 0 and 1. Validation split
+#'   ratio. Default is 0.
+#' @param ctx3_embed_dim Integer. Number of dimensions to embed trinucleotide
+#'   context to. Default is 3.
 #'
 #' @return Trained model in hdf5 format.
 #' @keywords model training
@@ -34,18 +42,18 @@ train_dreams_model_indels <- function(training_data, layers,
     model_features = model_features
   )
 
-  prepared_input <- prepare_input_layer(training_data$features,
+  prepared_input <- prepare_input_layer_indels(training_data$features,
     ctx3_embed_dim = ctx3_embed_dim
   )
 
-  model_structure <- generate_NN_structure(
+  model_structure <- generate_NN_structure_indels(
     inputs = prepared_input$inputs,
     input_layer = prepared_input$input_layer,
     layers = layers,
     reg = l2_reg
   )
 
-  model <- fit_model(
+  model <- fit_model_indels(
     features = training_data$features,
     labels = training_data$labels,
     input_structure = model_structure,
@@ -78,16 +86,18 @@ train_dreams_model_indels <- function(training_data, layers,
 
 #' Prepare Training Data with Indel Information
 #'
-#' This function processes training data by selecting specific features and the observed values (obs)
-#' for genomic data, including nucleotide bases and indels (insertions 'I' and deletions 'D'). It then
-#' prepares this data for use in machine learning models, particularly those that require categorical
-#' data to be converted into a one-hot encoded format.
+#' This function processes training data by selecting specific features and the
+#' observed values (obs) for genomic data, including nucleotide bases and indels
+#' (insertions 'I' and deletions 'D'). It then prepares this data for use in
+#' machine learning models, particularly those that require categorical data to
+#' be converted into a one-hot encoded format.
 #'
 #' @param training_data A data frame containing the training data.
-#' @param model_features A vector of selected feature names to be used in the model.
+#' @param model_features A vector of selected feature names to be used in the
+#'   model.
 #'
-#' @return A list with two elements: `features` containing the selected features of the training data,
-#' and `labels` containing the one-hot encoded labels.
+#' @return A list with two elements: `features` containing the selected features
+#'   of the training data, and `labels` containing the one-hot encoded labels.
 #' @keywords internal
 #' @importFrom keras to_categorical
 #'
@@ -117,18 +127,29 @@ prepare_training_data_indels <- function(training_data, model_features) {
 }
 
 
-#' Title
+#' Prepare Input Layer for Indel Analysis in Neural Network
 #'
-#' @param training_data_features training data features
-#' @param ctx3_embed_dim trinucleotide context embedding dimensions
+#' This function processes training data features and context embedding
+#' dimensions to prepare an input layer suitable for a neural network model in
+#' indel analysis.
 #'
-#' @return input layer
+#' @param training_data_features A data frame or similar structure containing
+#'   features of the training data.
+#' @param ctx3_embed_dim Integer specifying the dimension of the embedding for
+#'   trinucleotide context sequences.
+#'
+#' @return A list containing two elements: `inputs`, the raw input from the
+#'   dataset, and `input_layer`, the prepared input layer for the neural network
+#'   model.
 #' @keywords internal
 #'
-#' @importFrom keras fit layer_dense_features layer_batch_normalization layer_concatenate
-#' @importFrom tfdatasets feature_spec step_numeric_column step_categorical_column_with_vocabulary_list step_embedding_column step_indicator_column
-prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
-
+#' @importFrom keras fit layer_dense_features layer_batch_normalization
+#'   layer_concatenate
+#' @importFrom tfdatasets feature_spec step_numeric_column
+#'   step_categorical_column_with_vocabulary_list step_embedding_column
+#'   step_indicator_column
+#'
+prepare_input_layer_indels <- function(training_data_features, ctx3_embed_dim) {
 
   # Subset selected features into categorical and numeric
   all_numerical_variables <-
@@ -255,18 +276,23 @@ prepare_input_layer <- function(training_data_features, ctx3_embed_dim) {
 }
 
 
-#' Title
+#' Generate Neural Network Structure for Indel Analysis
 #'
-#' @param inputs input structure
-#' @param input_layer input layer
-#' @param layers layer sizes
-#' @param reg regularization
+#' This function builds a neural network structure for indel analysis. It takes
+#' an input layer and iteratively adds specified hidden layers, followed by an
+#' output layer for classification.
 #'
-#' @return NN structure
+#' @param inputs The input structure for the neural network, usually from the data input layer.
+#' @param input_layer The initial layer of the neural network to which additional layers are added.
+#' @param layers A list or vector indicating the number of units in each hidden layer of the network.
+#' @param reg Regularization parameter applied to each dense layer for preventing overfitting.
+#'        Defaults to 0.
+#'
+#' @return A keras model object representing the constructed neural network.
 #' @keywords internal
 #' @importFrom keras layer_dense
-
-generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
+#'
+generate_NN_structure_indels <- function(inputs, input_layer, layers, reg = 0) {
   hidden_layers <- input_layer
 
   for (layer_idx in 1:length(layers)) {
@@ -284,7 +310,7 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
   outputs <- keras::layer_dense(
     object = hidden_layers,
     name = "output",
-    units = 4,
+    units = 6,
     activation = "softmax"
   )
 
@@ -315,7 +341,7 @@ generate_NN_structure <- function(inputs, input_layer, layers, reg = 0) {
 #' @importFrom R6 R6Class
 
 
-fit_model <- function(features, labels, input_structure,
+fit_model_indels <- function(features, labels, input_structure,
                       lr,
                       batch_size,
                       epochs,

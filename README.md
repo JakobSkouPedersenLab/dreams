@@ -28,7 +28,7 @@ You can install the development version of dreams from
 devtools::install_github("JakobSkouPedersenLab/dreams")
 ```
 
-### Additional setup (If needed)
+### Additional Setup (If needed)
 
 If you encounter any issues related to TensorFlow integrations within R,
 install Keras within the correct python environment to ensure a proper
@@ -46,14 +46,16 @@ After installation, set the environment at the start of each R session:
 reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
 ```
 
-## Basic functions
+## Basic Functions
+
+This section provides an overview of the basic functions available in
+the dreams library, including data preparation, model training, variant
+calling, and cancer detection.
 
 ``` r
 library(dreams)
 
-# For training, data DREAMS requires one or more bam-files
-# and a reference genome.
-
+# For training, DREAMS requires one or more BAM files and a reference genome.
 training_data = get_training_data(
   bam_paths = "/path/bam_file",
   reference_path = "/path/hg38.fa",
@@ -61,9 +63,8 @@ training_data = get_training_data(
 
 beta = training_data$info$beta
 
-# The model can be trained using a neural network
-# - and requires basic settings for keras
-
+# Training the DREAMS Model using a Neural Network
+# Basic settings for Keras are required.
 model = train_dreams_model(
   training_data,
   layers = c(16,8),
@@ -72,8 +73,33 @@ model = train_dreams_model(
   batch_size = 10000,
   epochs = 100,
   ...)
+```
 
+### Feature Selection
 
+The DREAMS model supports a variety of features categorized into
+numeric, categorical, and embedded types:
+
+#### Numeric Features
+
+- `read_index`, `fragment_size`, `local_GC`, `umi_count`, `umi_errors`,
+  `local_complexity_1`, `local_complexity_2`, `n_other_errors`,
+  `prior_error`, `seq_length`
+
+#### Categorical Features
+
+- `ref`, `strand`, `first_in_pair`, `ctx_minus1`, `ctx_plus1`, `chr`,
+  `genomic_pos`
+
+#### Embedded Feature
+
+- `trinucleotide_ctx`
+
+Ensure that the dataset used aligns with the selected features and
+adjust the parameters such as `layers`, `lr`, `batch_size`, and `epochs`
+as needed.
+
+``` r
 # Call variants using DREAMS-vc
 
 variant_calls = dreams_vc(

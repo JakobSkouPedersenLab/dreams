@@ -21,11 +21,13 @@ train_dreams_model_indels(
 )
 }
 \arguments{
-\item{training_data}{\code{data.frame} Input training data (Generated from \code{\link[=get_training_data]{get_training_data()}})}
+\item{training_data}{\code{data.frame} Input training data (Generated from
+\code{\link[=get_training_data]{get_training_data()}})}
 
 \item{layers}{Numeric vector. Number of nodes in each layer.}
 
-\item{model_features}{Vector of feature names. Selected features for model training.}
+\item{model_features}{Vector of feature names. Selected features for model
+training.}
 
 \item{lr}{Numeric value between 0 and 1. Learning rate.}
 
@@ -33,19 +35,25 @@ train_dreams_model_indels(
 
 \item{epochs}{Integer. Number of training epochs.}
 
-\item{model_file_path}{String. Model output file path. Default is \code{NULL}.}
+\item{model_file_path}{String. Model output file path. Default is
+\code{NULL}.}
 
-\item{log_file_path}{String. Path to model output log file. Default is \code{NULL}.}
+\item{log_file_path}{String. Path to model output log file. Default is
+\code{NULL}.}
 
-\item{min_delta}{Numeric value between 0 and 1. Minimum delta for early stopping. Default is 0.}
+\item{min_delta}{Numeric value between 0 and 1. Minimum delta for early
+stopping. Default is 0.}
 
 \item{patience}{Integer. Patience when reaching minimum delta. Default is 0.}
 
-\item{l2_reg}{Numeric value between 0 and 1. Level of L2 regularization per layer. Default is 0.}
+\item{l2_reg}{Numeric value between 0 and 1. Level of L2 regularization per
+layer. Default is 0.}
 
-\item{validation_split}{Numeric value between 0 and 1. Validation split ratio. Default is 0.}
+\item{validation_split}{Numeric value between 0 and 1. Validation split
+ratio. Default is 0.}
 
-\item{ctx3_embed_dim}{Integer. Number of dimensions to embed trinucleotide context to. Default is 3.}
+\item{ctx3_embed_dim}{Integer. Number of dimensions to embed trinucleotide
+context to. Default is 3.}
 }
 \value{
 Trained model in hdf5 format.
