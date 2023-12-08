@@ -194,7 +194,6 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       .data$genomic_pos %in% q$genomic_pos
     )
 
-    print (current_mutations)
 
     # Call mutations
     calls <- call_mutations(

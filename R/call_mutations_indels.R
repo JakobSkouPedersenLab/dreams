@@ -37,7 +37,7 @@
 #' @importFrom foreach %dopar%
 #' @export
 
-dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
+dreams_vc_parallel_indels <- function(mutations_df, bam_file_path, reference_path, model,
                                beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                                batch_size = NULL, ncores = 1, log_file = NULL) {
   if (nrow(mutations_df) == 0) {
@@ -85,7 +85,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       dplyr::select(-idx)
 
 
-    current_calls <- dreams_vc(
+    current_calls <- dreams_vc_indels(
       mutations_df = mutations,
       bam_file_path = bam_file_path,
       reference_path = reference_path,
@@ -137,7 +137,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #'
 #' @export
 
-dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
+dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
                       beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                       batch_size = NULL) {
 
@@ -182,7 +182,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
     q <- position_batches %>% filter(batch_idx == batch)
 
     # Get read positions
-    read_positions_df <- get_read_positions_from_BAM(
+    read_positions_df <- get_read_positions_from_BAM_indels(
       bam_file_path = bam_file_path,
       chr = q$chr,
       genomic_pos = q$genomic_pos,
@@ -194,10 +194,9 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       .data$genomic_pos %in% q$genomic_pos
     )
 
-    print (current_mutations)
 
     # Call mutations
-    calls <- call_mutations(
+    calls <- call_mutations_indels(
       mutations_df = current_mutations,
       read_positions_df = read_positions_df,
       model = model,
@@ -241,7 +240,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export
-call_mutations <- function(mutations_df, read_positions_df, model, beta,
+#'
+call_mutations_indels <- function(mutations_df, read_positions_df, model, beta,
                            alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE, batch_size = NULL) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
