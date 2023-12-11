@@ -310,9 +310,8 @@ call_mutations_indels <- function(mutations_df, read_positions_df, model, beta,
       .data$genomic_pos %in% q$genomic_pos
     )
 
-
     # Prepare EM input
-    em_input <- prepare_em_input(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta)
+    em_input <- prepare_em_input_indels(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta)
 
     obs_is_mut_list <- em_input$obs_is_mut_list
     error_ref_to_mut_list <- em_input$error_ref_to_mut_list

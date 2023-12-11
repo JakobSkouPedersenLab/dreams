@@ -57,7 +57,9 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       pos_idx = .data$genomic_pos - .data$pos + 1
     ) %>%
     correct_pos_idx_w_cigar() %>%
-    mutate(obs = .data$indel_type,
+    mutate(
+      seq_corrected = mapply(remove_insertions, .data$cigar, .data$seq),
+      cleaned_cigar = lapply(lapply(.data$cigar, expand_cigar), clean_insertions),
       pos_index = .data$genomic_pos - .data$pos + 1,
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
@@ -87,8 +89,8 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     read_feature_df <-
       read_feature_df %>%
       mutate(
-        umi_count = map2_int(.data$cd, .data$pos_index, function(cd, pos_index) cd[pos_index]),
-        umi_errors = map2_int(.data$ce, .data$pos_index, function(ce, pos_index) ce[pos_index])
+        umi_count = map2_int(.data$cd, .data$pos_idx, function(cd, pos_idx) cd[pos_idx]),
+        umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx])
       )
 
     # Add UMI features to selection
@@ -101,8 +103,17 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       by = c("chr", "genomic_pos", "strand")
     ) %>%
     mutate(
+      obs = case_when(
+        substring(cleaned_cigar, pos_index, pos_index) == "D" ~ "D",
+        substring(cleaned_cigar, pos_index, pos_index) == "I" ~ "I",
+        substring(cleaned_cigar, pos_index, pos_index) == "M" &
+          substring(seq, pos_index, pos_index) == ref ~ substring(seq_corrected, pos_index, pos_index),
+        TRUE ~ "N"
+      ))
+  feature_df <- feature_df %>%
+    mutate(
       n_other_errors = .data$n_errors_in_read - ifelse((!.data$is_in_deletion) & (.data$obs != .data$ref), 1, 0)
-    ) %>%
+    )%>%
     select(all_of(selected_features))
   return(feature_df)
 }
@@ -128,4 +139,37 @@ extract_features_from_bam_indels_negatives <- function(bam_df, reference_path){
   return(extract_features_negatives)
   }
 
+#' Remove Insertions from Observed Sequence Based on CIGAR String
+#'
+#' This function processes an observed sequence based on a given CIGAR string,
+#' removing any insertions (denoted as 'I' in the CIGAR string) from the observed sequence.
+#' It first expands the CIGAR string to match the length of the observed sequence
+#' and then iteratively checks each character. If a character in the expanded CIGAR string
+#' is not an insertion ('I'), the corresponding character from the observed sequence
+#' is retained in the result.
+#'
+#' @param cigar A CIGAR string representing the alignment of an observed sequence
+#'              to a reference sequence.
+#' @param obs_sequence The observed sequence (string) that is to be processed based
+#'                     on the CIGAR string.
+#'
+#' @return A string representing the observed sequence with insertions removed.
+#'
+#' @keywords internal
+#'
+remove_insertions <- function(cigar, obs_sequence) {
+  # Expanding the CIGAR string to match the length of the observed sequence
+  expanded_cigar <- expand_cigar(cigar)
 
+  # Split the observed sequence into characters
+  obs_seq_split <- strsplit(obs_sequence, "")[[1]]
+
+  # Identify the positions not marked as insertion
+  non_insertion_positions <- which(substring(expanded_cigar, 1:nchar(expanded_cigar), 1:nchar(expanded_cigar)) != "I")
+
+  # Extract the corresponding characters from the observed sequence
+  result <- obs_seq_split[non_insertion_positions]
+
+  # Combine the characters back into a single string
+  return(paste(result, collapse = ""))
+}
