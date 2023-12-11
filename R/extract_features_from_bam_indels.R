@@ -107,7 +107,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
         substring(cleaned_cigar, pos_index, pos_index) == "D" ~ "D",
         substring(cleaned_cigar, pos_index, pos_index) == "I" ~ "I",
         substring(cleaned_cigar, pos_index, pos_index) == "M" &
-          substring(seq, pos_index, pos_index) == ref ~ substring(seq_corrected, pos_index, pos_index),
+          substring(seq_corrected, pos_index, pos_index) == ref ~ substring(seq_corrected, pos_index, pos_index),
         TRUE ~ "N"
       ))
   feature_df <- feature_df %>%
