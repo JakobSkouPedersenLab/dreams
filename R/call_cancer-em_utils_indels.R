@@ -8,6 +8,10 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, model, beta
       chr <- mutations_df[i, "chr"]
       genomic_pos <- mutations_df[i, "genomic_pos"]
       ref <- mutations_df[i, "ref"]
+      # Check if ref is A, C, T, or G and modify it to "ACTG" if true
+      if (ref %in% c("A", "C", "T", "G")) {
+        ref <- "ATCG"
+      }
       alt <- mutations_df[i, "alt"]
 
       mut_reads_ref_alt <-

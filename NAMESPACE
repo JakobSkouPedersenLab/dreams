@@ -2,9 +2,12 @@
 
 export(call_cancer)
 export(call_mutations)
+export(call_mutations_indels)
 export(dreams_cc)
 export(dreams_vc)
+export(dreams_vc_indels)
 export(dreams_vc_parallel)
+export(dreams_vc_parallel_indels)
 export(get_training_data)
 export(get_training_data_indels)
 export(train_dreams_model)

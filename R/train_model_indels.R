@@ -116,7 +116,11 @@ prepare_training_data_indels <- function(training_data, model_features) {
   training_data_labels <-
     training_data %>%
     select(.data$obs) %>%
-    mutate(obs = as.numeric(factor(.data$obs, levels = c("A", "T", "C", "G", "D", "I"))) - 1) %>%
+    mutate(obs = case_when(
+      .data$obs %in% c("A", "T", "C", "G") ~ 0,  # ATCG as one level
+      .data$obs == "D" ~ 1,                       # D as another level
+      .data$obs == "I" ~ 2                        # I as another level
+    )) %>%
     as.matrix() %>%
     keras::to_categorical()
 
@@ -310,7 +314,7 @@ generate_NN_structure_indels <- function(inputs, input_layer, layers, reg = 0) {
   outputs <- keras::layer_dense(
     object = hidden_layers,
     name = "output",
-    units = 6,
+    units = 3,
     activation = "softmax"
   )
 
