@@ -132,7 +132,6 @@ parallel_variant_calls = dreams_vc_parallel(
   mutations_df = mutations_df,
   bam_file_path = "/path/test_bam_file",
   reference_path = "/path/hg38.fa",
-  beta = beta,
   model = model,
   ...)
 
