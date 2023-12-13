@@ -67,8 +67,8 @@ beta = training_data$info$beta
 # Basic settings for Keras are required.
 model = train_dreams_model(
   training_data,
-  layers = c(16,8),
-  model_features = c("trinucleotide_ctx", "strand", "read_index"),
+  layers = c(128, 64, 32),
+  model_features = c("read_index", "strand", "trinucleotide_ctx", "first_in_pair", "umi_count"),
   lr = 0.01,
   batch_size = 10000,
   epochs = 100,
@@ -114,6 +114,34 @@ variant_calls = dreams_vc(
 # Call cancer using DREAMS-cc
 
 cancer_calls = dreams_cc(
+  mutations_df = mutations_df,
+  bam_file_path = "/path/test_bam_file",
+  reference_path = "/path/hg38.fa",
+  beta = beta,
+  model = model,
+  ...)
+```
+
+## Parallel Variant Calling with dreams_vc_parallel
+
+In addition to `dreams_vc`, the DREAMS package offers
+`dreams_vc_parallel` for parallel variant calling. This function is
+particularly useful when working with large datasets and is designed to
+leverage computational resources such as multi-core CPUs for parallel
+processing.
+
+### When to use dreams_vc_parallel
+
+- **Large Datasets**: Efficiently handles larger datasets by
+  distributing the workload across multiple cores.
+- **Parallel Processing Capability**: Ideal when the computational
+  environment supports parallel processing (e.g., multi-core systems).
+
+### Example Usage
+
+``` r
+# Parallel variant calling
+parallel_variant_calls = dreams_vc_parallel(
   mutations_df = mutations_df,
   bam_file_path = "/path/test_bam_file",
   reference_path = "/path/hg38.fa",
