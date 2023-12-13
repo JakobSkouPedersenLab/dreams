@@ -49,8 +49,13 @@ reticulate::use_condaenv("<ENVIRONMENT_NAME>", required = TRUE)
 ## Basic Functions
 
 This section provides an overview of the basic functions available in
-the dreams library, including data preparation, model training, variant
-calling, and cancer detection.
+the dreams library.
+
+### Data Preparation and Model Training
+
+The first steps in using DREAMS involve preparing your data and setting
+up the model for training, crucial for effective variant calling and
+cancer detection.
 
 ``` r
 library(dreams)
@@ -76,29 +81,34 @@ model = train_dreams_model(
   ...)
 ```
 
-### Feature Selection
+#### Feature Selection
 
 The DREAMS model supports a variety of features categorized into
 numeric, categorical, and embedded types:
 
-#### Numeric Features
+##### Numeric Features
 
 - `read_index`, `fragment_size`, `local_GC`, `umi_count`, `umi_errors`,
   `local_complexity_1`, `local_complexity_2`, `n_other_errors`,
   `prior_error`, `seq_length`
 
-#### Categorical Features
+##### Categorical Features
 
 - `ref`, `strand`, `first_in_pair`, `ctx_minus1`, `ctx_plus1`, `chr`,
   `genomic_pos`
 
-#### Embedded Feature
+##### Embedded Feature
 
 - `trinucleotide_ctx`
 
 Ensure that the dataset used aligns with the selected features and
 adjust the parameters such as `layers`, `lr`, `batch_size`, and `epochs`
 as needed.
+
+### Variant calling and Cancer Detection with DREAMS
+
+The statistical methods `dreams_vc` and `dreams_cc` can be used for
+variant calling and cancer detection, respectively.
 
 ``` r
 # Call variants using DREAMS-vc
@@ -122,7 +132,7 @@ cancer_calls = dreams_cc(
   ...)
 ```
 
-## Parallel Variant Calling with dreams_vc_parallel
+### Parallel Variant Calling with dreams_vc_parallel
 
 In addition to `dreams_vc`, the DREAMS package offers
 `dreams_vc_parallel` for parallel variant calling. This function is
@@ -130,14 +140,14 @@ particularly useful when working with large datasets and is designed to
 leverage computational resources such as multi-core CPUs for parallel
 processing.
 
-### When to use dreams_vc_parallel
+#### When to use dreams_vc_parallel
 
 - **Large Datasets**: Efficiently handles larger datasets by
   distributing the workload across multiple cores.
 - **Parallel Processing Capability**: Ideal when the computational
   environment supports parallel processing (e.g., multi-core systems).
 
-### Example Usage
+#### Example Usage
 
 ``` r
 # Parallel variant calling
