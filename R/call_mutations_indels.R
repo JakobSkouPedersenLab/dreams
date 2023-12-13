@@ -1,120 +1,19 @@
 
 
-#' Call mutations in a bam-file
+#' Variant Calling in Indels
 #'
-#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' @inheritParams call_cancer
-#' @param bam_file_path Path to .BAM-file
-#' @param reference_path Path to reference genome e.g. FASTA-file.
-#' @param ncores Number of processing cores
-#' @param batch_size Number of positions to process at a time
-#' @param log_file write log-file to this path
-
-
-
-#' @return A [data.frame()] with information about the individual mutation calls, including:
-#' \describe{
-#'   \item{chr, genomic_pos}{The genomic position of the mutation.}
-#'   \item{ref, alt}{The reference and alternative allele.}
-#'   \item{EM_converged}{If the EM algorithm converged.}
-#'   \item{EM_steps, fpeval, objfeval}{Number of steps and function evaluations by the EM algorithm.}
-#'   \item{tf_est}{The estiamted tumor fraction (allele fraction).}
-#'   \item{tf_min, tf_max}{The confidence interval of \code{tf_est}.}
-#'   \item{exp_count}{The expected count of the alternative allele under the error (null) model.}
-#'   \item{count}{The count of the alternative allele.}
-#'   \item{coverage}{The coverage used by the model (only referenceredas with and alternative allele).}
-#'   \item{full_coverage}{The total coverage of the position (for reference).}
-#'   \item{obs_freq}{The observed frequency of the alternative allele.}
-#'   \item{ll_0, ll_A}{The value of the log-likelihood function under the null (tf=0) and alternative (tf>0) hypothesis.}
-#'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
-#'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
-#' }
+#' This function performs variant calling on indels from a given BAM file using a predefined list of mutations.
+#' It processes the mutations data, batch processes the genomic positions, and calls mutations using a specific model.
 #'
-#' @seealso [call_mutations()], [call_cancer()], [train_dreams_model()]
+#' @param mutations_df A dataframe containing the list of mutations to be analyzed.
+#' @param bam_file_path Path to the BAM file containing sequencing data.
+#' @param reference_path Path to the reference genome file, typically in FASTA format.
+#' @param model The model to be used for calling mutations.
+#' @param alpha Significance level for statistical testing, default is 0.05.
+#' @param use_turboem Logical flag indicating whether to use the turboEM algorithm, default is TRUE.
+#' @param calculate_confidence_intervals Logical flag indicating whether to calculate confidence intervals, default is FALSE.
+#' @param batch_size Number of positions to process in each batch; if NULL, it's determined based on the data.
 #'
-#' @import parallel
-#' @import doParallel
-#' @importFrom foreach %dopar%
-#' @export
-
-dreams_vc_parallel_indels <- function(mutations_df, bam_file_path, reference_path, model,
-                               beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                               batch_size = NULL, ncores = 1, log_file = NULL) {
-  if (nrow(mutations_df) == 0) {
-    return(data.frame())
-  }
-
-  if (nrow(mutations_df) < ncores) {
-    ncores <- max(nrow(mutations_df), 1)
-  }
-
-
-  serial_model <- keras::serialize_model(model)
-
-  mutations_df <- mutations_df %>%
-    dplyr::select(
-      "chr" = matches("chr|CHR|CHROM"),
-      "genomic_pos" = matches("pos|POS"),
-      "ref" = matches("ref|REF"),
-      "alt" = matches("alt|ALT|obs|OBS")
-    ) %>%
-    mutate(idx = sort(row_number() %% ncores, decreasing = F))
-
-  index_list <- unique(mutations_df$idx)
-
-
-  cl <- makeCluster(ncores)
-  doParallel::registerDoParallel(cl)
-
-  mutation_calls <- foreach::foreach(
-    i = index_list,
-    .combine = rbind,
-    .packages = c("keras", "tensorflow", "parallel", "doParallel"),
-    .errorhandling = "pass",
-    .export = "dreams_vc"
-  ) %dopar% {
-    unserial_model <- keras::unserialize_model(serial_model)
-
-    if (!is.null(log_file)) {
-      sink(paste0(log_file, "_", i))
-    }
-
-
-    mutations <- mutations_df %>%
-      dplyr::filter(idx == i) %>%
-      dplyr::select(-idx)
-
-
-    current_calls <- dreams_vc_indels(
-      mutations_df = mutations,
-      bam_file_path = bam_file_path,
-      reference_path = reference_path,
-      model = unserial_model,
-      beta = beta,
-      use_turboem = use_turboem,
-      batch_size = batch_size,
-      calculate_confidence_intervals = calculate_confidence_intervals,
-      alpha = alpha
-    )
-
-    current_calls
-    return(current_calls)
-  }
-
-  sink()
-  stopCluster(cl)
-  return(mutation_calls)
-}
-
-#' Call mutations in a bam-file
-#'
-#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' @inheritParams call_cancer
-#' @param bam_file_path Path to .BAM-file
-#' @param reference_path Path to reference genome e.g. FASTA-file.
-#' @param batch_size Number of positions to process at a time
-
-
 #' @return A [data.frame()] with information about the individual mutation calls, including:
 #' \describe{
 #'   \item{chr, genomic_pos}{The genomic position of the mutation.}
@@ -137,9 +36,10 @@ dreams_vc_parallel_indels <- function(mutations_df, bam_file_path, reference_pat
 #'
 #' @export
 
-dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
-                      beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
-                      batch_size = NULL) {
+dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model, alpha = 0.05,
+                             use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                             batch_size = NULL) {
+
 
   # Clean up mutations
   mutations_df <- mutations_df %>%
@@ -174,6 +74,8 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
   print(paste0("Calling mutations in ", n_batches, " batches:"))
 
   count <- 1
+
+  beta <- get_training_data_from_bam_indel(bam_file_path, reference_path)$info$beta
 
   for (batch in sort(unique(position_batches$batch_idx))) {
     print(paste0("Calling batch ", count, "/", n_batches))
@@ -405,3 +307,6 @@ call_mutations_indels <- function(mutations_df, read_positions_df, model, beta,
   }
   return(mutation_calls)
 }
+
+
+

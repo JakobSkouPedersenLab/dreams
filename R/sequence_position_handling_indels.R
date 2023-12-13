@@ -262,6 +262,10 @@ extract_indel_info <- function(bam_df) {
   indels <- bam_df %>%
     filter(str_detect(.data$cigar, "\\d+[ID]"))
 
+  if (nrow(indels) == 0) {
+    return(data.frame())
+  }
+
   indel_length = unlist(Map(get_indel_length, indels$pos, indels$cigar))
   indel_type = unlist(Map(get_indel_type, indels$pos, indels$cigar))
 

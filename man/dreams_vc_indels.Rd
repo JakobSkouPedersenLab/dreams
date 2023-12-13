@@ -2,14 +2,13 @@
 % Please edit documentation in R/call_mutations_indels.R
 \name{dreams_vc_indels}
 \alias{dreams_vc_indels}
-\title{Call mutations in a bam-file}
+\title{Variant Calling in Indels}
 \usage{
 dreams_vc_indels(
   mutations_df,
   bam_file_path,
   reference_path,
   model,
-  beta,
   alpha = 0.05,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
@@ -17,23 +16,21 @@ dreams_vc_indels(
 )
 }
 \arguments{
-\item{mutations_df}{A \code{\link[=data.frame]{data.frame()}} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
+\item{mutations_df}{A dataframe containing the list of mutations to be analyzed.}
 
-\item{bam_file_path}{Path to .BAM-file}
+\item{bam_file_path}{Path to the BAM file containing sequencing data.}
 
-\item{reference_path}{Path to reference genome e.g. FASTA-file.}
+\item{reference_path}{Path to the reference genome file, typically in FASTA format.}
 
-\item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
+\item{model}{The model to be used for calling mutations.}
 
-\item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
+\item{alpha}{Significance level for statistical testing, default is 0.05.}
 
-\item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
+\item{use_turboem}{Logical flag indicating whether to use the turboEM algorithm, default is TRUE.}
 
-\item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
+\item{calculate_confidence_intervals}{Logical flag indicating whether to calculate confidence intervals, default is FALSE.}
 
-\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
-
-\item{batch_size}{Number of positions to process at a time}
+\item{batch_size}{Number of positions to process in each batch; if NULL, it's determined based on the data.}
 }
 \value{
 A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:
@@ -55,7 +52,8 @@ A \code{\link[=data.frame]{data.frame()}} with information about the individual 
 }
 }
 \description{
-This function evaluate the presence (calls) of individual mutations from a predefined list.
+This function performs variant calling on indels from a given BAM file using a predefined list of mutations.
+It processes the mutations data, batch processes the genomic positions, and calls mutations using a specific model.
 }
 \seealso{
 \code{\link[=call_mutations]{call_mutations()}}, \code{\link[=call_cancer]{call_cancer()}}, \code{\link[=train_dreams_model]{train_dreams_model()}}

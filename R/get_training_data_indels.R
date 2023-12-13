@@ -110,6 +110,15 @@ get_training_data_from_bam_indel <- function(bam_path, reference_path, bed_inclu
   # Add genomic positions of indels
   indel_bam_df <- extract_indel_info(bam_df)
 
+  # Check if the resulting dataframe has no rows
+  if (nrow(indel_bam_df) == 0) {
+    # Print a warning message
+    warning("No indels were found in the sequence")
+
+    # Return an empty dataframe
+    return(data.frame())
+  }
+
   # Add features
   indels_positions_df <-
     extract_features_from_bam_indels(
