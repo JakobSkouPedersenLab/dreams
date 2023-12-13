@@ -1,4 +1,3 @@
-
 #' Extract training data from BAM files (indel)
 #'
 #' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract
@@ -26,17 +25,17 @@
 #'
 #' @seealso [train_dreams_model()] Function for training model.
 get_training_data_indels <- function(bam_paths,
-                              reference_path,
-                              bed_include_path = NULL,
-                              factor = 1,
-                              common_positions_to_exclude_paths = NULL,
-                              positions_to_exclude_paths = NULL,
-                              mm_rate_max = 1,
-                              verbose = F) {
+                                     reference_path,
+                                     bed_include_path = NULL,
+                                     factor = 1,
+                                     common_positions_to_exclude_paths = NULL,
+                                     positions_to_exclude_paths = NULL,
+                                     mm_rate_max = 1,
+                                     verbose = F) {
 
   # Check if there is a position exclude path for each bam file
   if ((!is.null(positions_to_exclude_paths) &
-    (length(bam_paths) != length(positions_to_exclude_paths)))) {
+       (length(bam_paths) != length(positions_to_exclude_paths)))) {
     stop("Wrong number of exclude paths")
   }
 
@@ -160,7 +159,6 @@ get_training_data_from_bam_indel <- function(bam_path, reference_path, bed_inclu
 
   return(output_list)
 }
-
 
 
 

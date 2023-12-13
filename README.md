@@ -73,7 +73,9 @@ beta = training_data$info$beta
 model = train_dreams_model(
   training_data,
   layers = c(128, 64, 32),
-  model_features = c("read_index", "strand", "trinucleotide_ctx", "first_in_pair", "umi_count"),
+  model_features = c("read_index", "strand", "trinucleotide_ctx", "first_in_pair", 
+                     "umi_count", "seq_length", "fragment_size", "n_other_errors", 
+                     "local_GC", ),
   lr = 0.01,
   batch_size = 10000,
   epochs = 100,
