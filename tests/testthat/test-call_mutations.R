@@ -17,7 +17,7 @@ test_that("Simple example dreams_vc", {
   test <- dreams_vc(
     mutations_df = mutations_df, bam_file_path = read_example_bam_file,
     reference_path = reference_path,
-    model = model, beta = 0.01, alpha = 0.05,
+    model = model, alpha = 0.05,
     calculate_confidence_intervals = FALSE
   )
 })
@@ -42,7 +42,6 @@ test_that("Simple example dreams_vc parallel", {
     bam_file_path = read_example_bam_file,
     reference_path = reference_path,
     model = model,
-    beta = 0.01,
     alpha = 0.05,
     batch_size = 10,
     calculate_confidence_intervals = FALSE,
@@ -71,8 +70,7 @@ test_that("Simple example dreams_vc - 3 pos", {
   test <- dreams_vc(
     mutations_df = mutations_df,
     bam_file_path = read_example_bam_file,
-    reference_path = reference_path, model = model,
-    beta = 0.01, alpha = 0.05, calculate_confidence_intervals = FALSE
+    reference_path = reference_path, model = model, alpha = 0.05, calculate_confidence_intervals = FALSE
   )
 })
 
