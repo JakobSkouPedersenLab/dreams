@@ -62,7 +62,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       cleaned_cigar = lapply(lapply(.data$cigar, expand_cigar), clean_insertions),
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
-      read_index = if_else(.data$strand == "fwd", .data$pos_idx, - .data$pos_idx + 1),
+      read_index = if_else(.data$strand == "fwd", .data$pos_idx, - .data$pos_idx),
       first_in_pair = as.integer(as.logical(bitwAnd(.data$flag, 64))),
       n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
       n_insertions_in_read = str_count(.data$cigar, "I"),
