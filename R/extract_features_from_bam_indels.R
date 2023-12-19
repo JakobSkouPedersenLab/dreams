@@ -60,10 +60,9 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     mutate(
       seq_corrected = mapply(remove_insertions, .data$cigar, .data$seq),
       cleaned_cigar = lapply(lapply(.data$cigar, expand_cigar), clean_insertions),
-      pos_index = .data$genomic_pos - .data$pos + 1,
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
-      read_index = if_else(.data$strand == "fwd", .data$pos_index, .data$seq_length - .data$pos_index + 1),
+      read_index = if_else(.data$strand == "fwd", .data$pos_idx, length(.data$seq_corrected) - .data$pos_idx + 1),
       first_in_pair = as.integer(as.logical(bitwAnd(.data$flag, 64))),
       n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
       n_insertions_in_read = str_count(.data$cigar, "I"),
@@ -104,10 +103,10 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     ) %>%
     mutate(
       obs = case_when(
-        substring(cleaned_cigar, pos_index, pos_index) == "D" ~ "D",
-        substring(cleaned_cigar, pos_index, pos_index) == "I" ~ "I",
-        substring(cleaned_cigar, pos_index, pos_index) == "M" &
-          substring(seq_corrected, pos_index, pos_index) == ref ~ substring(seq_corrected, pos_index, pos_index),
+        substring(cleaned_cigar, pos_idx, pos_idx) == "D" ~ "D",
+        substring(cleaned_cigar, pos_idx, pos_idx) == "I" ~ "I",
+        substring(cleaned_cigar, pos_idx, pos_idx) == "M" &
+          substring(seq_corrected, pos_idx, pos_idx) == ref ~ substring(seq_corrected, pos_idx, pos_idx),
         TRUE ~ "N"
       ))
   feature_df <- feature_df %>%
