@@ -58,11 +58,11 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     ) %>%
     correct_pos_idx_w_cigar() %>%
     mutate(
-      seq_corrected = mapply(remove_insertions, .data$cigar, .data$seq),
-      cleaned_cigar = lapply(lapply(.data$cigar, expand_cigar), clean_insertions),
+      pos_idx_not_corrected = .data$genomic_pos - .data$pos + 1,
+      corrected_seq = mapply(correct_seq, .data$cigar, .data$seq),
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
-      read_index = if_else(.data$strand == "fwd", .data$pos_idx, length(.data$seq_corrected) - .data$pos_idx + 1),
+      read_index = if_else(.data$strand == "fwd", .data$pos_idx, .data$seq_length - .data$pos_idx + 1),
       first_in_pair = as.integer(as.logical(bitwAnd(.data$flag, 64))),
       n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
       n_insertions_in_read = str_count(.data$cigar, "I"),
@@ -103,10 +103,9 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     ) %>%
     mutate(
       obs = case_when(
-        substring(cleaned_cigar, pos_idx, pos_idx) == "D" ~ "D",
-        substring(cleaned_cigar, pos_idx, pos_idx) == "I" ~ "I",
-        substring(cleaned_cigar, pos_idx, pos_idx) == "M" &
-          substring(seq_corrected, pos_idx, pos_idx) == ref ~ substring(seq_corrected, pos_idx, pos_idx),
+        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == "D" ~ "D",
+        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == "I" ~ "I",
+        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == ref ~ substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected),
         TRUE ~ "N"
       ))
   feature_df <- feature_df %>%
@@ -117,58 +116,47 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
   return(feature_df)
 }
 
-#' Extract Features from BAM for Indels in Negative Samples
-#'
-#' This function processes a BAM file data frame and a reference path to extract features
-#' specifically for indels (insertions or deletions) in negative samples. It enhances the data frame
-#' with observed values set to reference values.
-#'
-#' @param bam_df A data frame representing BAM file reads.
-#' @param reference_path Path to the reference used in feature extraction.
-#' @return A modified data frame where each entry is enriched with additional features, particularly
-#' for indels in negative samples. The 'obs' column is added, which is set equal to the 'ref' column.
-#'
-#' @keywords internal
-#'
-extract_features_from_bam_indels_negatives <- function(bam_df, reference_path){
-  extract_features_negatives <- extract_features_from_bam_indels(
-    bam_df,
-    reference_path) %>%
-    mutate(obs = ref)
-  return(extract_features_negatives)
-  }
 
-#' Remove Insertions from Observed Sequence Based on CIGAR String
+
+#' Correct a DNA Sequence Based on a CIGAR String
 #'
-#' This function processes an observed sequence based on a given CIGAR string,
-#' removing any insertions (denoted as 'I' in the CIGAR string) from the observed sequence.
-#' It first expands the CIGAR string to match the length of the observed sequence
-#' and then iteratively checks each character. If a character in the expanded CIGAR string
-#' is not an insertion ('I'), the corresponding character from the observed sequence
-#' is retained in the result.
+#' This function corrects a DNA sequence based on a provided CIGAR string. It first expands the CIGAR string,
+#' then inserts 'D's into the DNA sequence at positions corresponding to 'D's in the expanded CIGAR string.
+#' It also replaces characters in the DNA sequence with 'I's at positions corresponding to 'I's in the CIGAR string.
+#' After applying these modifications, the function calls `clean_insertions` to clean up the sequence.
 #'
-#' @param cigar A CIGAR string representing the alignment of an observed sequence
-#'              to a reference sequence.
-#' @param obs_sequence The observed sequence (string) that is to be processed based
-#'                     on the CIGAR string.
+#' @param cigar A string representing the CIGAR sequence. Each character in the CIGAR string (such as M, I, D)
+#' represents a type of alignment operation.
+#' @param sequence A string representing the DNA sequence that needs to be corrected based on the CIGAR string.
 #'
-#' @return A string representing the observed sequence with insertions removed.
+#' @return A DNA sequence string that has been corrected based on the CIGAR string. The function returns the
+#' sequence after applying deletions, insertions, and further cleaning through the `clean_insertions` function.
 #'
-#' @keywords internal
-#'
-remove_insertions <- function(cigar, obs_sequence) {
-  # Expanding the CIGAR string to match the length of the observed sequence
+correct_seq <- function(cigar, sequence) {
+
+  #Expand cigar
   expanded_cigar <- expand_cigar(cigar)
 
-  # Split the observed sequence into characters
-  obs_seq_split <- strsplit(obs_sequence, "")[[1]]
+  # Find the positions of 'D' in the first string
+  positions <- which(strsplit(expanded_cigar, "")[[1]] == "D")
 
-  # Identify the positions not marked as insertion
-  non_insertion_positions <- which(substring(expanded_cigar, 1:nchar(expanded_cigar), 1:nchar(expanded_cigar)) != "I")
+  # Insert 'D's into the second string at the corresponding positions
+  for (pos in positions) {
+    sequence <- paste0(substr(sequence, 1, pos - 1), "D", substr(sequence, pos, nchar(sequence)))
+  }
+  # Convert both the CIGAR string and the sequence into character vectors
+  cigar_chars <- strsplit(expanded_cigar, "")[[1]]
+  sequence_chars <- strsplit(sequence, "")[[1]]
 
-  # Extract the corresponding characters from the observed sequence
-  result <- obs_seq_split[non_insertion_positions]
+  # Find the positions of 'I' in the CIGAR string
+  I_positions <- which(cigar_chars == "I")
 
-  # Combine the characters back into a single string
-  return(paste(result, collapse = ""))
+  # Replace corresponding positions in the sequence with 'I'
+  sequence_chars[I_positions] <- "I"
+
+  # Combine the modified sequence into a single string and clean insertions
+  corrected_seq <- clean_insertions(paste(sequence_chars, collapse = ""))
+
+  return(corrected_seq)
 }
+

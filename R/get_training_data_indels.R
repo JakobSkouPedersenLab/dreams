@@ -151,7 +151,7 @@ get_training_data_from_bam_indel <- function(bam_path, reference_path, bed_inclu
 
   # Add features
   negative_samples <-
-    extract_features_from_bam_indels_negatives(
+    extract_features_from_bam_indels(
       bam_df = negative_read_positions_df,
       reference_path = reference_path
     )
