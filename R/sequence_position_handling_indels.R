@@ -142,7 +142,7 @@ get_indel_info <- function(pos, cigar) {
   genomic_pos <- get_indels_start_positions(convert_to_cigar)
 
   # Extract matches for indel length and type from the original CIGAR string
-  matches <- regmatches(convert_to_cigar, gregexpr("\\d+[ID]", convert_to_cigar, perl = TRUE))[[1]]
+  matches <- regmatches(cigar, gregexpr("\\d+[ID]", cigar, perl = TRUE))[[1]]
 
   # Calculate the length of each indel
   indel_length <- as.numeric(sub("[ID]", "", matches))

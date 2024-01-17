@@ -16,7 +16,7 @@ test_that("Tests clean_insertions()", {
   expect_equal(clean_insertions("MMMMMIIIIDD"), "MMMMIDD" )
 })
 
-test_that("Tests clean_insertions()", {
+test_that("Tests convert_to_cigar()", {
   expect_equal(convert_to_cigar("MIMMMM"), "1M1I4M" )
   expect_equal(convert_to_cigar("MMMMM"), "5M" )
   expect_equal(convert_to_cigar("MMMMMDMMMM"), "5M1D4M" )

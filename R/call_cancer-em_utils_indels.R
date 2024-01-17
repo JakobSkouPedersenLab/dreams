@@ -1,4 +1,4 @@
-prepare_em_input_indels <- function(mutations_df, read_positions_df, model, beta) {
+prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positions_df_indels, model, model_indels, beta, beta_indels) {
   obs_is_mut_list <- list()
   error_ref_to_mut_list <- list()
   error_mut_to_ref_list <- list()
@@ -8,10 +8,6 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, model, beta
       chr <- mutations_df[i, "chr"]
       genomic_pos <- mutations_df[i, "genomic_pos"]
       ref <- mutations_df[i, "ref"]
-      # Check if ref is A, C, T, or G and modify it to "ACTG" if true
-      if (ref %in% c("A", "C", "T", "G")) {
-        ref <- "ATCG"
-      }
       alt <- mutations_df[i, "alt"]
 
       mut_reads_ref_alt <-
@@ -22,14 +18,27 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, model, beta
           # Filter mutation type (remove N and "other" than ref/alt alleles)
           .data$obs == !!ref | .data$obs == !!alt
         )
+      mut_reads_ref_alt_indels <-
+        read_positions_df_indels %>%
+        filter(
+          # Filter reads positions to mutation
+          .data$chr == !!chr, .data$genomic_pos == !!genomic_pos,
+          # Filter mutation type (remove N and "other" than ref/alt alleles)
+          .data$obs == !!ref | .data$obs == !!alt
+        )
+
 
       # Add to list
-      X <- mut_reads_ref_alt$obs == alt
+      X <- mut_reads_ref_alt_indels$obs == alt
       obs_is_mut_list <- append(obs_is_mut_list, list(X))
 
-      # Error rates
-      error_ref_df <- predict_error_rates_indels(mut_reads_ref_alt, model, beta)
-      error_mut_df <- predict_error_rates_indels(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+      # Error rates - indels
+      error_ref_df_indels <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels)
+      error_mut_df_indels <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
+
+      # Error rates - SNVs
+      error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
+      error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
 
       # Pick relevant error rates for ref and alt
       error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]

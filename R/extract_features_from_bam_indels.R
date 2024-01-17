@@ -105,7 +105,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       obs = case_when(
         substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == "D" ~ "D",
         substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == "I" ~ "I",
-        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == ref ~ substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected),
+        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) %in% c("A", "C", "T", "G") ~ substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected),
         TRUE ~ "N"
       ))
   feature_df <- feature_df %>%

@@ -36,7 +36,7 @@
 #'
 #' @export
 
-dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model, alpha = 0.05,
+dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model, model_indels, alpha = 0.05,
                              use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                              batch_size = NULL) {
 
@@ -75,7 +75,9 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 
   count <- 1
 
-  beta <- get_training_data_from_bam_indel(bam_file_path, reference_path)$info$beta
+  # Get beta
+  beta <- get_training_data_from_bam(bam_file_path, reference_path)$info$beta
+  beta_indels <- get_training_data_from_bam_indel(bam_file_path, reference_path)$info$beta
 
   for (batch in sort(unique(position_batches$batch_idx))) {
     print(paste0("Calling batch ", count, "/", n_batches))
@@ -84,7 +86,15 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
     q <- position_batches %>% filter(batch_idx == batch)
 
     # Get read positions
-    read_positions_df <- get_read_positions_from_BAM_indels(
+    read_positions_df <- get_read_positions_from_BAM(
+      bam_file_path = bam_file_path,
+      chr = q$chr,
+      genomic_pos = q$genomic_pos,
+      reference_path
+    )
+
+
+    read_positions_df_indels <- get_read_positions_from_BAM_indels(
       bam_file_path = bam_file_path,
       chr = q$chr,
       genomic_pos = q$genomic_pos,
@@ -101,8 +111,11 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
     calls <- call_mutations_indels(
       mutations_df = current_mutations,
       read_positions_df = read_positions_df,
+      read_positions_df_indels = read_positions_df_indels,
       model = model,
+      model_indels = model_indels,
       beta = beta,
+      beta = beta_indels,
       alpha = alpha,
       use_turboem = use_turboem,
       calculate_confidence_intervals = calculate_confidence_intervals
@@ -143,8 +156,9 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 #'
 #' @export
 #'
-call_mutations_indels <- function(mutations_df, read_positions_df, model, beta,
-                           alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE, batch_size = NULL) {
+call_mutations_indels <- function(mutations_df, read_positions_df, read_positions_df_indels, model, model_indels, beta,
+                                  beta_indels, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                                  batch_size = NULL) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -201,6 +215,10 @@ call_mutations_indels <- function(mutations_df, read_positions_df, model, beta,
       .data$genomic_pos %in% q$genomic_pos
     )
 
+    current_read_positions_df_indels <- read_positions_df_indels %>% filter(
+      .data$chr %in% q$chr,
+      .data$genomic_pos %in% q$genomic_pos
+    )
 
     if (nrow(current_read_positions_df) == 0) {
       return(data.frame())
@@ -213,7 +231,9 @@ call_mutations_indels <- function(mutations_df, read_positions_df, model, beta,
     )
 
     # Prepare EM input
-    em_input <- prepare_em_input_indels(mutations_df = current_mutations, read_positions_df = current_read_positions_df, model = model, beta = beta)
+    em_input <- prepare_em_input_indels(mutations_df = current_mutations, read_positions_df = current_read_positions_df,
+                                        read_positions_df_indels = current_read_positions_df_indels, model = model,
+                                        model_indels = model_indels, beta = beta, beta_indels = beta_indels)
 
     obs_is_mut_list <- em_input$obs_is_mut_list
     error_ref_to_mut_list <- em_input$error_ref_to_mut_list

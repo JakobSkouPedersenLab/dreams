@@ -39,6 +39,7 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
     bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos)
 
 
+
     # If no coverage -> return empty data.frame
     if (nrow(bam_df) == 0) {
       return(data.frame())

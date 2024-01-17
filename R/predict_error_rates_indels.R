@@ -7,12 +7,12 @@ correct_errors_predictions_indels <- function(error_df, beta) {
   error_df %>%
     mutate(
       error_prob_sample = case_when(
-        .data$ref %in% c("A", "T", "C", "G") ~ 1 - ATCG,
+        .data$ref %in% c("A", "C", "T", "G") ~ 1 - ATCG,
         .data$ref == "D" ~ 1 - D,
         .data$ref == "I" ~ 1 - I
         ),
       error_prob_corrected = beta * .data$error_prob_sample / (beta * .data$error_prob_sample - .data$error_prob_sample + 1),
-      ATCG_corrected = ifelse(.data$ref %in% c("A", "T", "C", "G"),
+      ATCG_corrected = ifelse(.data$ref %in% c("A", "C", "T", "G"),
                               1.00 - .data$error_prob_corrected,
                               .data$error_prob_corrected * .data$ATCG / (.data$error_prob_sample)
       ),
@@ -53,10 +53,12 @@ predict_error_rates_indels <- function(read_positions_df,
       )
   }
 
-  # Add predictions to read positions and correct error rates with bea
+
+  # Add predictions to read positions and correct error rates with beta
   predicted_errors <-
     read_positions_df %>%
     bind_cols(predictions_df) %>%
+    select(qname,obs,ref, ATCG, D, I) %>%
     correct_errors_predictions_indels(beta = beta)
 
   return(predicted_errors)
