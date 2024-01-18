@@ -115,7 +115,7 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
       model = model,
       model_indels = model_indels,
       beta = beta,
-      beta = beta_indels,
+      beta_indels = beta_indels,
       alpha = alpha,
       use_turboem = use_turboem,
       calculate_confidence_intervals = calculate_confidence_intervals
@@ -256,6 +256,7 @@ call_mutations_indels <- function(mutations_df, read_positions_df, read_position
       obs_is_mut <- obs_is_mut_list[[i]]
       error_ref_to_mut <- error_ref_to_mut_list[[i]]
       error_mut_to_ref <- error_mut_to_ref_list[[i]]
+
 
       # Run EM algorithm
       em_res <- get_tf_estimate_vc(

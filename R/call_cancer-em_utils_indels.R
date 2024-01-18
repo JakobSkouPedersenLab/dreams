@@ -27,7 +27,6 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
           .data$obs == !!ref | .data$obs == !!alt
         )
 
-      print(mut_reads_ref_alt_indels)
       # Add to list
       X <- mut_reads_ref_alt_indels$obs == alt
       obs_is_mut_list <- append(obs_is_mut_list, list(X))
@@ -50,6 +49,12 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
                G_corrected = error_ref_df_SNV$G*.data$ATCG_corrected
         )
 
+      if (!alt %in% c("A", "T", "C", "G")){
+        ref <- "ATCG"
+        error_mut_df <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
+      }
+      print(error_ref_df)
+      print(error_mut_df)
 
       # Pick relevant error rates for ref and alt
       error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
