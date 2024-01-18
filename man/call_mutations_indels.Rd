@@ -7,8 +7,11 @@
 call_mutations_indels(
   mutations_df,
   read_positions_df,
+  read_positions_df_indels,
   model,
+  model_indels,
   beta,
+  beta_indels,
   alpha = 0.05,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,

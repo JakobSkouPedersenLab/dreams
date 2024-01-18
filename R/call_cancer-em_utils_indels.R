@@ -27,18 +27,29 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
           .data$obs == !!ref | .data$obs == !!alt
         )
 
-
+      print(mut_reads_ref_alt_indels)
       # Add to list
       X <- mut_reads_ref_alt_indels$obs == alt
       obs_is_mut_list <- append(obs_is_mut_list, list(X))
 
-      # Error rates - indels
-      error_ref_df_indels <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels)
-      error_mut_df_indels <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
-
       # Error rates - SNVs
-      error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
-      error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+      error_ref_df_SNV <- predict_error_rates(mut_reads_ref_alt, model, beta)
+      error_mut_df_SNV <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+
+      # Error rates - indels
+      error_ref_df <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels) %>%
+        mutate(A_corrected = error_ref_df_SNV$A*.data$ATCG_corrected,
+               T_corrected = error_ref_df_SNV$T*.data$ATCG_corrected,
+               C_corrected = error_ref_df_SNV$C*.data$ATCG_corrected,
+               G_corrected = error_ref_df_SNV$G*.data$ATCG_corrected
+        )
+      error_mut_df <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels) %>%
+        mutate(A_corrected = error_ref_df_SNV$A*.data$ATCG_corrected,
+               T_corrected = error_ref_df_SNV$T*.data$ATCG_corrected,
+               C_corrected = error_ref_df_SNV$C*.data$ATCG_corrected,
+               G_corrected = error_ref_df_SNV$G*.data$ATCG_corrected
+        )
+
 
       # Pick relevant error rates for ref and alt
       error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]

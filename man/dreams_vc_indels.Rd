@@ -9,6 +9,7 @@ dreams_vc_indels(
   bam_file_path,
   reference_path,
   model,
+  model_indels,
   alpha = 0.05,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
