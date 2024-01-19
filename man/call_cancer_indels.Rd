@@ -7,8 +7,11 @@
 call_cancer_indels(
   mutations_df,
   read_positions_df,
+  read_positions_df_indels,
   model,
+  model_indels,
   beta,
+  beta_indels,
   alpha = 0.05,
   calculate_confidence_intervals = FALSE,
   use_turboem = TRUE

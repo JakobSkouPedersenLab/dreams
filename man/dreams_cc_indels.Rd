@@ -9,6 +9,7 @@ dreams_cc_indels(
   bam_file_path,
   reference_path,
   model,
+  model_indels,
   alpha = 0.05,
   calculate_confidence_intervals = FALSE,
   use_turboem = TRUE
@@ -22,6 +23,8 @@ dreams_cc_indels(
 \item{reference_path}{Path to the reference genome file, typically in FASTA format.}
 
 \item{model}{The model to be used for cancer detection.}
+
+\item{model_indels}{The model to be used for calling mutations for indels.}
 
 \item{alpha}{Significance level for statistical testing, default is 0.05.}
 

@@ -7,6 +7,7 @@
 #' @param bam_file_path Path to the BAM file containing sequencing data.
 #' @param reference_path Path to the reference genome file, typically in FASTA format.
 #' @param model The model to be used for cancer detection.
+#' @param model_indels The model to be used for calling mutations for indels.
 #' @param alpha Significance level for statistical testing, default is 0.05.
 #' @param calculate_confidence_intervals Logical flag indicating whether to calculate confidence intervals, default is FALSE.
 #' @param use_turboem Logical flag indicating whether to use the turboEM algorithm, default is TRUE.
@@ -45,7 +46,7 @@
 #' @seealso [call_mutations()], [train_dreams_model()]
 #'
 #' @export
-dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
+dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model, model_indels,
                       alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
@@ -68,6 +69,13 @@ dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 
 
   # Get read positions
+  read_positions_df <- get_read_positions_from_BAM(
+    bam_file_path = bam_file_path,
+    chr = mutations_df$chr,
+    genomic_pos = mutations_df$genomic_pos,
+    reference_path
+  )
+
   read_positions_df <- get_read_positions_from_BAM_indels(
     bam_file_path = bam_file_path,
     chr = mutations_df$chr,
@@ -75,14 +83,19 @@ dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
     reference_path
   )
 
+
   beta <- get_training_data_from_bam_indel(bam_file_path, reference_path)$info$beta
+  beta_indels <- get_training_data_from_bam_indel(bam_file_path, reference_path)$info$beta
 
   # Call cancer
   cancer_call <- call_cancer_indels(
       mutations_df = mutations_df,
       read_positions_df = read_positions_df,
+      read_positions_df_indels = read_positions_df_indels,
       model = model,
+      model_indels = model_indels,
       beta = beta,
+      beta_indels = beta_indels,
       alpha = alpha,
       use_turboem = use_turboem,
       calculate_confidence_intervals = calculate_confidence_intervals
@@ -140,7 +153,7 @@ dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 #' @seealso [call_mutations()], [train_dreams_model()]
 #'
 #' @export
-call_cancer_indels <- function(mutations_df, read_positions_df, model, beta, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
+call_cancer_indels <- function(mutations_df, read_positions_df, read_positions_df_indels, model, model_indels, beta, beta_indels, alpha = 0.05, calculate_confidence_intervals = FALSE, use_turboem = TRUE) {
   # If no mutations return empty result
   if (nrow(mutations_df) == 0) {
     return(
@@ -173,7 +186,9 @@ call_cancer_indels <- function(mutations_df, read_positions_df, model, beta, alp
   }
 
   # Prepare inputs for algorithm
-  em_input <- prepare_em_input_indels(mutations_df = mutations_df, read_positions_df = read_positions_df, model = model, beta = beta)
+  em_input <- prepare_em_input_indels(mutations_df = mutations_df, read_positions_df = read_positions_df,
+                                      read_positions_df_indels = read_positions_df_indels, model = model,
+                                      model_indels = model_indels, beta = beta, beta_indels = beta_indels)
   obs_is_mut_list <- em_input$obs_is_mut_list
   error_ref_to_mut_list <- em_input$error_ref_to_mut_list
   error_mut_to_ref_list <- em_input$error_mut_to_ref_list
