@@ -23,7 +23,9 @@ dreams_vc_indels(
 
 \item{reference_path}{Path to the reference genome file, typically in FASTA format.}
 
-\item{model}{The model to be used for calling mutations.}
+\item{model}{The model to be used for calling mutations for SNVs.}
+
+\item{model_indels}{The model to be used for calling mutations for indels.}
 
 \item{alpha}{Significance level for statistical testing, default is 0.05.}
 

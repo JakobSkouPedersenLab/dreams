@@ -50,10 +50,6 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
           )
 
 
-      if (!alt %in% c("A", "T", "C", "G")){
-        ref <- "ATCG"
-      }
-
       # Pick relevant error rates for ref and alt
       error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
       error_ref_to_mut_raw <- error_ref_df[[paste0(alt, "_corrected")]]

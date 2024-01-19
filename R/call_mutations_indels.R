@@ -8,7 +8,8 @@
 #' @param mutations_df A dataframe containing the list of mutations to be analyzed.
 #' @param bam_file_path Path to the BAM file containing sequencing data.
 #' @param reference_path Path to the reference genome file, typically in FASTA format.
-#' @param model The model to be used for calling mutations.
+#' @param model The model to be used for calling mutations for SNVs.
+#' @param model_indels The model to be used for calling mutations for indels.
 #' @param alpha Significance level for statistical testing, default is 0.05.
 #' @param use_turboem Logical flag indicating whether to use the turboEM algorithm, default is TRUE.
 #' @param calculate_confidence_intervals Logical flag indicating whether to calculate confidence intervals, default is FALSE.
