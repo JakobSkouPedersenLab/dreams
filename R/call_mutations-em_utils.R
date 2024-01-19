@@ -178,7 +178,6 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     error_mut_to_ref_list = error_mut_to_ref,
     error_ref_to_mut_list = error_ref_to_mut,
   )
-  print(ll_em)
 
   if (ll_0 >= ll_em) {
     em_res$tf_est <- 0
