@@ -33,22 +33,22 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
 
       # Error rates
 
-        error_ref_df_SNV <- predict_error_rates(mut_reads_ref_alt, model, beta)
-        error_mut_df_SNV <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
 
-        error_ref_df <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels) %>%
-          mutate(A_corrected = error_ref_df_SNV$A_corrected*.data$ATCG_corrected,
-                 T_corrected = error_ref_df_SNV$T_corrected*.data$ATCG_corrected,
-                 C_corrected = error_ref_df_SNV$C_corrected*.data$ATCG_corrected,
-                 G_corrected = error_ref_df_SNV$G_corrected*.data$ATCG_corrected
-          )
-        error_mut_df <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels) %>%
-          mutate(A_corrected = error_ref_df_SNV$A_corrected*.data$ATCG_corrected,
-                 T_corrected = error_ref_df_SNV$T_corrected*.data$ATCG_corrected,
-                 C_corrected = error_ref_df_SNV$C_corrected*.data$ATCG_corrected,
-                 G_corrected = error_ref_df_SNV$G_corrected*.data$ATCG_corrected
-          )
+      error_ref_df_SNV <- predict_error_rates(mut_reads_ref_alt, model, beta)
+      error_mut_df_SNV <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
 
+      error_ref_df_INDEL <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels)
+      error_mut_df_INDEL <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
+
+
+      if (alt %in% c("A", "T", "C", "G")){
+        error_ref_df <- error_ref_df_SNV
+        error_mut_df <- error_mut_df_SNV
+      } else {
+        ref = "ATCG"
+        error_ref_df <- error_ref_df_INDEL
+        error_mut_df <- error_mut_df_INDEL
+      }
 
       # Pick relevant error rates for ref and alt
       error_ref_to_ref_raw <- error_ref_df[[paste0(ref, "_corrected")]]
