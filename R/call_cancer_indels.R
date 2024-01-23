@@ -67,7 +67,7 @@ dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
       "alt" = matches("alt|ALT|obs|OBS")
     )
 
-
+  mutations_df <- read_mutations_df(mutations_df)
   # Get read positions
   read_positions_df <- get_read_positions_from_BAM(
     bam_file_path = bam_file_path,

@@ -50,6 +50,7 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
       "ref" = matches("ref|REF"),
       "alt" = matches("alt|ALT|obs|OBS")
     )
+  mutations_df <- read_mutations_df(mutations_df)
 
   # Stop if mutations do not have the expected columns
   mutations_expected_columns <- c("chr", "genomic_pos", "ref", "alt")
