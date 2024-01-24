@@ -17,41 +17,36 @@ Authors@R:
       comment = c(ORCID = "0000-0002-1401-6527")
     )
   )
-Description: What the package does (one paragraph).
+Description: DREAMS is an analysis pipeline that applies a neural network to low-frequency variant calling and circulating tumor DNA detection from next-generation DNA sequencing data.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 biocViews:
 Imports: 
     dplyr,
     GenomicRanges,
     IRanges,
-    magrittr,
     purrr,
     readr,
     rlang,
     Rsamtools,
-    stringi,
     stringr,
     tibble,
     tidyr,
     tfdatasets,
     R6,
-    tensorflow,
-    reticulate,
-    progress,
-    rsconnect,
     keras,
     parallel,
     doParallel,
-    foreach
+    foreach,
+    turboEM,
+    reticulate
 Suggests: 
     knitr,
     covr,
     testthat (>= 3.0.0),
     rmarkdown,
-    turboEM,
     learnr
 Config/testthat/edition: 3
 URL: https://github.com/JakobSkouPedersenLab/dreams

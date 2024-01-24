@@ -2,7 +2,7 @@
 % Please edit documentation in R/extract_features_from_bam.R
 \name{extract_features_from_bam}
 \alias{extract_features_from_bam}
-\title{Title}
+\title{Extract Features from BAM Data}
 \usage{
 extract_features_from_bam(
   bam_df,
@@ -11,16 +11,16 @@ extract_features_from_bam(
 )
 }
 \arguments{
-\item{bam_df}{dataframe from load_BAM}
+\item{bam_df}{A DataFrame originating from 'load_BAM' and processed by extract_mismatch_positions' containing alignment data.}
 
-\item{reference_path}{reference genome path}
+\item{reference_path}{Path to the reference genome file in FASTA format.}
 
-\item{add_umi_features}{Check if umi information is available}
+\item{add_umi_features}{Check if umi information is available.}
 }
 \value{
-dataframe with read positions
+A DataFrame with extracted features, including read positions and possibly UMI data.
 }
 \description{
-Title
+Extract Features from BAM Data
 }
 \keyword{internal}

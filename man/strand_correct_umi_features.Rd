@@ -13,6 +13,10 @@ strand_correct_umi_features(df)
 data.frame with corrected UMI features
 }
 \description{
-Strand correct UMI features (ce and cd)
+This function corrects the orientation of Unique Molecular Identifier (UMI) features based on
+the DNA strand from which they originate. It takes a data frame containing UMI features and adjusts them
+if they are from the reverse strand, ensuring that the orientation of the UMI sequences is consistent with
+their representation on the forward strand. This correction is necessary for accurate downstream analysis
+of sequence data.
 }
 \keyword{internal}

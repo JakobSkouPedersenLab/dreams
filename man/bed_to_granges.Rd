@@ -2,17 +2,19 @@
 % Please edit documentation in R/get_training_data.R
 \name{bed_to_granges}
 \alias{bed_to_granges}
-\title{Title}
+\title{Convert a BED File to a GRanges Object}
 \usage{
 bed_to_granges(bed_path)
 }
 \arguments{
-\item{bed_path}{path to bed-file}
+\item{bed_pathA}{A string specifying the path to the BED file to be converted.}
 }
 \value{
-granges object
+A GRanges object representing the genomic intervals from the BED file.
 }
 \description{
-Title
+This function reads a BED file and converts it into a GRanges object. BED files typically contain genomic intervals
+(like regions of the genome associated with certain features or annotations) and are formatted in a specific way.
+The function adjusts for the zero-based indexing of BED format to the one-based indexing used in GRanges.
 }
 \keyword{internal}

@@ -1,17 +1,30 @@
+
 #' Extract training data from BAM files
 #'
-#' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract training data from.
+#' @param bam_paths Vector of strings. Paths to \code{.bam} files to extract
+#'   training data from.
 #' @param reference_path String. Path to reference genome fasta file.
-#' @param bed_include_path String. Path to bed-file with regions to include. Default is \code{NULL}.
-#' @param positions_to_exclude_paths Vector of strings. List of files with positions to exclude from training with length equal to number of samples. Default is \code{NULL}.
-#' @param common_positions_to_exclude_paths Vector of strings. List of files with positions to exclude from all samples. Default is \code{NULL}.
-#' @param factor Number between 0 and 1. Ratio between negative and positive data. Default is 1.
-#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position. Default is 1.
+#' @param bed_include_path String. Path to bed-file with regions to include.
+#'   Default is \code{NULL}.
+#' @param factor Number between 0 and 1. Ratio between negative and positive
+#'   data. Default is 1.
+#' @param common_positions_to_exclude_paths Vector of strings. List of files
+#'   with positions to exclude from all samples. Default is \code{NULL}.
+#' @param positions_to_exclude_paths Vector of strings. List of files with
+#'   positions to exclude from training with length equal to number of samples.
+#'   Default is \code{NULL}.
+#' @param mm_rate_max Number between 0 and 1. Maximum mismatch rate in position.
+#'   Default is 1.
 #' @param verbose TODO: Write this
 #'
+#' @return A list containing two elements:
+#' \itemize{
+#'   \item `data`: A `tbl_df` with dimensions 2 x 22.
+#'   \item `info`: A `data.frame` with dimensions 1 x 4.
+#' }
 #' @export
-#' @return \code{data.frame} with training data for a bam file
-#' @seealso [train_dreams_model()] Function for training model
+#'
+#' @seealso [train_dreams_model()] Function for training model.
 get_training_data <- function(bam_paths,
                               reference_path,
                               bed_include_path = NULL,
@@ -80,12 +93,13 @@ get_training_data <- function(bam_paths,
 #' @param bam_path Path to BAM file
 #' @param reference_path Path to reference file
 #' @param bed_include_path BED regions to include
-#' @param positions_to_exclude_paths positions to exclude from training
 #' @param factor ratio between negative and positive data
+#' @param positions_to_exclude_paths positions to exclude from training
 #' @param mm_rate_max maximum mismatch rate in position
 #' @keywords internal
 #'
-#' @return dataframe with training data for a bam file
+#' @return `data.frame` with training data for a \code{.bam} file
+
 get_training_data_from_bam <- function(bam_path, reference_path, bed_include_path = NULL, factor = 1, positions_to_exclude_paths = NULL, mm_rate_max = 1) {
   bam_df <- load_BAM(bam_path)
 
@@ -144,20 +158,20 @@ get_training_data_from_bam <- function(bam_path, reference_path, bed_include_pat
 
 
 
-
-
-
-#' Title
+#' Filter Mismatch Positions in Sequencing Data
 #'
-#' @param read_positions dataframe of read positions
-#' @param bam_file bam file path
-#' @param mm_rate_max maximum mm_rate for positions
-#' @param bed_include_path bed regions to include in training data
-#' @param positions_to_exclude_paths positions to exclude from training
+#' This function filters read positions from sequencing data based on mismatch rates and specific genomic regions. It is designed to process data from BAM files and can include or exclude specific regions and positions as needed.
+#'
+#' @param read_positions A dataframe containing positions of reads (fx df obtained from extract_features_from_bam()) . Each row should represent a unique read position with relevant information such as observed nucleotides.
+#' @param bam_file A string specifying the path to a BAM file.
+#' @param mm_rate_max A numeric value representing the maximum mismatch rate allowed for positions. Defaults to 1. Positions with a mismatch rate higher than this threshold will be excluded.
+#' @param bed_include_path An optional string specifying the path to a BED file that contains genomic regions to include in the analysis. If `NULL`, all regions are included.
+#' @param positions_to_exclude_paths An optional vector of strings specifying paths to files containing positions that should be excluded from the analysis. If `NULL`, no positions are excluded.
 #' @keywords internal
 #'
-#' @return filtered read position dataframe
+#' @return A list with two elements: `data` containing the filtered read positions dataframe, and `info` containing a dataframe with summary information such as the number of mismatches and total coverage.
 #'
+#' @importFrom Rsamtools pileup
 #' @importFrom readr read_csv
 
 filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1, bed_include_path = NULL, positions_to_exclude_paths = NULL) {
@@ -231,20 +245,34 @@ filter_mismatch_positions <- function(read_positions, bam_file, mm_rate_max = 1,
   ))
 }
 
-#' Title
-#' @param bed_path path to bed-file
-#' @return granges object
+#' Convert a BED File to a GRanges Object
+#'
+#' This function reads a BED file and converts it into a GRanges object. BED files typically contain genomic intervals
+#' (like regions of the genome associated with certain features or annotations) and are formatted in a specific way.
+#' The function adjusts for the zero-based indexing of BED format to the one-based indexing used in GRanges.
+#'
+#' @param bed_pathA A string specifying the path to the BED file to be converted.
+#' @return A GRanges object representing the genomic intervals from the BED file.
 #' @keywords internal
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
-
+#' @importFrom dplyr mutate
+#'
 bed_to_granges <- function(bed_path) {
+  # Check for a null input and return an empty GRanges object if true
   if (is.null(bed_path)) {
     return(GRanges())
   }
 
-  df <- readr::read_delim(bed_path, delim = "\t", col_names = c("chrom", "start", "end"), show_col_types = FALSE) %>% mutate(start = .data$start + 1)
+  # Read the BED file with specified column names and delimiter
+  # Automatically adjust for BED's zero-based start position
 
-  grange_from_bed <- makeGRangesFromDataFrame(df, start.field = "start", end.field = c("end", "stop"))
+  df <- readr::read_delim(bed_path, delim = "\t", col_names = c("chrom", "start", "end"),
+                          show_col_types = FALSE) %>%
+    mutate(start = .data$start + 1) # Adjust start positions to 1-based indexing
 
+  # Convert the dataframe to a GRanges object
+  grange_from_bed <- makeGRangesFromDataFrame(df, start.field = "start",
+                                              end.field = c("end", "stop"))
+  # Return the constructed GRanges object
   return(grange_from_bed)
 }

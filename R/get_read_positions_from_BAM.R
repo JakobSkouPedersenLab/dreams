@@ -9,7 +9,8 @@
 
 #'
 #' @return [data.frame()]. Each line describes a position in a read.
-#' @export
+#' @keywords internal
+#'
 get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, reference_path, batch_size = NULL) {
 
   # Only extract reads from distinct positions
@@ -36,6 +37,7 @@ get_read_positions_from_BAM <- function(bam_file_path, chr, genomic_pos, referen
     # Load reads from BAM into data.frame
 
     bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos)
+
 
 
     # If no coverage -> return empty data.frame

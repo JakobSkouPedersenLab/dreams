@@ -27,7 +27,7 @@ get_training_data_from_bam(
 \item{mm_rate_max}{maximum mismatch rate in position}
 }
 \value{
-dataframe with training data for a bam file
+\code{data.frame} with training data for a \code{.bam} file
 }
 \description{
 Title

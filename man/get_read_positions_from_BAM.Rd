@@ -27,3 +27,4 @@ get_read_positions_from_BAM(
 \description{
 This functions extracts information about read position that cover positions of interest in a BAM-file.
 }
+\keyword{internal}

@@ -9,9 +9,7 @@
 #' @param ncores Number of processing cores
 #' @param batch_size Number of positions to process at a time
 #' @param log_file write log-file to this path
-
-
-
+#'
 #' @return A [data.frame()] with information about the individual mutation calls, including:
 #' \describe{
 #'   \item{chr, genomic_pos}{The genomic position of the mutation.}
@@ -34,11 +32,11 @@
 #'
 #' @import parallel
 #' @import doParallel
-#'
+#' @importFrom foreach %dopar%
 #' @export
 
 dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, model,
-                               beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                               alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                                batch_size = NULL, ncores = 1, log_file = NULL) {
   if (nrow(mutations_df) == 0) {
     return(data.frame())
@@ -90,7 +88,6 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
       bam_file_path = bam_file_path,
       reference_path = reference_path,
       model = unserial_model,
-      beta = beta,
       use_turboem = use_turboem,
       batch_size = batch_size,
       calculate_confidence_intervals = calculate_confidence_intervals,
@@ -138,7 +135,7 @@ dreams_vc_parallel <- function(mutations_df, bam_file_path, reference_path, mode
 #' @export
 
 dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
-                      beta, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
+                      alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
                       batch_size = NULL) {
 
   # Clean up mutations
@@ -175,6 +172,8 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 
   count <- 1
 
+  beta <- get_training_data_from_bam(bam_file_path, reference_path)$info$beta
+
   for (batch in sort(unique(position_batches$batch_idx))) {
     print(paste0("Calling batch ", count, "/", n_batches))
     count <- count + 1
@@ -194,7 +193,6 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
       .data$genomic_pos %in% q$genomic_pos
     )
 
-    print (current_mutations)
 
     # Call mutations
     calls <- call_mutations(
@@ -237,7 +235,7 @@ dreams_vc <- function(mutations_df, bam_file_path, reference_path, model,
 #'   \item{Q_val, df, p_val}{The chisq test statistic, degrees of freedom and p-value of the statistical test.}
 #'   \item{mutation_detected}{Whether the mutation was detected at the supplied alpha level.}
 #' }
-#'
+#' @import foreach
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
 #' @export

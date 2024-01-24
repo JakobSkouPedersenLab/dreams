@@ -103,6 +103,7 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
   observed_mut <- sum(obs_is_mut)
   total_observed_positions <- length(obs_is_mut)
   total_mut_ratio <- observed_mut / total_observed_positions
+
   if (observed_mut == 0) {
     res <- list(
       tf_est = 0,
@@ -160,13 +161,16 @@ get_tf_estimate_vc <- function(obs_is_mut, error_ref_to_mut, error_mut_to_ref, u
     )
   }
 
+
   # Check if 0 is better fit
+
   ll_0 <- log_likelihood(
     tf = 0,
     obs_is_mut_list = obs_is_mut,
     error_mut_to_ref_list = error_mut_to_ref,
     error_ref_to_mut_list = error_ref_to_mut
   )
+
 
   ll_em <- log_likelihood(
     tf = em_res$tf_est,

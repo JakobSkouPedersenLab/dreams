@@ -13,6 +13,11 @@ hardclip_correct_umi_features(df)
 data.frame with corrected UMI features
 }
 \description{
-Hard clip correct UMI features (ce and cd)
+This function identifies and corrects for hard clipped bases in the UMI (Unique Molecular Identifier)
+features within sequencing data. Hard clipping, indicated by 'H' in the CIGAR string of a BAM file, refers to
+bases of the sequence that are not aligned to the reference genome and are therefore not included in the read.
+This function adjusts the UMI feature sequences accordingly to ensure that only the aligned portions of the UMIs
+are considered in downstream analyses. The function applies corrections to both 'ce' and 'cd' UMI feature columns
+in the provided dataframe.
 }
 \keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{get_match_genomic_pos_list}
 \alias{get_match_genomic_pos_list}
-\title{Title get_match_genomic_pos_list}
+\title{Get_match_genomic_pos_list}
 \usage{
 get_match_genomic_pos_list(pos, cigar, MDtag)
 }
@@ -17,6 +17,6 @@ get_match_genomic_pos_list(pos, cigar, MDtag)
 match_positions
 }
 \description{
-Title get_match_genomic_pos_list
+Get_match_genomic_pos_list
 }
 \keyword{internal}

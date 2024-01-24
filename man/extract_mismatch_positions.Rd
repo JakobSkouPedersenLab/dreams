@@ -2,17 +2,22 @@
 % Please edit documentation in R/sequence_position_handling.R
 \name{extract_mismatch_positions}
 \alias{extract_mismatch_positions}
-\title{Title Get mismatch positions}
+\title{Extract mismatch positions from BAM data}
 \usage{
 extract_mismatch_positions(bam_df)
 }
 \arguments{
-\item{bam_df}{dataframe from load_BAM}
+\item{bam_df}{A dataframe obtained from the \code{load_BAM} function.}
 }
 \value{
-mismatch_positions
+A dataframe of mismatch positions, which includes the genomic
+positions of all identified mismatches across the reads.
 }
 \description{
-Title Get mismatch positions
+This function filters a dataframe for reads that contain
+mismatches when compared to the reference genome, as indicated by the MD
+tag within the BAM data. It then extracts the genomic positions of these
+mismatches, providing a detailed account of where the sequencing reads do
+not match the reference sequence.
 }
 \keyword{internal}

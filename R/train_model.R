@@ -26,6 +26,9 @@ train_dreams_model <- function(training_data, layers,
                         model_file_path = NULL, log_file_path = NULL,
                         min_delta = 0, patience = 0, l2_reg = 0,
                         validation_split = 0, ctx3_embed_dim = 3) {
+  training_data <- training_data$data %>%
+    filter(.data$obs %in% c("A", "T", "C", "G"))
+
   training_data <- prepare_training_data(
     training_data = training_data,
     model_features = model_features

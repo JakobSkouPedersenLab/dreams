@@ -9,7 +9,6 @@ dreams_vc_parallel(
   bam_file_path,
   reference_path,
   model,
-  beta,
   alpha = 0.05,
   use_turboem = TRUE,
   calculate_confidence_intervals = FALSE,
@@ -26,8 +25,6 @@ dreams_vc_parallel(
 \item{reference_path}{Path to reference genome e.g. FASTA-file.}
 
 \item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
-
-\item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
 
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 

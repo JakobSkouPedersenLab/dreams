@@ -64,6 +64,7 @@ predict_error_rates <- function(read_positions_df, model, beta) {
   predicted_errors <-
     read_positions_df %>%
     bind_cols(predictions_df) %>%
+    select(qname,obs,ref, A, T, C, G) %>%
     correct_errors_predictions(beta = beta)
 
   return(predicted_errors)

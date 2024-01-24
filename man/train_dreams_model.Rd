@@ -55,6 +55,9 @@ Train error model
 }
 \seealso{
 \code{\link[=get_training_data]{get_training_data()}} Function for getting training data
+
+Other Train model: 
+\code{\link{train_dreams_model_indels}()}
 }
 \concept{Train model}
 \keyword{model}

@@ -1,13 +1,21 @@
-#' Title
+#' Calculate Shannon Entropy for K-mers in a String
 #'
-#' @param s string
-#' @param k kmer size
-#' @param alphabet possible readings
+#' @description This function computes the Shannon entropy for all possible k-mers within a given string.
+#' Shannon entropy is a measure of the unpredictability of the k-mer composition, with higher
+#' values indicating more diversity. This function is useful in bioinformatics for analyzing the
+#' complexity of sequences.
 #'
-#' @return shannon entropy
+#' @param s A string for which the Shannon entropy is to be calculated.
+#' @param k The size of the k-mers (substrings of length k) to be considered for entropy calculation.
+#' The default value is 2.
+#' @param alphabet A vector of characters representing the possible nucleotides or readings in the string.
+#' The default set includes "A", "C", "G", "T", "N".
+#'
+#' @return Returns a numeric value representing the Shannon entropy of the k-mers in the string.
+#' This entropy value is a measure of the randomness or diversity of k-mer composition.
 #' @keywords internal
 #'
-#' @importFrom stringi stri_count_fixed
+#' @importFrom dplyr %>%
 calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T", "N")) {
 
   # Generate k-mers
@@ -17,9 +25,28 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 
   s_length <- nchar(s) - (k - 1)
 
-  count_mat <- s %>% sapply(stri_count_fixed, pattern = k_mer_vec, overlap = TRUE)
+  count_occurrences <- function(patterns, in_strings) {
+    counts_list <- lapply(in_strings, function(in_string) {
+      sapply(patterns, function(pattern) {
+        pattern_length <- nchar(pattern)
+        num_matches <- 0
+        for (i in 1:(nchar(in_string) - pattern_length + 1)) {
+          substring <- substr(in_string, i, i + pattern_length - 1)
+          if (substring == pattern) {
+            num_matches <- num_matches + 1
+          }
+        }
+        num_matches
+      })
+    })
+    counts_matrix <- do.call(cbind, counts_list)
+    colnames(counts_matrix) <- in_strings
+    return(counts_matrix)
+  }
 
-  freq_mat <- t(count_mat) / s_length
+  count_mat_matrix <- count_occurrences(k_mer_vec, s)
+
+  freq_mat <- t(count_mat_matrix) / s_length
 
 
 
@@ -30,16 +57,18 @@ calc_string_entropy_k_mer <- function(s, k = 2, alphabet = c("A", "C", "G", "T",
 }
 
 
-#' Title
+#' Extract Features from BAM Data
 #'
-#' @param bam_df dataframe from load_BAM
-#' @param reference_path reference genome path
-#' @param add_umi_features Check if umi information is available
+#' @param bam_df A DataFrame originating from 'load_BAM' and processed by extract_mismatch_positions' containing alignment data.
+#' @param reference_path Path to the reference genome file in FASTA format.
+#' @param add_umi_features Check if umi information is available.
 #'
-#' @return dataframe with read positions
+#' @return A DataFrame with extracted features, including read positions and possibly UMI data.
 #' @keywords internal
 #'
 #' @importFrom purrr map2_int
+#'
+#'
 extract_features_from_bam <- function(bam_df, reference_path, add_umi_features = all(c("cd", "ce") %in% colnames(bam_df))) {
 
   # If UMI features are asked for but not present
@@ -61,7 +90,8 @@ extract_features_from_bam <- function(bam_df, reference_path, add_umi_features =
       )
     ) %>%
     mutate(
-      context11 = get_reference_seq(
+      context11 =
+        get_reference_seq(
         chr = .data$chr,
         genomic_pos = .data$genomic_pos,
         buffer = 5,

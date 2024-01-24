@@ -1,4 +1,4 @@
-require(usethis)
-require(devtools)
-require(pkgdown)
-require(testthat)
+
+if (interactive()) {
+    require(devtools)
+}
