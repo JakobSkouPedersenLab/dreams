@@ -7,19 +7,10 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://https://jakobskoupedersenlab.github.io/dreams/articles/dreams.html</loc>
-  </url>
-  <url>
-    <loc>https://https://jakobskoupedersenlab.github.io/dreams/articles/index.html</loc>
-  </url>
-  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/authors.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/index.html</loc>
-  </url>
-  <url>
-    <loc>https://https://jakobskoupedersenlab.github.io/dreams/news/index.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/bed_to_granges.html</loc>
@@ -31,25 +22,52 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/call_cancer.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/call_cancer_indels.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/call_mutations.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/call_mutations_indels.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/clean_insertions.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/convert_to_cigar.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/correct_pos_idx_w_cigar.html</loc>
   </url>
   <url>
-    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/dopar-pipe.html</loc>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/correct_seq.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/dreams_cc.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/dreams_cc_indels.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/dreams_vc.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/dreams_vc_indels.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/dreams_vc_parallel.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/expand_cigar.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/extract_features_from_bam.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/extract_features_from_bam_indels.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/extract_indel_info.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/extract_mismatch_positions.html</loc>
@@ -61,7 +79,28 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/fit_model.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/fit_model_indels.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/generate_NN_structure.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/generate_NN_structure_indels.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_indel_genomic_pos.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_indel_info.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_indel_length.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_indel_type.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_indels_start_positions.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_match_genomic_pos_list.html</loc>
@@ -73,6 +112,9 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_read_positions_from_BAM.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_read_positions_from_BAM_indels.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_reference_seq.html</loc>
   </url>
   <url>
@@ -80,6 +122,12 @@
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_training_data_from_bam.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_training_data_from_bam_indel.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/get_training_data_indels.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/hardclip_correct_umi_features.html</loc>
@@ -91,13 +139,19 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/load_BAM.html</loc>
   </url>
   <url>
-    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/pipe.html</loc>
-  </url>
-  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/prepare_input_layer.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/prepare_input_layer_indels.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/prepare_training_data.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/prepare_training_data_indels.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/remove_hardclips.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/remove_softclips.html</loc>
@@ -106,9 +160,15 @@
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/sample_negative_read_positions.html</loc>
   </url>
   <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/sample_negative_read_positions_indels.html</loc>
+  </url>
+  <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/strand_correct_umi_features.html</loc>
   </url>
   <url>
     <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/train_dreams_model.html</loc>
+  </url>
+  <url>
+    <loc>https://https://jakobskoupedersenlab.github.io/dreams/reference/train_dreams_model_indels.html</loc>
   </url>
 </urlset>
