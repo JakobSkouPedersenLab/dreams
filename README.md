@@ -132,33 +132,6 @@ cancer_calls = dreams_cc(
   ...)
 ```
 
-### Parallel Variant Calling with dreams_vc_parallel
-
-In addition to `dreams_vc`, the DREAMS package offers
-`dreams_vc_parallel` for parallel variant calling. This function is
-particularly useful when working with large datasets and is designed to
-leverage computational resources such as multi-core CPUs for parallel
-processing.
-
-#### When to use dreams_vc_parallel
-
-- **Large Datasets**: Efficiently handles larger datasets by
-  distributing the workload across multiple cores.
-- **Parallel Processing Capability**: Ideal when the computational
-  environment supports parallel processing (e.g., multi-core systems).
-
-#### Example Usage
-
-``` r
-# Parallel variant calling
-parallel_variant_calls = dreams_vc_parallel(
-  mutations_df = mutations_df,
-  bam_file_path = "/path/test_bam_file",
-  reference_path = "/path/hg38.fa",
-  model = model,
-  ...)
-```
-
 ### Saving and Loading Models
 
 You can save your trained models for later use and load them as needed.
