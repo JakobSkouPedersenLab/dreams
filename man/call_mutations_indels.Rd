@@ -19,21 +19,27 @@ call_mutations_indels(
 )
 }
 \arguments{
-\item{mutations_df}{A \code{\link[=data.frame]{data.frame()}} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
+\item{mutations_df}{A data frame containing the mutation information.}
 
-\item{read_positions_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions. See \code{\link[=get_read_positions_from_BAM]{get_read_positions_from_BAM()}}}
+\item{read_positions_df}{A data frame containing read position information for base substitution mutations.}
 
-\item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
+\item{read_positions_df_indels}{A data frame containing read position information for INDELs.}
 
-\item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
+\item{model}{The model used for calling base substitution mutations.}
 
-\item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
+\item{model_indels}{The model used for calling INDEL mutations.}
 
-\item{use_turboem}{Logical. Should \code{\link[turboEM:turboem]{turboEM::turboem()}} be used for EM algorithm? Default is TRUE.}
+\item{beta}{Coefficients or parameters for the base substitution model.}
 
-\item{calculate_confidence_intervals}{Logical. Should confidence intervals be calculated? Default is FALSE.}
+\item{beta_indels}{Coefficients or parameters for the INDEL model.}
 
-\item{batch_size}{Number of positions to process at a time}
+\item{alpha}{Significance level for mutation detection; default is 0.05.}
+
+\item{use_turboem}{Logical; if TRUE, use the TurboEM algorithm for faster computation.}
+
+\item{calculate_confidence_intervals}{Logical; if TRUE, calculate confidence intervals for the estimated tumor fraction.}
+
+\item{batch_size}{Number of positions to process at a time; if NULL, all positions are processed together.}
 }
 \value{
 A \code{\link[=data.frame]{data.frame()}} with information about the individual mutation calls, including:
@@ -55,8 +61,12 @@ A \code{\link[=data.frame]{data.frame()}} with information about the individual 
 }
 }
 \description{
-This function evaluate the presence (calls) of individual mutations from a predefined list.
+@description This function evaluates the presence (calls) of
+individual mutations, including insertions and deletions (INDELs), from a
+predefined list. It processes given mutation and read position data frames
+to call mutations based on the specified models and parameters.
 }
 \seealso{
 \code{\link[=call_cancer]{call_cancer()}}, \code{\link[=train_dreams_model]{train_dreams_model()}}
 }
+\keyword{internal}

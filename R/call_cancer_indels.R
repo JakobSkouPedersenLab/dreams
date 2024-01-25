@@ -112,9 +112,12 @@ dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 #' @description This function evaluates the presence of cancer in a sample by combining the cancerous signal across a catalogue of candidate mutations.
 #'
 #' @param mutations_df A [data.frame()] with candidate mutations (SNVs) (chromosome, positions, reference and alternative)
-#' @param read_positions_df A [data.frame()] with read-positions. See [get_read_positions_from_BAM()]
+#' @param read_positions_df A [data.frame()] with read-positions. See [get_read_positions_from_BAM()].
+#' @param read_positions_df_indels A [data.frame()] with read-positions for indels. See [get_read_positions_from_BAM_indels()].
 #' @param model A dreams model. See [train_dreams_model()].
-#' @param beta Down sampling parameter from [get_training_data()] for correcting the error-rates from the DREAMS model.
+#' @param model_indels A DREAMS model for indels. See [train_dreams_model_indels()].
+#' @param beta Down sampling parameter for correcting the error-rates from the DREAMS model.
+#' @param beta_indels Down sampling parameter for indels for correcting the error-rates from the DREAMS model for indels.
 #' @param alpha Alpha-level used for testing and confidence intervals. Default is 0.05.
 #' @param use_turboem Logical. Should [turboEM::turboem()] be used for EM algorithm? Default is TRUE.
 #' @param calculate_confidence_intervals Logical. Should confidence intervals be calculated? Default is FALSE.

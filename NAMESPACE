@@ -3,7 +3,6 @@
 export(call_cancer)
 export(call_cancer_indels)
 export(call_mutations)
-export(call_mutations_indels)
 export(dreams_cc)
 export(dreams_cc_indels)
 export(dreams_vc)

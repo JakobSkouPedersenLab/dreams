@@ -131,10 +131,22 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 
 #' Call mutations from read positions
 #'
-#' @description This function evaluate the presence (calls) of individual mutations from a predefined list.
-#' @inheritParams call_cancer
-#' @param batch_size Number of positions to process at a time
-
+#' @description @description This function evaluates the presence (calls) of
+#'   individual mutations, including insertions and deletions (INDELs), from a
+#'   predefined list. It processes given mutation and read position data frames
+#'   to call mutations based on the specified models and parameters.
+#'
+#' @param mutations_df A data frame containing the mutation information.
+#' @param read_positions_df A data frame containing read position information for base substitution mutations.
+#' @param read_positions_df_indels A data frame containing read position information for INDELs.
+#' @param model The model used for calling base substitution mutations.
+#' @param model_indels The model used for calling INDEL mutations.
+#' @param beta Coefficients or parameters for the base substitution model.
+#' @param beta_indels Coefficients or parameters for the INDEL model.
+#' @param alpha Significance level for mutation detection; default is 0.05.
+#' @param use_turboem Logical; if TRUE, use the TurboEM algorithm for faster computation.
+#' @param calculate_confidence_intervals Logical; if TRUE, calculate confidence intervals for the estimated tumor fraction.
+#' @param batch_size Number of positions to process at a time; if NULL, all positions are processed together.
 #'
 #' @return A [data.frame()] with information about the individual mutation calls, including:
 #' \describe{
@@ -156,7 +168,7 @@ dreams_vc_indels <- function(mutations_df, bam_file_path, reference_path, model,
 #' @import foreach
 #' @seealso [call_cancer()], [train_dreams_model()]
 #'
-#' @export
+#' @keywords internal
 #'
 call_mutations_indels <- function(mutations_df, read_positions_df, read_positions_df_indels, model, model_indels, beta,
                                   beta_indels, alpha = 0.05, use_turboem = TRUE, calculate_confidence_intervals = FALSE,
