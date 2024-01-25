@@ -20,11 +20,17 @@ call_cancer_indels(
 \arguments{
 \item{mutations_df}{A \code{\link[=data.frame]{data.frame()}} with candidate mutations (SNVs) (chromosome, positions, reference and alternative)}
 
-\item{read_positions_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions. See \code{\link[=get_read_positions_from_BAM]{get_read_positions_from_BAM()}}}
+\item{read_positions_df}{A \code{\link[=data.frame]{data.frame()}} with read-positions. See \code{\link[=get_read_positions_from_BAM]{get_read_positions_from_BAM()}}.}
+
+\item{read_positions_df_indels}{A \code{\link[=data.frame]{data.frame()}} with read-positions for indels. See \code{\link[=get_read_positions_from_BAM_indels]{get_read_positions_from_BAM_indels()}}.}
 
 \item{model}{A dreams model. See \code{\link[=train_dreams_model]{train_dreams_model()}}.}
 
-\item{beta}{Down sampling parameter from \code{\link[=get_training_data]{get_training_data()}} for correcting the error-rates from the DREAMS model.}
+\item{model_indels}{A DREAMS model for indels. See \code{\link[=train_dreams_model_indels]{train_dreams_model_indels()}}.}
+
+\item{beta}{Down sampling parameter for correcting the error-rates from the DREAMS model.}
+
+\item{beta_indels}{Down sampling parameter for indels for correcting the error-rates from the DREAMS model for indels.}
 
 \item{alpha}{Alpha-level used for testing and confidence intervals. Default is 0.05.}
 
