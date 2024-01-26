@@ -37,10 +37,7 @@ get_read_positions_from_BAM_indels <- function(bam_file_path, chr, genomic_pos, 
 
     # Load reads from BAM into data.frame
 
-    bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos) %>%
-      mutate(indel_length = 0,
-             indel_type = "",
-             indel_seq = "")
+    bam_df <- load_BAM(bam_file_path, q$chr, q$genomic_pos)
 
 
 
