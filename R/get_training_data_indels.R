@@ -47,6 +47,8 @@ get_training_data_indels <- function(bam_paths,
   for (bam_idx in 1:n_bam_files) {
     bam_path <- bam_paths[[bam_idx]]
 
+    print(bam_path)
+
     if (verbose) {
       cat("file ", bam_idx, "/", n_bam_files, "\n")
     }
