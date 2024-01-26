@@ -144,7 +144,7 @@ get_training_data_from_bam_indel <- function(bam_path, reference_path, bed_inclu
 
   # Generate negative samples
   negative_read_positions_df <-
-    sample_negative_read_positions_indels(
+    sample_negative_read_positions(
       bam_df = bam_df,
       n_samples = n_samples
     )
