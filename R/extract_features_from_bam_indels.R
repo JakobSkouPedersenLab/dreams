@@ -74,7 +74,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       "strand", "first_in_pair", "read_index", "fragment_size",
       "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
       "local_complexity_1", "local_complexity_2", "local_GC",
-      "n_insertions_in_read", "n_deletions_in_read", "seq_length", "pos_idx"
+      "n_insertions_in_read", "n_deletions_in_read", "seq_length"
     )
 
 
