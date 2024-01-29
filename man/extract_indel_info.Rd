@@ -11,10 +11,8 @@ extract_indel_info(bam_df)
 for position (\code{pos}), CIGAR string (\code{cigar}), and sequence (\code{seq}).}
 }
 \value{
-A modified version of the input data frame \code{bam_df}, which includes
-additional columns for genomic position (\code{genomic_pos}), indel length
-(\code{indel_length}), indel type (\code{indel_type}), and indel sequence
-(\code{indel_seq}). Each row corresponds to an indel event.
+A modified version of the input data frame \code{bam_df}, which includes an
+additional column for genomic position (\code{genomic_pos}).
 }
 \description{
 This function processes a data frame containing BAM file information to

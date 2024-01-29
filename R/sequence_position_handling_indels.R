@@ -115,20 +115,17 @@ get_indels_start_positions <- function(cigar){
 #'
 #' This function takes a genomic position and a CIGAR string as input and
 #' extracts information about indels. It processes the CIGAR string to determine
-#' the genomic positions, lengths, and indel type.
+#' the genomic positions.
 #'
 #' @param pos An integer representing the starting genomic position of the CIGAR
 #'   string.
 #' @param cigar A character string representing the CIGAR format.
 #'
-#' @return A list containing the following elements:
-#'         - `genomic_pos`: An integer vector of the genomic positions of the indels.
-#'         - `indel_length`: An integer vector of the lengths of the indels.
-#'         - `indel_type`: A character vector of the types of the indels
-#'                        (either 'I' for insertion or 'D' for deletion).
+#' @return An integer vector of the genomic positions of the indels.
 #'
 #'
-get_indel_info <- function(pos, cigar) {
+#'
+get_genomic_pos_indels <- function(pos, cigar) {
 
   # Expand the CIGAR string to include full representation of each operation
   expanded_cigar <- expand_cigar(cigar)
@@ -141,74 +138,9 @@ get_indel_info <- function(pos, cigar) {
   # Extract genomic positions of indels
   genomic_pos <- get_indels_start_positions(convert_to_cigar)
 
-  # Extract matches for indel length and type from the original CIGAR string
-  matches <- regmatches(cigar, gregexpr("\\d+[ID]", convert_to_cigar, perl = TRUE))[[1]]
-
-  # Calculate the length of each indel
-  indel_length <- as.numeric(sub("[ID]", "", matches))
 
   # Return a list with genomic positions, lengths, and types of indels
-  list(genomic_pos = genomic_pos + pos-1,
-       indel_length = indel_length)
-}
-
-
-#' Extract Genomic Positions of Indels from a CIGAR String
-#'
-#' This function uses the `get_indel_info` function to extract the genomic
-#' positions of indels from a given CIGAR string, starting from a specified
-#' genomic position.
-#'
-#' @param pos Integer, the starting genomic position for the CIGAR string
-#'   analysis.
-#' @param cigar String, the CIGAR string representing genomic alignments.
-#'
-#' @return An integer vector containing the genomic positions of the indels in
-#'   the CIGAR string.
-#'
-#' @keywords internal
-#'
-get_indel_genomic_pos <- function(pos, cigar){
-  return(get_indel_info(pos, cigar)$genomic_pos)
-}
-
-#' Extract Lengths of Indels from a CIGAR String
-#'
-#' This function uses the `get_indel_info` function to extract the lengths of
-#' indels from a given CIGAR string, starting from a specified genomic position.
-#'
-#' @param pos Integer, the starting genomic position for the CIGAR string
-#'   analysis.
-#' @param cigar String, the CIGAR string representing genomic alignments.
-#'
-#' @return An integer vector containing the lengths of the indels in the CIGAR
-#'   string.
-#'
-#' @keywords internal
-#'
-get_indel_length <- function(pos, cigar){
-  return(get_indel_info(pos, cigar)$indel_length)
-}
-
-#' Get Indel Length with Zero Default
-#'
-#' This function calculates the indel length based on the provided position (pos)
-#' and cigar string (cigar). It wraps around the `get_indel_length` function and ensures
-#' that a 0 is returned whenever the indel length is either `NULL` or 0.
-#'
-#' @param pos A numerical value or vector representing the position(s).
-#' @param cigar A string or vector of strings representing the CIGAR data.
-#'
-#' @return A numerical value or vector representing the indel lengths.
-#'         If the indel length calculated by `get_indel_length` is `NULL` or 0,
-#'         this function returns 0 instead.
-#'
-get_indel_length_with_zero <- function(pos, cigar) {
-  indel_length_result <- get_indel_length(pos, cigar)
-  if (identical(indel_length_result, numeric(0))) {
-    indel_length_result = 0
-  }
-  return(indel_length_result)
+  return(genomic_pos + pos-1)
 }
 
 
@@ -222,10 +154,8 @@ get_indel_length_with_zero <- function(pos, cigar) {
 #' @param bam_df A data frame containing BAM file information, including columns
 #'   for position (`pos`), CIGAR string (`cigar`), and sequence (`seq`).
 #'
-#' @return A modified version of the input data frame `bam_df`, which includes
-#'   additional columns for genomic position (`genomic_pos`), indel length
-#'   (`indel_length`), indel type (`indel_type`), and indel sequence
-#'   (`indel_seq`). Each row corresponds to an indel event.
+#' @return A modified version of the input data frame `bam_df`, which includes an
+#'   additional column for genomic position (`genomic_pos`).
 #'
 #' @importFrom dplyr filter mutate
 #' @importFrom stringr str_detect
@@ -243,7 +173,7 @@ extract_indel_info <- function(bam_df) {
   }
 
   indels <- indels %>%
-    mutate(genomic_pos = Map(get_indel_genomic_pos, .data$pos, .data$cigar)) %>%
+    mutate(genomic_pos = Map(get_genomic_pos_indels, .data$pos, .data$cigar)) %>%
     unnest(genomic_pos)
 
 

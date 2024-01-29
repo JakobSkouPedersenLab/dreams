@@ -54,20 +54,15 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
   read_feature_df <-
     bam_df %>%
     mutate(
-      pos_idx = .data$genomic_pos - .data$pos + 1
-    ) %>%
-    correct_pos_idx_w_cigar() %>%
-    mutate(
-      pos_idx_not_corrected = .data$genomic_pos - .data$pos + 1,
+      pos_idx = .data$genomic_pos - .data$pos + 1,
       corrected_seq = mapply(correct_seq, .data$cigar, .data$seq),
       fragment_size = abs(.data$isize),
       seq_length = nchar(.data$seq),
-      read_index = if_else(.data$strand == "fwd", .data$pos_idx, .data$seq_length - .data$pos_idx + 1),
+      read_index = if_else(.data$strand == "fwd", .data$pos_idx, length(.data$corrected_seq) - .data$pos_idx + 1),
       first_in_pair = as.integer(as.logical(bitwAnd(.data$flag, 64))),
       n_errors_in_read = str_count(.data$MD, "\\d+[ATCG]"),
       n_insertions_in_read = str_count(.data$cigar, "I"),
-      n_deletions_in_read = str_count(.data$cigar, "D"),
-      indel_length = unlist(Map(get_indel_length_with_zero, .data$pos, .data$cigar))
+      n_deletions_in_read = str_count(.data$cigar, "D")
     ) %>%
     # TODO: Move to filter function! Or do before calling this function!
     filter(.data$fragment_size != 0)
@@ -79,8 +74,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
       "strand", "first_in_pair", "read_index", "fragment_size",
       "ctx_minus1", "ctx_plus1", "trinucleotide_ctx", "context11",
       "local_complexity_1", "local_complexity_2", "local_GC",
-      "n_other_errors", "n_insertions_in_read", "n_deletions_in_read",
-      "seq_length", "indel_length"
+      "n_insertions_in_read", "n_deletions_in_read", "seq_length"
     )
 
 
@@ -104,15 +98,11 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     ) %>%
     mutate(
       obs = case_when(
-        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == "D" ~ "D",
-        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) == "I" ~ "I",
-        substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected) %in% c("A", "C", "T", "G") ~ substring(corrected_seq, pos_idx_not_corrected, pos_idx_not_corrected),
+        substring(corrected_seq, pos_idx, pos_idx) == "D" ~ "D",
+        substring(corrected_seq, pos_idx, pos_idx) == "I" ~ "I",
+        substring(corrected_seq, pos_idx, pos_idx) %in% c("A", "C", "T", "G") ~ substring(corrected_seq, pos_idx, pos_idx),
         TRUE ~ "N"
-      ))
-  feature_df <- feature_df %>%
-    mutate(
-      n_other_errors = .data$n_errors_in_read - ifelse((!.data$is_in_deletion) & (.data$obs != .data$ref), 1, 0)
-    )%>%
+      )) %>%
     select(all_of(selected_features))
   return(feature_df)
 }
