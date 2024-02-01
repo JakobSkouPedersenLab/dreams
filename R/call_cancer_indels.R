@@ -76,7 +76,7 @@ dreams_cc_indels <- function(mutations_df, bam_file_path, reference_path, model,
     reference_path
   )
 
-  read_positions_df <- get_read_positions_from_BAM_indels(
+  read_positions_df_indels <- get_read_positions_from_BAM_indels(
     bam_file_path = bam_file_path,
     chr = mutations_df$chr,
     genomic_pos = mutations_df$genomic_pos,
