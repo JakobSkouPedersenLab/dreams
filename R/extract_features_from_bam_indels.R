@@ -83,8 +83,9 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     read_feature_df <-
       read_feature_df %>%
       mutate(
-        umi_count = map2_int(.data$cd, .data$pos_idx, function(cd, pos_idx) cd[pos_idx]),
-        umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx])
+        ce = mapply(correct_num, .data$cigar, .data$ce),
+        umi_count = cD,
+        umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx]),
       )
 
     # Add UMI features to selection
@@ -151,3 +152,44 @@ correct_seq <- function(cigar, sequence) {
   return(corrected_seq)
 }
 
+
+#' Correct Number Vector Based on CIGAR String
+#'
+#' This function takes a CIGAR string and a vector of numbers and adjusts the numbers
+#' based on the CIGAR operations. Deletions ('D') in the CIGAR string cause zeros to be inserted
+#' into the number vector at the corresponding positions, and insertions ('I') cause the corresponding
+#' numbers to be marked for removal. The final vector excludes these marked insertions.
+#'
+#' @param cigar A character string representing a CIGAR sequence.
+#' @param numbers A numeric vector that corresponds to the CIGAR string and needs correction.
+#'
+#' @return An integer vector with corrections applied based on the CIGAR string.
+#' Deletions result in zeros inserted at the appropriate indices, and insertions are removed.
+#'
+correct_num <- function(cigar, numbers) {
+
+  #Expand cigar
+  expanded_cigar <- expand_cigar(cigar)
+
+  # Find the positions of 'D' in the first string
+  positions <- which(strsplit(expanded_cigar, "")[[1]] == "D")
+
+  # Insert 'D's into the second string at the corresponding positions
+  for (pos in positions) {
+    numbers <- append(numbers, 0, after=pos-1)
+  }
+  # Convert both the CIGAR string and the sequence into character vectors
+  cigar_chars <- strsplit(expanded_cigar, "")[[1]]
+
+
+  # Find the positions of 'I' in the CIGAR string
+  I_positions <- which(cigar_chars == "I")
+
+  # Replace corresponding positions in the sequence with 'I'
+  numbers[I_positions] <- "I"
+
+  # Remove all instances of "I" from the vector
+  corrected_numbers <- as.integer(numbers[numbers != "I"])
+
+  return(corrected_numbers)
+}
