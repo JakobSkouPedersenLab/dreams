@@ -83,7 +83,7 @@ extract_features_from_bam_indels <- function(bam_df, reference_path, add_umi_fea
     read_feature_df <-
       read_feature_df %>%
       mutate(
-        ce = mapply(correct_num, .data$cigar, .data$ce),
+        ce = mapply(correct_num, .data$cigar, .data$ce, SIMPLIFY = FALSE),
         umi_count = cD,
         umi_errors = map2_int(.data$ce, .data$pos_idx, function(ce, pos_idx) ce[pos_idx]),
       )

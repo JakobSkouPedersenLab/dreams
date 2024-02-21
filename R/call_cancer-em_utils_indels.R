@@ -33,21 +33,15 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
 
       # Error rates
 
-
-      error_ref_df_SNV <- predict_error_rates(mut_reads_ref_alt, model, beta)
-      error_mut_df_SNV <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
-
-      error_ref_df_INDEL <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels)
-      error_mut_df_INDEL <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
-
-
       if (alt %in% c("A", "T", "C", "G")){
-        error_ref_df <- error_ref_df_SNV
-        error_mut_df <- error_mut_df_SNV
-      } else {
+        error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
+        error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+      } else if (alt %in% c("I", "D")){
         ref = "ATCG"
-        error_ref_df <- error_ref_df_INDEL
-        error_mut_df <- error_mut_df_INDEL
+        error_ref_df <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels)
+        error_mut_df <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
+      } else {
+        stop("Error: 'alt' must be one of A, T, C, G, I, D.")
       }
 
       # Pick relevant error rates for ref and alt
