@@ -244,6 +244,10 @@ call_mutations_indels <- function(mutations_df, read_positions_df, read_position
       .data$genomic_pos %in% q$genomic_pos
     )
 
+    print(current_mutations)
+    print(current_read_positions_df)
+    print(current_read_positions_df_indels)
+
     # Prepare EM input
     em_input <- prepare_em_input_indels(mutations_df = current_mutations, read_positions_df = current_read_positions_df,
                                         read_positions_df_indels = current_read_positions_df_indels, model = model,
@@ -253,9 +257,7 @@ call_mutations_indels <- function(mutations_df, read_positions_df, read_position
     error_ref_to_mut_list <- em_input$error_ref_to_mut_list
     error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
-    print(obs_is_mut_list)
-    print(error_ref_to_mut_list)
-    print(error_ref_to_mut_list)
+
 
     # Add full coverage to mutations
     full_coverage_df <- current_read_positions_df %>%
