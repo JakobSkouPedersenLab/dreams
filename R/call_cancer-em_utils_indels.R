@@ -27,16 +27,24 @@ prepare_em_input_indels <- function(mutations_df, read_positions_df, read_positi
           .data$obs == !!ref | .data$obs == !!alt
         )
 
-      # Add to list
-      X <- mut_reads_ref_alt_indels$obs == alt
-      obs_is_mut_list <- append(obs_is_mut_list, list(X))
+
 
       # Error rates
 
       if (alt %in% c("A", "T", "C", "G")){
+        # Add to list
+        X <- mut_reads_ref_alt$obs == alt
+        obs_is_mut_list <- append(obs_is_mut_list, list(X))
+
         error_ref_df <- predict_error_rates(mut_reads_ref_alt, model, beta)
         error_mut_df <- predict_error_rates(mut_reads_ref_alt %>% mutate(ref = !!alt), model, beta)
+
+
       } else if (alt %in% c("I", "D")){
+        # Add to list
+        X <- mut_reads_ref_alt_indels$obs == alt
+        obs_is_mut_list <- append(obs_is_mut_list, list(X))
+
         ref = "ATCG"
         error_ref_df <- predict_error_rates_indels(mut_reads_ref_alt_indels, model_indels, beta_indels)
         error_mut_df <- predict_error_rates_indels(mut_reads_ref_alt_indels %>% mutate(ref = !!alt), model_indels, beta_indels)
