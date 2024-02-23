@@ -253,6 +253,10 @@ call_mutations_indels <- function(mutations_df, read_positions_df, read_position
     error_ref_to_mut_list <- em_input$error_ref_to_mut_list
     error_mut_to_ref_list <- em_input$error_mut_to_ref_list
 
+    print(obs_is_mut_list)
+    print(error_ref_to_mut_list)
+    print(error_ref_to_mut_list)
+
     # Add full coverage to mutations
     full_coverage_df <- current_read_positions_df %>%
       count(.data$chr, .data$genomic_pos, name = "full_coverage")
